@@ -117,8 +117,209 @@ It acts as a container for logical partitions, allowing you to bypass the 4-part
 A logical partition resides within the extended partition. It is essentially a secondary partition and is used to extend the available partitioning beyond the 4-primary partition limit.
 You can create as many logical partitions as you need (limited by the disk size and filesystem constraints).
 
+# Shell
+
+```sh
+echo $-
+569XZims
+```
+
+https://tldp.org/LDP/abs/html/options.html
+
+<table>
+  <thead>
+    <tr>
+      <th>Option</th>
+      <th>Description</th>
+      <th>shell</th>
+      <th>ssh</th>
+      <th>su</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>#</td>
+      <td><b>Bash Compatibility</b><br>
+          Indicates which Bash version's features are active.</td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>i</td>
+      <td><b>Interactive Shell</b><br>
+          Allows input and output directly from the user.</td>
+      <td>set -i</td>
+      <td></td>
+      <td>su -</td>
+    </tr>
+    <tr>
+      <td>m</td>
+      <td><b>Job Control</b><br>
+          Allows background jobs and job suspension.</td>
+      <td>set -m</td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>B</td>
+      <td><b>Brace Expansion</b><br>
+          Allows the use of brace expansion (e.g., <code>{a,b}</code>).</td>
+      <td>set -B</td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>H</td>
+      <td><b>Command History Expansion</b><br>
+          Allows expansion of <code>!</code> to previous commands.</td>
+      <td>set -H</td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>p</td>
+      <td><b>Privileged Mode</b><br>Disables user-specific shell settings.</td>
+      <td>set -p</td>
+      <td>-p</td>
+      <td>-p</td>
+    </tr>
+  </tbody>
+</table>
+
+<table>
+  <thead>
+    <tr>
+      <th>Option</th>
+      <th>Description</th>
+      <th>shell</th>
+      <th>ssh</th>
+      <th>su</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>0</td>
+      <td><b>Posix Mode</b><br>Enables POSIX compliance.</td>
+      <td>set -o posix</td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td><b>Debugger Support</b><br>Specific to shell debugging; not commonly used.</td>
+      <td>set -o debug</td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td><b>Extended Glob</b><br>Allows extended pattern matching.</td>
+      <td>shopt -s extglob</td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>9</td>
+      <td><b>Pipefail</b><br>Returns status of the last command in a pipeline that failed.</td>
+      <td>set -o pipefail</td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>B</td>
+      <td><b>Brace Expansion</b><br>Enables brace expansion like <code>{a,b}</code>.</td>
+      <td>set -B</td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>J</td>
+      <td><b>Multi-Line Comments</b><br>Allows multi-line comments in scripts.</td>
+      <td>set -J</td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>N</td>
+      <td><b>Nullglob</b><br>Expands patterns to nothing if no matches are found.</td>
+      <td>shopt -s nullglob</td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>R</td>
+      <td><b>Restricted Shell</b><br>Limits functionality to enhance security.</td>
+      <td>set -r</td>
+      <td>-r</td>
+      <td>-r</td>
+    </tr>
+    <tr>
+      <td>X</td>
+      <td><b>Debug Mode</b><br>Prints commands before executing them.</td>
+      <td>set -x</td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>Z</td>
+      <td><b>Custom Option</b><br>Shell-specific behavior; varies.</td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>g</td>
+      <td><b>Global Alias</b><br>Allows creation of global aliases.</td>
+      <td>set -g</td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>i</td>
+      <td><b>Interactive Shell</b><br>Enables direct input/output interaction.</td>
+      <td>set -i</td>
+      <td></td>
+      <td>su -</td>
+    </tr>
+    <tr>
+      <td>k</td>
+      <td><b>Export Options</b><br>Exports all function arguments.</td>
+      <td>set -k</td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>l</td>
+      <td><b>Login Shell</b><br>Configures shell as a login session.</td>
+      <td>bash -l</td>
+      <td>-l</td>
+      <td>-l</td>
+    </tr>
+    <tr>
+      <td>m</td>
+      <td><b>Job Control</b><br>Enables job control features.</td>
+      <td>set -m</td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>s</td>
+      <td><b>Read Commands from stdin</b><br>Reads commands directly from input.</td>
+      <td>set -s</td>
+      <td></td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
+
+
+
 # Notes
-Arch Liux install medium (x86_64, BIOS)
+Kernel Version: 4
+Bit: 32
+
+Arch Linux install medium (x86_64, BIOS)
 ```shell
 .linux /arch/boot/x86_64/vmlinuz-linux archisobasedir=arch archisosearchuuid=2024-11-01-10-09-22-00 initrd=/arch/boot/x86_64/initramfs-linux.img
 ```
