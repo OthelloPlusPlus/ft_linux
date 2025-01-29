@@ -100,16 +100,46 @@ DisplayConfigurationFiles()
 #																			   #
 # ===============ft_linux==============||==============©Othello=============== #
 
+declare -A binutils;
+binutils[package]="binutils-2.43.1";
+binutils[status]="";
+binutils[SBU]="1";
+binutils[time]="0";
+
+declare -A gcc
+gcc[package]="gcc-14.2.0";
+gcc[status]="";
+gcc[SBU]="3.2";
+gcc[time]="0";
+
+declare -A LinuxApiHeader
+LinuxApiHeader[package]="linux-6.10.5";
+LinuxApiHeader[status]="";
+LinuxApiHeader[SBU]="<0.1";
+LinuxApiHeader[time]="0";
+
+declare -A glibc
+glibc[package]="glibc-2.40";
+glibc[status]="";
+glibc[SBU]="1.3";
+glibc[time]="0";
+
 MenuCrossToolchain()
 {
+
 	printf '%*s\n' "$width" '' | tr ' ' '-';
 	echo	"${C_ORANGE}Cross-Toolchain${C_RESET}";
 	printf '%*s\n' "$width" '' | tr ' ' '-';
-	ValidateAndPrintPackage	0	"binutils-2.43.1"	"1 SBU"	ValidateBinutils
-	ValidateAndPrintPackage	1	"gcc-14.2.0"	"3.2 SBU"	ValidateGcc
-	ValidateAndPrintPackage	2	"linux-6.10.5"	"<0.1 SBU"
-	ValidateAndPrintPackage	3	"glibc-2.40"	"1.3 SBU"
-	ValidateAndPrintPackage	4	"gcc-14.2.0 (libstdc++)"	"0.2 SBU"
+	ValidateBinutils;			PrintPackage	binutils;
+	ValidateGcc;				PrintPackage	gcc;
+	ValidateAPIHeaders;			PrintPackage	LinuxApiHeader;
+	ToolchainTest1;	PrintPackage	glibc;
+	# printf	"%-23s %-4s %4s SBU %s\n"	${binutils[package]}	${binutils[status]}	${binutils[SBU]}	${binutils[time]}
+	# ValidateAndPrintPackage	0	"binutils-2.43.1"	"1 SBU"	ValidateBinutils
+	# ValidateAndPrintPackage	1	"gcc-14.2.0"	"3.2 SBU"	ValidateGcc
+	# ValidateAndPrintPackage	2	"linux-6.10.5"	"<0.1 SBU"	ValidateAPIHeaders
+	# ValidateAndPrintPackage	3	"glibc-2.40"	"1.3 SBU"	ValidateGlibc
+	# ValidateAndPrintPackage	4	"gcc-14.2.0 (libstdc++)"	"0.2 SBU"
 	printf '%*s\n' "$width" '' | tr ' ' '-';
 	echo -n	"Sanity check:"
 	ToolchainTest1
@@ -156,68 +186,107 @@ MenuCrossToolchain()
 
 }
 
-ValidateAndPrintPackage()
+# ValidateAndPrintPackage()
+# {
+# 	if [ -z $4 ]; then 
+# 		printf "%-0.2s ${C_DGRAY}%-22s${C_RESET} %-s\n"	"$1" "$2" "$3";
+# 	elif $4; then
+# 		printf "%-0.2s ${C_GREEN}%-22s${C_RESET} %-s\n"	"$1" "$2" "$3";
+# 	else
+# 		printf "%-0.2s ${C_RED}%-22s${C_RESET} %-s\n"	"$1" "$2" "$3";
+# 	fi
+# }
+PrintPackage()
 {
-	if [ -z $4 ]; then 
-		printf "%-0.2s ${C_DGRAY}%-22s${C_RESET} %-s\n"	"$1" "$2" "$3";
-	elif $4; then
-		printf "%-0.2s ${C_GREEN}%-22s${C_RESET} %-s\n"	"$1" "$2" "$3";
+	local STATUS="$(eval echo "\${${1}[status]}")";
+	if [ "$STATUS" = true ]; then
+		printf	"${C_GREEN}%-23s${C_RESET} %-4s SBU %s\n"	$(eval echo "\${${1}[package]}")	$(eval echo "\${${1}[SBU]}")	$(eval echo "\${${1}[time]}")
+	elif [ "$STATUS" = false ]; then
+		printf	"${C_RED}%-23s${C_RESET} %-4s SBU %s\n"	$(eval echo "\${${1}[package]}")	$(eval echo "\${${1}[SBU]}")	$(eval echo "\${${1}[time]}")
 	else
-		printf "%-0.2s ${C_RED}%-22s${C_RESET} %-s\n"	"$1" "$2" "$3";
+		printf	"${C_GRAY}%-23s${C_RESET} %-4s SBU %s\n"	$(eval echo "\${${1}[package]}")	$(eval echo "\${${1}[SBU]}")	$(eval echo "\${${1}[time]}")
 	fi
 }
+# PrintPackage()
+# {
+# 	echo "$1[package]"
+# 	# if [ "$PackageArray[status]" = true ]; then
+# 	# 	printf	"${C_GREEN}%-23s${C_RESET} %4s SBU %s\n"	${PackageArray[package]}	${PackageArray[SBU]}	${PackageArray[time]}
+# 	# else
+# 	# 	printf	"${C_RED}%-23s${C_RESET} %4s SBU %s\n"	${PackageArray[package]}	${PackageArray[SBU]}	${PackageArray[time]}
+# 	# fi
+# }
 
 InstallPackages()
 {
 	PDIR="$LFS/sources/lfs-packages12.2/";
 	# cd "$PDIR";
 
-	local FORCE=$1;
-
-	if [ "$FORCE" = "true" ] || ! ValidateBinutils; then
+	if [ "$1" = true ]; then
 		echo	"${C_ORANGE}binutils...${C_RESET}";
 		InstallPackageBinutils;
-	fi
-
-	if ValidateBinutils; then
-		if ! ValidateGcc; then 
-			echo	"${C_ORANGE}gcc...${C_RESET}";
-			InstallCrossGCC;
+		echo	"${C_ORANGE}gcc...${C_RESET}";
+		InstallCrossGCC;
+		echo	"${C_ORANGE}Linux API Headers...${C_RESET}";
+		ExposeAPIHeaders;
+		echo	"${C_ORANGE}glibc...${C_RESET}";
+		InstallGlibc;
+		# if ValidateGlibc; then
+		# 	echo	"${C_GREEN}Ready for LibstdC++${C_RESET}";
+		# else
+		# 	echo	"${C_RED}Not ready for LibstdC++${C_RESET}";
+		# fi
+	else
+		# binutils
+		if [ $binutils[status] = false ]; then
+			echo	"${C_ORANGE}binutils...${C_RESET}";
+			InstallPackageBinutils;
+			ValidateBinutils;
 		fi
-	else
-		MSG="${C_RED}Error${C_RESET}: Missing ${C_ORANGE}binutils${C_RESET} which is required before ${C_ORANGE}gcc${C_RESET}";
-		return ;
-	fi
-	
-	if ValidateGcc; then
-		if ValidateGcc; then
-			echo	"${C_ORANGE}Linux API Headers...${C_RESET}";
-			ExposeAPIHeaders;
+		# gcc
+		if [ $binutils[status] = true ]; then
+			if [ $gcc[status] = false ]; then
+				echo	"${C_ORANGE}gcc...${C_RESET}";
+				InstallCrossGCC;
+				ValidateGcc;
+			fi
+		else
+			MSG="${C_RED}Error${C_RESET}: Missing ${C_ORANGE}binutils${C_RESET} which is required before ${C_ORANGE}gcc${C_RESET}";
+			return ;
 		fi
-	else
-		MSG="${C_RED}Error${C_RESET}: Missing ${C_ORANGE}gcc${C_RESET} which is required before ${C_ORANGE}Linux API Headers${C_RESET}";
-		return ;
-	fi
-
-	if ValidateGcc; then
-		if ValidateGcc; then
-			echo	"${C_ORANGE}glibc...${C_RESET}";
-			InstallGlibc;
+		# Linux API headers
+		if [ $gcc[status] = true ]; then
+			if [ $LinuxApiHeader[status] = false ]; then
+				echo	"${C_ORANGE}Linux API Headers...${C_RESET}";
+				ExposeAPIHeaders;
+				ValidateAPIHeaders;
+			fi
+		else
+			MSG="${C_RED}Error${C_RESET}: Missing ${C_ORANGE}gcc${C_RESET} which is required before ${C_ORANGE}Linux API Headers${C_RESET}";
+			return ;
 		fi
-	else
-		MSG="${C_RED}Error${C_RESET}: Missing ${C_ORANGE}Linux API Headers${C_RESET} which is required before ${C_ORANGE}glibc${C_RESET}";
-		return ;
+		# glibc
+		if [ $LinuxApiHeader[status] = true ]; then
+			if [ $glibc[status] = false ]; then
+				echo	"${C_ORANGE}glibc...${C_RESET}";
+				InstallGlibc;
+				ValidateGlibc;
+			else
+				echo	"Not installing glibc..."
+			fi
+		else
+			MSG="${C_RED}Error${C_RESET}: Missing ${C_ORANGE}gcc${C_RESET} which is required before ${C_ORANGE}glibc${C_RESET}";
+			return ;
+		fi
+		# LibstdC++
+		if ToolchainTest1 > /dev/null; then
+			echo	"${C_GREEN}Ready for LibstdC++${C_RESET}";
+		else
+			echo	"${C_RED}Not ready for LibstdC++${C_RESET}";
+		fi
 	fi
 
-	echo	"${C_ORANGE}Sanity check...${C_RESET}";
-	if ToolchainTest1 1> /dev/null; then
-		echo "${C_GREEN}OK${C_RESET}";
-	else
-		MSG="${C_RED}Error${C_RESET}: Failed sanity check...";
-		return ;
-	fi
-
-	InstallLibstdcpp;
+	# InstallLibstdcpp;
 
 	# cd ~;	
 }
@@ -233,12 +302,13 @@ ExtractPackage()
 	fi
 
 	for FILENAME in $(tar -tf "$SRC"); do
+		# echo "Filename: ${C_ORANGE}$FILENAME${$C_RESET}"
 		if [ ! -e ${DST}/${FILENAME} ]; then
 			echo "Unpacking $SRC($FILENAME)...";
 			mkdir -p "$DST";
 			tar -xf "$SRC" -C "$DST";
 			return $?;
-		fi		
+		fi
 	done
 	return 0;
 }
@@ -250,8 +320,10 @@ ExtractPackage()
 ValidateBinutils()
 {
 	if command -v as > /dev/null && command -v ld > /dev/null; then
+		binutils[status]=true;
 		return 0
 	else
+		binutils[status]=false;
 		return 1
 	fi
 }
@@ -260,6 +332,7 @@ InstallPackageBinutils()
 {
 	PACKNAME="binutils-2.43.1";
 	ExtractPackage	"${PDIR}${PACKNAME}.tar.xz"	"${PDIR}";
+
 	if [ $? -ne 0 ]; then
 		echo	"${C_RED}Error($?)${C_RESET}: failed to unpack binutils";
 		return ;
@@ -285,8 +358,10 @@ InstallPackageBinutils()
 	fi
 
 	echo "Installing {$PACKNAME}...";
-	time make 1> /dev/null;
-	time make install 1> /dev/null;
+	binutils[time]=$(time make 1> /dev/null);
+	binutils[time]+=$(time make install 1> /dev/null);
+	# time make 1> /dev/null;
+	# time make install 1> /dev/null;
 
 	cd -;
 }
@@ -298,8 +373,10 @@ InstallPackageBinutils()
 ValidateGcc()
 {
 	if command -v gcc > /dev/null; then
+		gcc[status]=true;
 		return 0
 	else
+		gcc[status]=false;
 		return 1
 	fi
 }
@@ -376,6 +453,44 @@ InstallCrossGCC()
 #								Linux API Headers							   #
 # ===============ft_linux==============||==============©Othello=============== #
 
+ValidateAPIHeaders()
+{
+	local INCLUDE_DIR="$LFS/usr/include";
+	if [ ! -d "$INCLUDE_DIR" ]; then
+		LinuxApiHeader[status]=false;
+		return 1;
+	fi
+
+	declare -A HeaderDirectoryList;
+	HeaderDirectoryList[asm]=65;
+	HeaderDirectoryList[asm-generic]=37;
+	HeaderDirectoryList[drm]=28;
+	HeaderDirectoryList[linux]=781;
+	HeaderDirectoryList[misc]=7;
+	HeaderDirectoryList[mtd]=5;
+	HeaderDirectoryList[rdma]=29;
+	HeaderDirectoryList[regulator]=1;
+	HeaderDirectoryList[scsi]=10;
+	HeaderDirectoryList[sound]=23;
+	HeaderDirectoryList[video]=3;
+	HeaderDirectoryList[xen]=4;
+
+	for DIRECTORY in ${(k)HeaderDirectoryList}; do
+		if [ ! -d "$INCLUDE_DIR/$DIRECTORY" ]; then
+			MSG="${C_RED}Error${C_RESET}(${C_ORANGE}Linux API Header${C_RESET}): Missing directory ${C_ORANGE}$INCLUDE_DIR/$DIRECTORY${C_RESET}"
+			LinuxApiHeader[status]=false;
+			return 2;
+		elif [ ${HeaderDirectoryList[$DIRECTORY]} -gt $(find $INCLUDE_DIR/$DIRECTORY -type f -name '*.h' | wc -l) ]; then
+			MSG="${C_RED}Error${C_RESET}(${C_ORANGE}Linux API Header${C_RESET}): Missing headers in directory ${C_ORANGE}$INCLUDE_DIR/$DIRECTORY${C_RESET}"
+			LinuxApiHeader[status]=false;
+			return 3;
+		fi
+	done
+	LinuxApiHeader[status]=true;
+	return 0;
+}
+
+
 ExposeAPIHeaders()
 {
 	PACKNAME="linux-6.10.5";
@@ -397,6 +512,17 @@ ExposeAPIHeaders()
 # =====================================||===================================== #
 #									  Glibc									   #
 # ===============ft_linux==============||==============©Othello=============== #
+
+ValidateGlibc()
+{
+	if ToolchainTest1 > /dev/null; then
+		glibc[status]=true;
+		return 0;
+	else
+		glibc[status]=false;
+		return 1;
+	fi
+}
 
 InstallGlibc()
 {
@@ -451,10 +577,20 @@ InstallGlibc()
 
 ToolchainTest1()
 {
-	echo 'int main(){}' | $LFS_TGT-gcc -xc -
-	readelf -l a.out | grep ld-linux
+	echo 'int main(){}' | $LFS_TGT-gcc -xc - >/dev/null
+	if [ -f "a.out" ]; then
+		readelf -l a.out | grep ld-linux
+		if [ $? -eq 0 ]; then
+			glibc[status]=true;
+		else
+			glibc[status]=false;
+		fi
 
-	rm a.out
+		rm a.out
+	else
+		# echo	"${C_RED}Error${C_RESET}: a.out not found";
+		glibc[status]=false;
+	fi
 }
 
 # =====================================||===================================== #
@@ -532,7 +668,9 @@ PressAnyKeyToContinue()
 MainMenu()
 {
 	printf '%*s\n' "$width" '' | tr ' ' '-';
-	echo	"${C_ORANGE} LFS configuration${C_RESET} ($MENU)";
+	echo	"${C_ORANGE} LFS configuration${C_RESET}";
+	echo	"Menu:\t${MENU}";
+	echo	"Option:\t${-}";
 	printf '%*s\n' "$width" '' | tr ' ' '-';
 	echo	"1)\tUser configuration";
 	echo	"2)\tCross-Toolchain compilling";

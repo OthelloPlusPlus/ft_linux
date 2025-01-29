@@ -40,11 +40,11 @@ if [ $? -eq 1 ]; then
 	ssh-keygen -f "/home/ohengelm/.ssh/known_hosts" -R "[127.0.0.1]:2222";
 	scp -P $PORT $COPYFILES $RUNFILES $USER@$ADDRESS:/root;
 fi
-if [[ $- == *i* ]]; then
-    echo "Shell is interactive"
-else
-    echo "Shell is not interactive"
-fi
+# if [[ $- == *i* ]]; then
+#     echo "Shell is interactive"
+# else
+#     echo "Shell is not interactive"
+# fi
 ssh -p $PORT $USER@$ADDRESS -t "
 	chmod +x $RUNFILES;
 	zsh -i /root/InstallArchLinux.sh

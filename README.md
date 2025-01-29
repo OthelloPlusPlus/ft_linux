@@ -323,3 +323,6 @@ Arch Linux install medium (x86_64, BIOS)
 ```shell
 .linux /arch/boot/x86_64/vmlinuz-linux archisobasedir=arch archisosearchuuid=2024-11-01-10-09-22-00 initrd=/arch/boot/x86_64/initramfs-linux.img
 ```
+
+Run install
+

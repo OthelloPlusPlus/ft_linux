@@ -772,7 +772,7 @@ CreateNewUser()
 
 	AddUserToLFS;
 	if [ "$ADMIN" = true ]; then
-		MakeUserAdmin;
+		MakeUserAdmin "$NAME";
 	fi
 	ConfigureUsersShell;
 }
@@ -823,11 +823,17 @@ AddUserToLFS()
 
 MakeUserAdmin()
 {
+	if [ -z "$1" ]; then
+		return ;
+	else
+		NAME="$1";
+	fi
+
 	chown -v "$NAME" $LFS/{usr{,/*},lib,var,etc,bin,sbin,tools};
 	case $(uname -m) in
 		x86_64) chown -v "$NAME" $LFS/lib64 ;;
 	esac
-	chown -R $USER $LFS;
+	chown -R $NAME $LFS;
 }
 
 ConfigureUsersShell()
@@ -1099,6 +1105,7 @@ FullInstall()
 	CreateAndLinkDirectories;
 	CreateNewUser "$USER";
 	DownloadPackages;
+	MakeUserAdmin "$USER";
 }
 
 SpaceMenu()
