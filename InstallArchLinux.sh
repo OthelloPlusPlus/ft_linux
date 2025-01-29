@@ -745,7 +745,7 @@ ConfigurationsMenu()
 	case $input in
 		d|D)	CreateAndLinkDirectories;
 				PressAnyKeyToContinue;;
-		u|U)	CreateNewUser;
+		u|U)	CreateNewUser "$USER";
 				PressAnyKeyToContinue;;
 		q|Q)	MENU=0;;
 		*)	MSG="${C_RED}Invalid input${C_RESET}: $input";;
@@ -754,18 +754,21 @@ ConfigurationsMenu()
 
 CreateNewUser()
 {
-	# ReadNewUserInput;
-	# if [ $? -ne 0 ]; then
-	# 	echo "Bad input. try again:";
-	# 	ReadNewUserInput;
-	# 	if [ $? -ne 0 ]; then
-	# 		echo "I give up...";
-	# 		return 1;
-	# 	fi
-	# fi
-	NAME=$USER
-	ADMIN=true
-	USERSHELL=/bin/bash
+	if [ ! -z "$1" ]; then
+		NAME="$1"
+		ADMIN=true
+		USERSHELL=/bin/bash
+	else
+		ReadNewUserInput;
+		if [ $? -ne 0 ]; then
+			echo "Bad input. try again:";
+			ReadNewUserInput;
+			if [ $? -ne 0 ]; then
+				echo "I give up...";
+				return 1;
+			fi
+		fi
+	fi
 
 	AddUserToLFS;
 	if [ "$ADMIN" = true ]; then
@@ -951,22 +954,42 @@ DisplayEnv()
 
 CrossCompilationMenu()
 {
-	cp /root/{ConfigureArchLinux.sh,colors.sh} /home/$USER/
-	chmod +x /home/$USER/ConfigureArchLinux.sh	printf '%*s\n' "$width" '' | tr ' ' '-';
-
-	echo	"${C_ORANGE}CrossCompilation${C_RESET}";
+	local OWNER=$(ls -ld $LFS/usr | awk '{printf "%s", $3}');
+	
 	printf '%*s\n' "$width" '' | tr ' ' '-';
-	ls -ld $LFS/usr | awk '{printf "Owner: %s\n", $3}';
+	echo	"${C_ORANGE}Cross Compilation${C_RESET}";
 	printf '%*s\n' "$width" '' | tr ' ' '-';
+	echo	"Owner:\t$OWNER";
+	printf '%*s\n' "$width" '' | tr ' ' '-';
+	echo	"c)\tConfigure ${C_ORANGE}$OWNER${C_RESET}";
 	echo	"q)\tReturn to main menu";
 	printf '%*s\n' "$width" '' | tr ' ' '-';
 
 	GetInput;
 
 	case $input in
+		c|C)	LoginAs	"$OWNER";;
 		q|Q)	MENU=0;;
 		*)	MSG="${C_RED}Invalid input${C_RESET}: $input";;
 	esac
+}
+
+LoginAs()
+{
+	if [ -z "$1" ]; then
+		return ;
+	fi
+	clear;
+	printf '%*s\n' "$width" '' | tr ' ' '-';
+	echo	"${C_ORANGE}User $1${C_RESET}";
+	printf '%*s\n' "$width" '' | tr ' ' '-';
+	echo	"To continue enter the following command:";
+	echo	"${CB_BLACK}> zsh ./ConfigureArchLinux.sh ${C_RESET}";
+	printf '%*s\n' "$width" '' | tr ' ' '-';
+
+	cp /root/{ConfigureArchLinux.sh,colors.sh} "/home/$1/"
+	chmod +x "/home/$1/ConfigureArchLinux.sh"
+	su - "$1";
 }
 
 # =====================================||===================================== #
@@ -1019,13 +1042,16 @@ MENU=0;
 MainMenu()
 {
 	printf '%*s\n' "$width" '' | tr ' ' '-';
-	echo -n	"${C_ORANGE} Arch linux setup for LFS${C_RESET} ($MENU)";
-	if [[ $- == *i* ]]; then
-		echo "(interactive)"
-	else
-		echo "(not interactive)"
-	fi
+	echo	"${C_ORANGE}${C_BOLD}Arch linux setup for LFS${C_RESET}";
+	echo	"Menu:\t${MENU}";
+	echo	"Option:\t${-}";
+	# if [[ $- == *i* ]]; then
+	# 	echo "(interactive)"
+	# else
+	# 	echo "(not interactive)"
+	# fi
 	printf '%*s\n' "$width" '' | tr ' ' '-';
+	echo	"0)\tFull Install";
 	echo	"1)\t${C_ALT}ArchLinux Tools";
 	echo	"2)\tDisk Partitioning";
 	echo	"3)\tFile Systems";
@@ -1046,6 +1072,7 @@ MainMenu()
 	GetInput;
 
 	case $input in
+		0)	FullInstall;;
 		1)	MENU=1;;
 		2)	MENU=2;;
 		3)	MENU=3;;
@@ -1061,6 +1088,17 @@ MainMenu()
 		q|Q)	MENU=-1;;
 		*)	MSG="${C_RED}Invalid input${C_RESET}: $input";;
 	esac
+}
+
+FullInstall()
+{
+	InstallTools;
+	CreateNewPartioning;
+	FormatFileSystems;
+	MountPartitions;
+	CreateAndLinkDirectories;
+	CreateNewUser "$USER";
+	DownloadPackages;
 }
 
 SpaceMenu()
@@ -1134,9 +1172,9 @@ while true; do
 	case $MENU in
 		-1)	break ;;
 		0)	MainMenu;;
+		1)	ArchLinuxToolsMenu;;
 		2)	DiskPartitionMenu;;
 		3)	FileSystemMenu;;
-		1)	ArchLinuxToolsMenu;;
 		4)	ConfigurationsMenu;;
 		5)	PackagesMenu;;
 		6)	CrossCompilationMenu;;
