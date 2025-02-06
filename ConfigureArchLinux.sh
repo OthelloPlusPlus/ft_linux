@@ -132,23 +132,24 @@ libstdcpp[time]="0";
 
 MenuCrossToolchain()
 {
-	PDIR="$LFS/sources/lfs-packages12.2/";
+	# PDIR="$LFS/sources/lfs-packages12.2/";
 
 	printf '%*s\n' "$width" '' | tr ' ' '-';
 	echo	"${C_ORANGE}Cross-Toolchain${C_RESET}";
 	printf '%*s\n' "$width" '' | tr ' ' '-';
-	ValidateBinutils;				echo -n	"1 ";	PrintPackage	binutils;
-	ValidateGcc;					echo -n	"2 ";	PrintPackage	gcc;
-	ValidateAPIHeaders;				echo -n	"3 ";	PrintPackage	LinuxApiHeader;
-	ToolchainTest1 >/dev/null;		echo -n	"4 ";	PrintPackage	glibc;
-	ValidateLibstdCpp >/dev/null;	echo -n	"5 ";	PrintPackage	libstdcpp;
+	echo -n	"1 ";	PrintPackage	binutils;
+	echo -n	"2 ";	PrintPackage	gcc;
+	echo -n	"3 ";	PrintPackage	LinuxApiHeader;
+	echo -n	"4 ";	PrintPackage	glibc;
+	echo -n	"5 ";	PrintPackage	libstdcpp;
 	printf '%*s\n' "$width" '' | tr ' ' '-';
 	echo -n	"gcc sanity check:";	ToolchainTest1;
-	echo -n	"g++ sanity check:";	ValidateLibstdCpp;
+	# echo -n	"g++ sanity check:";	ValidateLibstdcpp;
 	printf '%*s\n' "$width" '' | tr ' ' '-';
 	echo	"#)\tInstall package"
 	echo	"i)\tInstall all packages"
 	echo	"f)\tForce install all packages"
+	echo	"v)\tValidate all packages"
 	echo	"q)\tReturn to main menu";
 	printf '%*s\n' "$width" '' | tr ' ' '-';
 
@@ -157,9 +158,9 @@ MenuCrossToolchain()
 	case $input in
 		1)	InstallPackageBinutils;
 			PressAnyKeyToContinue;;
-		2)	InstallCrossGCC;
+		2)	InstallGccPass1;
 			PressAnyKeyToContinue;;
-		3)	ExposeAPIHeaders;
+		3)	ExtractApiHeaders;
 			PressAnyKeyToContinue;;
 		4)	InstallGlibc;
 			PressAnyKeyToContinue;;
@@ -168,6 +169,8 @@ MenuCrossToolchain()
 		i|I)	InstallPackages;
 				PressAnyKeyToContinue;;
 		f|F)	InstallPackages "true";
+				PressAnyKeyToContinue;;
+		v|V)	ValidatePackages;
 				PressAnyKeyToContinue;;
 		q|Q)	MENU=0;;
 		*)	MSG="${C_RED}Invalid input${C_RESET}: $input";;
@@ -191,63 +194,60 @@ PrintPackage()
 
 InstallPackages()
 {
-	PDIR="$LFS/sources/lfs-packages12.2/";
+	# PDIR="$LFS/sources/lfs-packages12.2/";
 	# cd "$PDIR";
 
 	if [ "$1" = true ]; then
-		echo	"${C_ORANGE}binutils...${C_RESET}";
-		InstallPackageBinutils;
-		echo	"${C_ORANGE}gcc...${C_RESET}";
-		InstallCrossGCC;
-		echo	"${C_ORANGE}Linux API Headers...${C_RESET}";
-		ExposeAPIHeaders;
-		echo	"${C_ORANGE}glibc...${C_RESET}";
+		EchoInfo	"binutils...";
+		InstallBinutils;
+		EchoInfo	"gcc...";
+		InstallGccPass1;
+		EchoInfo	"Linux API Headers...";
+		ExtractApiHeaders;
+		EchoInfo	"glibc...";
 		InstallGlibc;
-		echo	"${C_ORANGE}libstdc++...${C_RESET}";
+		EchoInfo	"libstdc++...";
 		InstallLibstdcpp;
 	else
 		# binutils
-		if [ $binutils[status] = false ]; then
-			echo	"${C_ORANGE}binutils...${C_RESET}";
-			InstallPackageBinutils;
-			ValidateBinutils;
+		if [ "$binutils[status]" != true ]; then
+			EchoInfo	"binutils...";
+			InstallBinutils;
 		fi
 		# gcc
-		if [ $binutils[status] = true ]; then
-			if [ $gcc[status] = false ]; then
-				echo	"${C_ORANGE}gcc...${C_RESET}";
-				InstallCrossGCC;
-				ValidateGcc;
+		if [ "$binutils[status]" = true ]; then
+			if [ "$gcc[status]" != true ]; then
+				EchoInfo	"gcc...";
+				InstallGccPass1;
 			fi
 		else
 			MSG="${C_RED}Error${C_RESET}: Missing ${C_ORANGE}binutils${C_RESET} which is required before ${C_ORANGE}gcc${C_RESET}";
 			return ;
 		fi
 		# Linux API headers
-		if [ $gcc[status] = true ]; then
-			if [ $LinuxApiHeader[status] = false ]; then
-				echo	"${C_ORANGE}Linux API Headers...${C_RESET}";
-				ExposeAPIHeaders;
-				ValidateAPIHeaders;
+		if [ "$gcc[status]" = true ]; then
+			if [ "$LinuxApiHeader[status]" != true ]; then
+				EchoInfo	"Linux API Headers...";
+				ExtractApiHeaders;
 			fi
 		else
 			MSG="${C_RED}Error${C_RESET}: Missing ${C_ORANGE}gcc${C_RESET} which is required before ${C_ORANGE}Linux API Headers${C_RESET}";
 			return ;
 		fi
 		# glibc
-		if [ $LinuxApiHeader[status] = true ]; then
-			if [ $glibc[status] = false ]; then
-				echo	"${C_ORANGE}glibc...${C_RESET}";
+		if [ "$LinuxApiHeader[status]" = true ]; then
+			if [ "$glibc[status]" != true ]; then
+				EchoInfo	"glibc...";
 				InstallGlibc;
-				ValidateGlibc;
 			fi
 		else
 			MSG="${C_RED}Error${C_RESET}: Missing ${C_ORANGE}gcc${C_RESET} which is required before ${C_ORANGE}glibc${C_RESET}";
 			return ;
 		fi
 		# LibstdC++
-		if [ $glibc[status] = true ]; then
-			if [ $libstdcpp[status] = false ]; then
+		if [ "$glibc[status]" = true ]; then
+			if [ "$libstdcpp[status]" != true ]; then
+				EchoInfo	"libstdc++...";
 				InstallLibstdcpp;
 			fi
 		else
@@ -265,13 +265,13 @@ ExtractPackage()
 	DST="$2";
 
 	if [[ -z "$SRC" || ! -f "$SRC"  || -z "$DST" ]]; then
-		echo	"Error: no $SRC or $DST";
+		EchoError	"No $SRC or $DST";
 		return 1;
 	fi
 
 	for FILENAME in $(tar -tf "$SRC"); do
 		if [ ! -e ${DST}/${FILENAME} ]; then
-			echo "${C_ORANGE}Unpacking $SRC($FILENAME)...${C_RESET}";
+			EchoInfo	"Unpacking $SRC($FILENAME)...";
 			mkdir -p "$DST";
 			tar -xf "$SRC" -C "$DST";
 			return $?;
@@ -280,54 +280,96 @@ ExtractPackage()
 	return 0;
 }
 
+ValidatePackages()
+{
+	# ConfigureBinutils;
+	ValidateBinutils;
+
+	# ConfigureGccPass1;
+	ValidateGccPass1;
+
+	ValidateAPIHeaders;
+
+	ValidateGlibc;
+
+	# ConfigureLibstdcpp;
+	ValidateLibstdcpp;
+}
+
+# ValidatePackageWithMakefile()
+# {
+# 	local LOCATION="$1";
+# 	if [ -z "$2" ]; then
+# 		local TARGET=check;
+# 	else
+# 		local TARGET="$2";
+# 	fi
+# 	local STATUS=false;
+
+# 	if [ -d "$LOCATION" ]; then
+# 		cd "$LOCATION";
+# 		if [ -f Makefile ]; then
+# 			if make -n $TARGET 1> /dev/null 2>&1; then
+# 				if make $TARGET 1> /dev/null 2>&1; then
+# 					local STATUS=true;
+# 				else
+# 				fi
+# 			else
+# 				EchoError	"Makefile does not contain target ${C_ORANGE}check${C_RESET}..."
+# 			fi
+# 		else
+# 			EchoError	"Makefile not found..."
+# 		fi
+# 		cd -;
+# 	else
+# 		EchoError	"Directory ${C_ORANGE}$LOCATION${C_RESET} not found..."
+# 	fi
+
+# 	if [ $STATUS = true ]; then
+# 		return 0;
+# 	else
+# 		return 1;
+# 	fi
+# }
+
 # =====================================||===================================== #
 #									Binutils								   #
 # ===============ft_linux==============||==============©Othello=============== #
 
-ValidateBinutils()
-{
-	if ! cd "${PDIR}${binutils[package]}/build" 2> /dev/null; then
-		return ;
-	fi
-
-	if	make check >/dev/null 2>&1 && \
-		command -v as > /dev/null && \
-		command -v ld > /dev/null; then
-		binutils[status]=true;
-	else
-		binutils[status]=false;
-	fi
-
-	cd -;
-
-	# if command -v as > /dev/null && command -v ld > /dev/null; then
-	# 	binutils[status]=true;
-	# 	return 0
-	# else
-	# 	binutils[status]=false;
-	# 	return 1
-	# fi
-}
-
-InstallPackageBinutils()
+InstallBinutils()
 {
 	ExtractPackage	"${PDIR}${binutils[package]}.tar.xz"	"${PDIR}";
 
 	if [ $? -ne 0 ]; then
-		echo	"${C_RED}Error($?)${C_RESET}: failed to unpack binutils";
+		EchoError	"Failed to unpack binutils";
 		return ;
 	fi
 
 	if ! mkdir -pv "${PDIR}${binutils[package]}/build"; then
-		echo	"${C_RED}Error($?)${C_RESET}: Failed to make build directory.";
+		EchoError	"Failed to make build directory.";
 		return ;
 	fi
 
-	PBDIR="${PDIR}${binutils[package]}/build"
-	cd "${PBDIR}";
 	binutils[time]=$(date +%s);
+
+	ConfigureBinutils;
+	InstallPackageBinutils;
+
+	binutils[time]=$(( $(date +%s) - $binutils[time] ));
+
+	ValidateBinutils;
+}
+
+ConfigureBinutils()
+{
+	local PBDIR="${PDIR}${binutils[package]}/build";
+
+	if ! cd "${PDIR}${binutils[package]}/build" 2> /dev/null; then
+		return ;
+	fi
+
 	if [ ! -f "${PBDIR}/Makefile" ] || [ ! -f "${PBDIR}/config.status" ] || [ ! -f "${PBDIR}/config.log" ]; then
-		echo	"${C_ORANGE}Configuring ${binutils[package]}...${C_RESET}";
+		EchoInfo	"Configuring ${binutils[package]}...";
 		time ../configure	--prefix=$LFS/tools	\
 							--with-sysroot=$LFS	\
 							--target=$LFS_TGT	\
@@ -338,14 +380,40 @@ InstallPackageBinutils()
 							--enable-default-hash-style=gnu	\
 							1> /dev/null;
 	fi
-	echo	"${C_ORANGE}Installing ${binutils[package]}${C_RESET}";
+
+	cd -;
+}
+
+InstallPackageBinutils()
+{
+	if ! cd "${PDIR}${binutils[package]}/build" 2> /dev/null; then
+		return ;
+	fi
+
+	EchoInfo	"Compiling ${binutils[package]}";
 	echo	"${C_DGRAY}> make 1> /dev/null${C_RESET}";
 	time make 1> /dev/null;
-	echo	"${C_ORANGE}Installing ${binutils[package]}...${C_RESET}";
+	EchoInfo	"Installing ${binutils[package]}...${C_RESET}";
 	echo	"${C_DGRAY}> make install 1> /dev/null${C_RESET}";
 	time make install 1> /dev/null;
 
-	binutils[time]=$(( $(date +%s) - $binutils[time] ));
+	cd -;
+}
+
+ValidateBinutils()
+{
+	if ! cd "${PDIR}${binutils[package]}/build" 2> /dev/null; then
+		return ;
+	fi
+
+	if make check >/dev/null 2>&1 && \
+		command -v as > /dev/null && \
+		command -v ld > /dev/null; then
+		binutils[status]=true;
+	else
+		binutils[status]=false;
+	fi
+
 	cd -;
 }
 
@@ -353,30 +421,37 @@ InstallPackageBinutils()
 #									   gcc									   #
 # ===============ft_linux==============||==============©Othello=============== #
 
-ValidateGcc()
+InstallGccPass1()
 {
-	if ! cd "${PDIR}${gcc[package]}/build" 2> /dev/null; then
+	if ! ExtracPackagesGccPass1; then
 		return ;
 	fi
 
-	if	make check > /dev/null 2>&1 && \
-		command -v gcc > /dev/null; then
-		gcc[status]=true;
-	else
-		gcc[status]=false;
+	# On x86_64 hosts, set the default directory name for 64-bit libraries to “lib”
+	case $(uname -m) in
+		x86_64) sed -e '/m64=/s/lib64/lib/' -i.orig "${PDIR}${gcc[package]}/gcc/config/i386/t-linux64";;
+	esac
+
+	if ! mkdir -pv "${PDIR}${gcc[package]}/build"; then
+		EchoError	"Failed to make build directory.";
+		return ;
 	fi
 
-	cd -;
-	# if command -v gcc > /dev/null; then
-	# 	gcc[status]=true;
-	# 	return 0
-	# else
-	# 	gcc[status]=false;
-	# 	return 1
-	# fi
+	gcc[time]=$(date +%s);
+	ConfigureGccPass1;
+	InstallPackageGccPass1;
+	gcc[time]=$(( $(date +%s) - $gcc[time] ));
+
+	ValidateGccPass1;
+
+	# echo	"${C_ORANGE}Copying header files...${C_RESET}"
+	# cat ${PDIR}${gcc[package]}/gcc/limitx.h \
+	# 	${PDIR}${gcc[package]}/gcc/glimits.h \
+	# 	${PDIR}${gcc[package]}/gcc/limity.h \
+	# 	> `dirname $($LFS_TGT-gcc -print-libgcc-file-name)`/include/limits.h
 }
 
-InstallCrossGCC()
+ExtracPackagesGccPass1()
 {
 	ExtractPackage	"${PDIR}${gcc[package]}.tar.xz"	"${PDIR}";
 
@@ -392,21 +467,26 @@ InstallCrossGCC()
 	ExtractPackage	"${PDIR}mpc-1.3.1.tar.gz"	"${PDIR}";
 	mv -fv "${PDIR}mpc-1.3.1" "${PDIR}${gcc[package]}/mpc";
 
-	case $(uname -m) in
-		x86_64) sed -e '/m64=/s/lib64/lib/' -i.orig "${PDIR}${gcc[package]}/gcc/config/i386/t-linux64";;
-	esac
+	if	[ ! -d "${PDIR}${gcc[package]}" ] ||
+		[ ! -d "${PDIR}${gcc[package]}/mpfr" ] ||
+		[ ! -d "${PDIR}${gcc[package]}/gmp" ] ||
+		[ ! -d "${PDIR}${gcc[package]}/mpc" ]; then
+		EchoError	"Failed to unpack a package for gcc{mpfr, gmp, mpc}...";
+		return false;
+	fi
+	return true;
+}
 
-	if ! mkdir -pv "${PDIR}${gcc[package]}/build"; then
-		echo	"${C_RED}Error($?)${C_RESET}: Failed to make build directory.";
+ConfigureGccPass1()
+{
+	local PBDIR="${PDIR}${gcc[package]}/build";
+
+	if ! cd "${PDIR}${gcc[package]}/build" 2> /dev/null; then
 		return ;
 	fi
 
-	PBDIR="${PDIR}${gcc[package]}/build"
-	cd "${PBDIR}";
-
-	gcc[time]=$(date +%s);
-	if [ ! -f "${PBDIR}/Makefile" ] || [ ! -f "${PBDIR}/config.status" ] || [ ! -f "${PBDIR}/config.log" ]; then
-		echo	"${C_ORANGE}Configuring...${C_RESET}";
+	# if [ ! -f "${PBDIR}/Makefile" ] || [ ! -f "${PBDIR}/config.status" ] || [ ! -f "${PBDIR}/config.log" ]; then
+		EchoInfo	"Configuring...";
 		time ../configure	--target=$LFS_TGT	\
 							--prefix=$LFS/tools	\
 							--with-glibc-version=2.40 \
@@ -427,29 +507,89 @@ InstallCrossGCC()
 							--disable-libstdcxx	\
 							-enable-languages=c,c++	\
 							1> /dev/null;
+	# fi
+
+	cd -;
+}
+
+InstallPackageGccPass1()
+{
+	if ! cd "${PDIR}${gcc[package]}/build" 2> /dev/null; then
+		return ;
 	fi
 
-	echo	"${C_ORANGE}Installing ${gcc[package]}...${C_RESET}";
+	EchoInfo	"Compiling ${gcc[package]}...";
 	echo	"${C_DGRAY}> make 1> /dev/null${C_RESET}";
 	time make 1> /dev/null;
-	echo	"${C_ORANGE}Installing ${gcc[package]}...${C_RESET}";
+	EchoInfo	"Installing ${gcc[package]}...";
 	echo	"${C_DGRAY}> make install 1> /dev/null${C_RESET}";
 	time make install 1> /dev/null;
 
-	cd -
-
-	echo	"${C_ORANGE}Copying header files...${C_RESET}"
-	cat ${PDIR}${gcc[package]}/gcc/limitx.h \
-		${PDIR}${gcc[package]}/gcc/glimits.h \
-		${PDIR}${gcc[package]}/gcc/limity.h \
-		> `dirname $($LFS_TGT-gcc -print-libgcc-file-name)`/include/limits.h
-	gcc[time]=$(( $(date +%s) - $gcc[time] ));
+	cd -;
 }
 
+ValidateGccPass1()
+{
+	if ! cd "${PDIR}${gcc[package]}/build" 2> /dev/null; then
+		return ;
+	fi
+
+	if command -v gcc >/dev/null && \
+		make check-gcc 1> /dev/null 2>&1 &&
+	then
+		gcc[status]=true;
+	else
+		if make check 1> /dev/null 2>&1; then
+			gcc[status]=true;
+		else
+			gcc[status]=false;
+		fi
+	fi;
+
+	cd -;
+}
 
 # =====================================||===================================== #
 #								Linux API Headers							   #
 # ===============ft_linux==============||==============©Othello=============== #
+
+ExtractApiHeaders()
+{
+	# PACKNAME="linux-6.10.5";
+	ExtractPackage	"${PDIR}${LinuxApiHeader[package]}.tar.xz"	"${PDIR}";
+
+	LinuxApiHeader[time]=$(date +%s);
+
+	MakeAndMoveApiHeaders;
+
+	LinuxApiHeader[time]=$(( $(date +%s) - $LinuxApiHeader[time] ));
+
+	ValidateAPIHeaders;
+
+}
+
+MakeAndMoveApiHeaders()
+{
+	if ! cd "${PDIR}${LinuxApiHeader[package]}" 2> /dev/null; then
+		return ;
+	fi
+
+	EchoInfo	"Cleaning stale files...";
+	echo	"${C_DGRAY}> make mrproper 1> /dev/null${C_RESET}";
+	time make mrproper 1> /dev/null;
+
+	EchoInfo	"Extracting user-visible kernel headers from source...";
+	echo	"${C_DGRAY}> make headers 1> /dev/null${C_RESET}";
+	time make headers 1> /dev/null;
+
+	EchoInfo	"Copying headers to $LFS/usr/include...";
+	echo	"${C_DGRAY}> cp -rv usr/include \$LFS/usr 1> /dev/null${C_RESET}";
+	find usr/include -type f ! -name '*.h' -delete
+	cp -rv usr/include $LFS/usr 1> /dev/null
+
+	cd -;
+
+}
 
 ValidateAPIHeaders()
 {
@@ -488,74 +628,66 @@ ValidateAPIHeaders()
 	return 0;
 }
 
-
-ExposeAPIHeaders()
-{
-	# PACKNAME="linux-6.10.5";
-	ExtractPackage	"${PDIR}${LinuxApiHeader[package]}.tar.xz"	"${PDIR}";
-
-	cd "${PDIR}${LinuxApiHeader[package]}";
-	LinuxApiHeader[time]=$(date +%s);
-
-	echo	"${C_ORANGE}Cleaning stale files...${C_RESET}";
-	echo	"${C_DGRAY}> make mrproper 1> /dev/null${C_RESET}";
-	time make mrproper 1> /dev/null;
-
-	echo	"${C_ORANGE}Extracting user-visible kernel headers from source...${C_RESET}";
-	echo	"${C_DGRAY}> make headers 1> /dev/null${C_RESET}";
-	time make headers 1> /dev/null;
-
-	echo	"${C_ORANGE}Copying headers to $LFS/usr/include...${C_RESET}";
-	echo	"${C_DGRAY}> cp -rv usr/include \$LFS/usr 1> /dev/null${C_RESET}";
-	find usr/include -type f ! -name '*.h' -delete
-	cp -rv usr/include $LFS/usr 1> /dev/null
-
-	LinuxApiHeader[time]=$(( $(date +%s) - $LinuxApiHeader[time] ));
-	cd -
-}
-
 # =====================================||===================================== #
 #									  Glibc									   #
 # ===============ft_linux==============||==============©Othello=============== #
-
-ValidateGlibc()
-{
-	if ToolchainTest1 > /dev/null; then
-		glibc[status]=true;
-		return 0;
-	else
-		glibc[status]=false;
-		return 1;
-	fi
-}
 
 InstallGlibc()
 {
 	# PACKNAME="glibc-2.40";
 	ExtractPackage	"${PDIR}${glibc[package]}.tar.xz"	"${PDIR}";
 
-	cd "${PDIR}${glibc[package]}";
+	if [ $? -ne 0 ]; then
+		EchoError	"Failed to unpack glibc";
+		return ;
+	fi
+
+	if ! mkdir -pv "${PDIR}${glibc[package]}/build"; then
+		EchoError	"Failed to make build directory.";
+		return ;
+	fi
+
 	glibc[time]=$(date +%s);
 
+	PrepareGlibc;
+	ConfigureGlibc;
+	InstallPackageGlibc;
+
+	glibc[time]=$(( $(date +%s) - $glibc[time] ));
+
+	ValidateGlibc;
+
+	cd -;
+}
+
+PrepareGlibc()
+{
+	if ! cd "${PDIR}${glibc[package]}" 2> /dev/null; then
+		return ;
+	fi
+
+	# For x86_64, create a compatibility symbolic link required for proper operation of the dynamic library loader
 	case $(uname -m) in
 		i?86)	ln -sfv ld-linux.so.2 $LFS/lib/ld-lsb.so.3;;
 		x86_64)	ln -sfv ../lib/ld-linux-x86-64.so.2 $LFS/lib64;
 				ln -sfv ../lib/ld-linux-x86-64.so.2 $LFS/lib64/ld-lsb-x86-64.so.3;;
 	esac
 
+	# Patch to make programs store their runtime data in the FHS-compliant locations.
 	patch -Np1 -i ../glibc-2.40-fhs-1.patch;
 
-	PBDIR="${PDIR}${glibc[package]}/build"
-	if ! mkdir -pv "${PBDIR}"; then
-		echo	"${C_RED}Error($?)${C_RESET}: Failed to make build directory.";
+	cd -;
+
+}
+
+ConfigureGlibc()
+{
+	if ! cd "${PDIR}${glibc[package]}/build" 2> /dev/null; then
 		return ;
 	fi
-	cd -;
-	cd "${PBDIR}";
-
 
 	if [ ! -f "${PBDIR}/Makefile" ]; then
-		echo	"${C_ORANGE}Configuring ${glibc[package]}...${C_RESET}";
+		EchoInfo	"Configuring ${glibc[package]}...";
 		echo "rootsbindir=/usr/sbin" > configparms
 		time ../configure	--prefix=/usr	\
 							--host=$LFS_TGT	\
@@ -567,23 +699,42 @@ InstallGlibc()
 							1> /dev/null
 	fi
 
-	echo	"${C_ORANGE}Installing ${glibc[package]}...${C_RESET}";
+	cd -;
+}
+
+InstallPackageGlibc()
+{
+	if ! cd "${PDIR}${glibc[package]}/build" 2> /dev/null; then
+		return ;
+	fi
+
+	EchoInfo	"Compiling ${glibc[package]}...";
 	echo	"${C_DGRAY}> make 1> /dev/null${C_RESET}";
 	time make 1> /dev/null;
 	if [ "$(whoami)" != "root" ] && [ -n "$LFS" ]; then
-		echo	"${C_ORANGE}Installing ${glibc[package]}...${C_RESET}";
+		EchoInfo	"Installing ${glibc[package]}...";
 		echo	"${C_DGRAY}> make DESTDIR=\$LFS install 1> /dev/null${C_RESET}";
 		time make DESTDIR=$LFS install 1> /dev/null
 	else
-		echo "Error!: Almost made build unstable with glibc!";
+		EchoError "Almost made build unstable with glibc!";
 		return 1;
 	fi
 
-	echo	"${C_ORANGE}Fixing hardcoded path...${C_RESET}";
+	EchoInfo	"Fixing hardcoded path...";
 	sed '/RTLDLIST=/s@/usr@@g' -i $LFS/usr/bin/ldd
 
-	glibc[time]=$(( $(date +%s) - $glibc[time] ));
 	cd -;
+}
+
+ValidateGlibc()
+{
+	if ToolchainTest1 > /dev/null; then
+		glibc[status]=true;
+		return 0;
+	else
+		glibc[status]=false;
+		return 1;
+	fi
 }
 
 ToolchainTest1()
@@ -607,41 +758,36 @@ ToolchainTest1()
 #									libstdcpp								   #
 # ===============ft_linux==============||==============©Othello=============== #
 
-ValidateLibstdCpp()
-{
-	echo '#include <cstdlib>
-	int main(){}' | $LFS_TGT-g++ -xc - -o gpptest.out
-
-	if [ -f "gpptest.out" ]; then
-		readelf -l gpptest.out | grep ld-linux
-		if [ $? -eq 0 ]; then
-			libstdcpp[status]=true;
-		else
-			libstdcpp[status]=false;
-		fi
-		rm gpptest.out;
-	else
-		libstdcpp[status]=false;
-	fi
-	echo	"${C_RED}Note${C_RESET}: Not testing propperly..."
-}
-
 InstallLibstdcpp()
 {
 	PACKNAME="libstdc++";
 
-	echo	"${C_ORANGE}Double checking Toolchain ...${C_RESET}";
+	EchoInfo	"Double checking Toolchain ...";
 	ToolchainTest1	1> /dev/null;
 	if [ "$glibc[status]" != true ]; then
 		MSG="${C_RED}Error${C_RESET}: Toolchain test failed. Aborting $PACKNAME...${C_RESET}"
 		return ;
 	fi
 	
-	PBDIR="${PDIR}${libstdcpp[package]}/build"
-	cd "${PBDIR}";
 	libstdcpp[time]=$(date +%s);
 
-	echo	"${C_ORANGE}Configuring ${PACKNAME}...${C_RESET}";
+	ConfigureLibstdcpp;
+	InstallPackageLibstdcpp;
+
+	libstdcpp[time]=$(( $(date +%s) - $libstdcpp[time] ));
+
+	ValidateLibstdcpp;
+
+	cd -
+}
+
+ConfigureLibstdcpp()
+{
+	if ! cd "${PDIR}${libstdcpp[package]}/build" 2> /dev/null; then
+		return ;
+	fi
+	
+	EchoInfo	"Configuring ${PACKNAME}...";
 	../libstdc++-v3/configure	--host=$LFS_TGT	\
 								--build=$(../config.guess)	\
 								--prefix=/usr	\
@@ -650,20 +796,61 @@ InstallLibstdcpp()
 								--disable-libstdcxx-pch	\
 								--with-gxx-include-dir=/tools/$LFS_TGT/include/c++/14.2.0	\
 								1> /dev/null
-	
-	echo	"${C_ORANGE}Compiling ${libstdcpp[package]}...${C_RESET}";
+
+	cd -;
+}
+
+InstallPackageLibstdcpp()
+{
+	if ! cd "${PDIR}${libstdcpp[package]}/build" 2> /dev/null; then
+		return ;
+	fi
+
+	EchoInfo	"Compiling ${libstdcpp[package]}...";
 	echo	"${C_DGRAY}> make 1> /dev/null${C_RESET}";
 	make 1> /dev/null
 
-	echo	"${C_ORANGE}Installing ${PACKNAME} library...${C_RESET}";
+	EchoInfo	"Installing ${PACKNAME} library...";
 	echo	"${C_DGRAY}> make DESTDIR=\$LFS install 1> /dev/null${C_RESET}";
 	make DESTDIR=$LFS install 1> /dev/null
 
-	echo	"${C_ORANGE}Removing libtool archive files...${C_RESET} (they are harmful for cross-compilation)"
+	EchoInfo	"Removing libtool archive files...";
+	echo	"${C_DGRAY}(they are harmful for cross-compilation)${C_RESET}";
 	rm -v $LFS/usr/lib/lib{stdc++{,exp,fs},supc++}.la
 
-	libstdcpp[time]=$(( $(date +%s) - $libstdcpp[time] ));
-	cd -
+	cd -;
+}
+
+ValidateLibstdcpp()
+{
+	if ! cd "${PDIR}${gcc[package]}/build" 2> /dev/null; then
+		return ;
+	fi
+
+	if command -v g++ >/dev/null && \
+		make check 1> /dev/null 2>&1 &&
+	then
+		libstdcpp[status]=true
+	else
+		libstdcpp[status]=false
+	fi;
+
+	cd -;
+	# echo '#include <cstdlib>
+	# int main(){}' | $LFS_TGT-g++ -xc - -o gpptest.out
+
+	# if [ -f "gpptest.out" ]; then
+	# 	readelf -l gpptest.out | grep ld-linux
+	# 	if [ $? -eq 0 ]; then
+	# 		libstdcpp[status]=true;
+	# 	else
+	# 		libstdcpp[status]=false;
+	# 	fi
+	# 	rm gpptest.out;
+	# else
+	# 	libstdcpp[status]=false;
+	# fi
+	# echo	"${C_RED}Note${C_RESET}: Not testing propperly..."
 }
 
 # =====================================||===================================== #
@@ -678,22 +865,57 @@ MenuTemporaryTools()
 	echo	"${C_ORANGE}Temporary Tools${C_RESET}";
 	printf '%*s\n' "$width" '' | tr ' ' '-';
 	echo	"i)\tInstall temporary tools"
+	echo	"v)\tValidate temporary tools"
 	echo	"q)\tReturn to main menu";
 	printf '%*s\n' "$width" '' | tr ' ' '-';
 
 	GetInput;
 
-	PDIR="$LFS/sources/lfs-packages12.2/";
+	# PDIR="$LFS/sources/lfs-packages12.2/";
 
 	case $input in
-		i|I)	InstallPackageM4;
+		i|I)	InstallM4;
+				InstallNcurses;
+				InstallBash;
+				InstallCoreutils;
+				InstallDiffutils;
+				InstallFile;
+				InstallFindutils;
+				InstallGawk;
+				InstallGrep;
+				InstallGzip;
+				InstallMake;
+				InstallPatch;
+				InstallSed;
+				InstallTar;
+				InstallXz;
+				PressAnyKeyToContinue;;
+		v|V)	ValidateM4;
+				ValidateNcurses;
+				ValidateBash;
+				ValidateCoreutils;
+				ValidateDiffutils;
+				ValidateFile;
+				ValidateFindutils;
+				ValidateGawk;
+				ValidateGrep;
+				ValidateGzip;
+				ValidateMake;
+				ValidatePatch;
+				ValidateSed;
+				ValidateTar;
+				ValidateXz;
 				PressAnyKeyToContinue;;
 		q|Q)	MENU=0;;
 		*)	MSG="${C_RED}Invalid input${C_RESET}: $input";;
 	esac
 }
 
-InstallPackageTemp()
+# =====================================||===================================== #
+#									  Temp									   #
+# ===============ft_linux==============||==============©Othello=============== #
+
+InstallTemp()
 {
 	PACKAGE="";
 
@@ -703,66 +925,163 @@ InstallPackageTemp()
 		echo	"${C_RED}Error($?)${C_RESET}: Failed to make build directory.";
 		return ;
 	fi
-	PBDIR="${PDIR}${PACKAGE}/build";
-	cd "${PBDIR}";
 
-	echo	"${C_ORANGE}Installing ${PACKAGE}...${C_RESET}";
-	echo	"${C_DGRAY}> ${C_RESET}";
+	ConfigureTemp;
+	InstallPackageTemp;
+
+	# EchoInfo	"Testing $PACKAGE";
+	# ValidateTemp;
+}
+
+ConfigureTemp()
+{
+	if ! cd "${PDIR}${PACKAGE}/build"; then
+		return ;
+	fi
+
+	EchoInfo	"Configuring $PACKAGE...";
+
+
 
 	cd -;
 }
 
-ValidatePackageM4()
+InstallPackageTemp()
+{
+	if ! cd "${PDIR}${PACKAGE}/build"; then
+		return ;
+	fi
+
+	EchoInfo	"Compiling $PACKAGE...";
+	echo		"${C_DGRAY}> make 1> /dev/null${C_RESET}";
+	time make 1> /dev/null;
+
+	EchoInfo	"Installing $PACKAGE...";
+	echo		"${C_DGRAY}> make install 1> /dev/null${C_RESET}";
+	time make install 1> /dev/null;
+
+	cd -;
+}
+
+ValidateTemp()
+{
+	PACKAGE="";
+	if ! cd "${PDIR}${PACKAGE}/build"; then
+		return ;
+	fi
+
+	if make check >/dev/null 2>&1; then
+		EchoTest	OK	"$PACKAGE";
+	else
+		EchoTest	KO	"$PACKAGE";
+	fi
+
+	cd -;
+}
+
+# =====================================||===================================== #
+#									  M4									   #
+# ===============ft_linux==============||==============©Othello=============== #
+
+InstallM4()
 {
 	PACKAGE="m4-1.4.19";
-	make -C "${PDIR}${PACKAGE}" check;
 
-	echo $?;
+	ExtractPackage	"${PDIR}${PACKAGE}.tar.xz"	"${PDIR}";
+
+	ConfigureM4;
+	InstallPackageM4;
+
+	# EchoInfo	"Testing $PACKAGE";
+	# ValidateM4;
+
+	cd -;
+}
+
+ConfigureM4()
+{
+	if ! cd "${PDIR}${PACKAGE}"; then
+		return ;
+	fi
+
+	EchoInfo	"Configuring $PACKAGE...";
+	./configure	--prefix=/usr	\
+				--host=$LFS_TGT	\
+				--build=$(build-aux/config.guess)	\
+				1> /dev/null
+
+	cd -;
 }
 
 InstallPackageM4()
 {
-	PACKAGE="m4-1.4.19";
+	if ! cd "${PDIR}${PACKAGE}"; then
+		return ;
+	fi
 
-	ExtractPackage	"${PDIR}${PACKAGE}.tar.xz"	"${PDIR}";
+	EchoInfo	"Compiling $PACKAGE...";
+	echo		"${C_DGRAY}> make 1> /dev/null${C_RESET}";
+	time make 1> /dev/null;
+	EchoInfo	"Installing $PACKAGE...";
+	echo		"${C_DGRAY}> DESTDIR=\$LFS install 1> /dev/null${C_RESET}";
+	time make DESTDIR=$LFS install 1> /dev/null;
 
-	PBDIR="${PDIR}${PACKAGE}";
-	cd "${PBDIR}";
-
-	echo	"${C_ORANGE}Configuring ${PACKAGE}...${C_RESET}";
-	./configure --prefix=/usr	\
-				--host=$LFS_TGT	\
-				--build=$(build-aux/config.guess)	\
-				1> /dev/null;
-	
-
-	echo	"${C_ORANGE}Installing ${PACKAGE}...${C_RESET}";
-	echo	"${C_DGRAY}> make 1> /dev/null${C_RESET}";
-	make 1> /dev/null
-
-	echo	"${C_DGRAY}> make DESTDIR=\$LFS install 1> /dev/null${C_RESET}";
-	make DESTDIR=$LFS install 1> /dev/null
 	cd -;
 }
 
-InstallPackageNcurses()
+ValidateM4()
 {
-	PACKAGE="";
+	PACKAGE="m4-1.4.19";
+	if ! cd "${PDIR}${PACKAGE}"; then
+		return ;
+	fi
 
-	ExtractPackage	"${PDIR}${PACKAGE}.tar.xz"	"${PDIR}";
+	if make check >/dev/null 2>&1; then
+		EchoTest	OK	"$PACKAGE";
+	else
+		EchoTest	KO	"$PACKAGE";
+	fi
+
+	cd -;
+}
+
+# =====================================||===================================== #
+#									  Ncurses									   #
+# ===============ft_linux==============||==============©Othello=============== #
+
+InstallNcurses()
+{
+	PACKAGE="ncurses-6.5";
+
+	ExtractPackage	"${PDIR}${PACKAGE}.tar.gz"	"${PDIR}";
 
 	if ! mkdir -pv "${PDIR}${PACKAGE}/build"; then
 		echo	"${C_RED}Error($?)${C_RESET}: Failed to make build directory.";
 		return ;
 	fi
-	PBDIR="${PDIR}${PACKAGE}";
-	cd "${PBDIR}";
-	sed -i s/mawk// configure
-	if [ $? -ne 0 ]; then
+
+	ConfigureNcurses;
+	InstallPackageNcurses;
+
+	# EchoInfo	"Testing $PACKAGE";
+	# ValidateNcurses;
+}
+
+ConfigureNcurses()
+{
+	if ! cd "${PDIR}${PACKAGE}"; then
 		return ;
 	fi
+
+	sed -i s/mawk// configure;
+
+	if [ ! -d "${PDIR}${PACKAGE}/build"] ; then
+		return ;
+	fi
+
+	EchoInfo	"Configuring $PACKAGE...";
 	pushd build
-		../configure
+		../configure	1> /dev/null
 		make -C include	1> /dev/null
 		make -C progs tic	1> /dev/null
 	popd
@@ -778,13 +1097,942 @@ InstallPackageNcurses()
 				--without-debug	\
 				--without-ada	\
 				--disable-stripping	\
+				1> /dev/null
+
+	cd -;
+}
+
+InstallPackageNcurses()
+{
+	if ! cd "${PDIR}${PACKAGE}"; then
+		return ;
+	fi
+
+	EchoInfo	"Compiling $PACKAGE...";
+	echo		"${C_DGRAY}> make 1> /dev/null${C_RESET}";
+	time make 1> /dev/null;
+
+	EchoInfo	"Installing $PACKAGE...";
+	echo		"${C_DGRAY}> make DESTDIR=\$LFS TIC_PATH=\$(pwd)/build/progs/tic install 1> /dev/null${C_RESET}";
+	time make DESTDIR=$LFS TIC_PATH=$(pwd)/build/progs/tic install 1> /dev/null;
+
+	EchoInfo	"Configuring libncurses library...";
+	# symlink to use libncursesw.so
+	ln -sv libncursesw.so $LFS/usr/lib/libncurses.so;
+	# Edit the header file so it will always use the wide-character data structure definition compatible with libncursesw.so.
+	sed -e 's/^#if.*XOPEN.*$/#if 1/' \
+		-i $LFS/usr/include/curses.h;
+
+	cd -;
+}
+
+ValidateNcurses()
+{
+	PACKAGE="ncurses-6.5";
+	if ! cd "${PDIR}${PACKAGE}"; then
+		return ;
+	fi
+
+	if make check >/dev/null 2>&1; then
+		EchoTest	OK	"$PACKAGE";
+	else
+		EchoTest	KO	"$PACKAGE";
+	fi
+
+	cd -;
+}
+
+# =====================================||===================================== #
+#									  Bash									   #
+# ===============ft_linux==============||==============©Othello=============== #
+
+InstallBash()
+{
+	PACKAGE="bash-5.2.32";
+
+	ExtractPackage	"${PDIR}${PACKAGE}.tar.gz"	"${PDIR}";
+
+	ConfigureBash;
+	InstallPackageBash;
+
+	# EchoInfo	"Testing $PACKAGE";
+	# ValidateBash;
+}
+
+ConfigureBash()
+{
+	if ! cd "${PDIR}${PACKAGE}"; then
+		return ;
+	fi
+
+	EchoInfo	"Configuring $PACKAGE...";
+
+	./configure	--prefix=/usr	\
+				--build=$(sh support/config.guess) \
+				--host=$LFS_TGT	\
+				--without-bash-malloc	\
+				bash_cv_strtold_broken=no	\
+				1>/dev/null
+	cd -;
+}
+
+InstallPackageBash()
+{
+	if ! cd "${PDIR}${PACKAGE}"; then
+		return ;
+	fi
+
+	EchoInfo	"Compiling $PACKAGE...";
+	echo		"${C_DGRAY}> make 1> /dev/null${C_RESET}";
+	time make 1> /dev/null;
+
+	EchoInfo	"Installing $PACKAGE...";
+	echo		"${C_DGRAY}> make DESTDIR=\$LFS install 1> /dev/null${C_RESET}";
+	time make DESTDIR=$LFS install 1> /dev/null;
+
+	# Link for the programs that use sh for a shell
+	ln -sv bash $LFS/bin/sh
+
+	cd -;
+}
+
+ValidateBash()
+{
+	PACKAGE="bash-5.2.32";
+	if ! cd "${PDIR}${PACKAGE}"; then
+		return ;
+	fi
+
+	if make check >/dev/null 2>&1; then
+		EchoTest	OK	"$PACKAGE";
+	else
+		EchoTest	KO	"$PACKAGE";
+	fi
+
+	cd -;
+}
+
+# =====================================||===================================== #
+#									  Coreutils									   #
+# ===============ft_linux==============||==============©Othello=============== #
+
+InstallCoreutils()
+{
+	PACKAGE="coreutils-9.5";
+
+	ExtractPackage	"${PDIR}${PACKAGE}.tar.xz"	"${PDIR}";
+
+	ConfigureCoreutils;
+	InstallPackageCoreutils;
+
+	# EchoInfo	"Testing $PACKAGE";
+	# ValidateCoreutils;
+}
+
+ConfigureCoreutils()
+{
+	if ! cd "${PDIR}${PACKAGE}"; then
+		return ;
+	fi
+
+	EchoInfo	"Configuring $PACKAGE...";
+	./configure	--prefix=/usr	\
+				--host=$LFS_TGT	\
+				--build=$(build-aux/config.guess)	\
+				--enable-install-program=hostname	\
+				--enable-no-install-program=kill,uptime	\
 				1> /dev/null;
 
-	make;
-	make DESTDIR=$LFS TIC_PATH=$(pwd)/build/progs/tic install
-	ln	-sv libncursesw.so $LFS/usr/lib/libncurses.so
-	sed	-e 's/^#if.*XOPEN.*$/#if 1/'	\
-		-i $LFS/usr/include/curses.h
+	cd -;
+}
+
+InstallPackageCoreutils()
+{
+	if ! cd "${PDIR}${PACKAGE}"; then
+		return ;
+	fi
+
+	EchoInfo	"Compiling $PACKAGE...";
+	echo		"${C_DGRAY}> make 1> /dev/null${C_RESET}";
+	time make 1> /dev/null;
+
+	EchoInfo	"Installing $PACKAGE...";
+	echo		"${C_DGRAY}> make DESTDIR=$LFS install 1> /dev/null${C_RESET}";
+	time make DESTDIR=$LFS install 1> /dev/null;
+
+	# Move programs to their final expected locations
+	mv -v $LFS/usr/bin/chroot
+	$LFS/usr/sbin
+	mkdir -pv $LFS/usr/share/man/man8
+	mv -v $LFS/usr/share/man/man1/chroot.1 $LFS/usr/share/man/man8/chroot.8
+	sed -i 's/"1"/"8"/'
+	$LFS/usr/share/man/man8/chroot.8
+
+	cd -;
+}
+
+ValidateCoreutils()
+{
+	PACKAGE="coreutils-9.5";
+	if ! cd "${PDIR}${PACKAGE}"; then
+		return ;
+	fi
+
+	if make check >/dev/null 2>&1; then
+		EchoTest	OK	"$PACKAGE";
+	else
+		EchoTest	KO	"$PACKAGE";
+	fi
+
+	cd -;
+}
+
+# =====================================||===================================== #
+#									  Diffutils									   #
+# ===============ft_linux==============||==============©Othello=============== #
+
+InstallDiffutils()
+{
+	PACKAGE="diffutils-3.10";
+
+	ExtractPackage	"${PDIR}${PACKAGE}.tar.xz"	"${PDIR}";
+
+	ConfigureDiffutils;
+	InstallPackageDiffutils;
+
+	# EchoInfo	"Testing $PACKAGE";
+	# ValidateDiffutils;
+}
+
+ConfigureDiffutils()
+{
+	if ! cd "${PDIR}${PACKAGE}"; then
+		return ;
+	fi
+
+	EchoInfo	"Configuring $PACKAGE...";
+	./configure	--prefix=/usr	\
+				--host=$LFS_TGT	\
+				--build=$(./build-aux/config.guess)	\
+				1> /dev/null
+
+	cd -;
+}
+
+InstallPackageDiffutils()
+{
+	if ! cd "${PDIR}${PACKAGE}"; then
+		return ;
+	fi
+
+	EchoInfo	"Compiling $PACKAGE...";
+	echo		"${C_DGRAY}> make 1> /dev/null${C_RESET}";
+	time make 1> /dev/null;
+
+	EchoInfo	"Installing $PACKAGE...";
+	echo		"${C_DGRAY}> make DESTDIR=$LFS install 1> /dev/null${C_RESET}";
+	time make DESTDIR=$LFS install 1> /dev/null;
+
+	cd -;
+}
+
+ValidateDiffutils()
+{
+	PACKAGE="diffutils-3.10";
+	if ! cd "${PDIR}${PACKAGE}"; then
+		return ;
+	fi
+
+	if make check >/dev/null 2>&1; then
+		EchoTest	OK	"$PACKAGE";
+	else
+		EchoTest	KO	"$PACKAGE";
+	fi
+
+	cd -;
+}
+
+# =====================================||===================================== #
+#									  File									   #
+# ===============ft_linux==============||==============©Othello=============== #
+
+InstallFile()
+{
+	PACKAGE="file-5.45";
+
+	ExtractPackage	"${PDIR}${PACKAGE}.tar.gz"	"${PDIR}";
+
+	if ! mkdir -pv "${PDIR}${PACKAGE}/build"; then
+		echo	"${C_RED}Error($?)${C_RESET}: Failed to make build directory.";
+		return ;
+	fi
+
+	ConfigureFile;
+	InstallPackageFile;
+
+	# EchoInfo	"Testing $PACKAGE";
+	# ValidateFile;
+}
+
+ConfigureFile()
+{
+	if ! cd "${PDIR}${PACKAGE}"; then
+		return ;
+	fi
+
+	if [ ! -d "${PDIR}${PACKAGE}/build" ]; then
+		return ;
+	fi
+	EchoInfo	"Configuring $PACKAGE...";
+	pushd build
+		../configure	--disable-bzlib	\
+						--disable-libseccomp \
+						--disable-xzlib	\
+						--disable-zlib	\
+						1> /dev/null
+		make	 1> /dev/null
+	popd
+
+	./configure	--prefix=/usr	\
+				--host=$LFS_TGT	\
+				--build=$(./config.guess)	\
+				1> /dev/null
+
+	cd -;
+}
+
+InstallPackageFile()
+{
+	if ! cd "${PDIR}${PACKAGE}"; then
+		return ;
+	fi
+
+	EchoInfo	"Compiling $PACKAGE...";
+	echo		"${C_DGRAY}> make FILE_COMPILE=\$(pwd)/build/src/file 1> /dev/null${C_RESET}";
+	time make FILE_COMPILE=$(pwd)/build/src/file 1> /dev/null;
+
+	EchoInfo	"Installing $PACKAGE...";
+	echo		"${C_DGRAY}> make DESTDIR=\$LFS install 1> /dev/null${C_RESET}";
+	time make DESTDIR=$LFS install 1> /dev/null;
+
+	# Remove the libtool archive file because it is harmful for cross compilation
+	rm -v $LFS/usr/lib/libmagic.la
+
+	cd -;
+}
+
+ValidateFile()
+{
+	PACKAGE="file-5.45";
+	if ! cd "${PDIR}${PACKAGE}"; then
+		return ;
+	fi
+
+	if make check >/dev/null 2>&1; then
+		EchoTest	OK	"$PACKAGE";
+	else
+		EchoTest	KO	"$PACKAGE";
+	fi
+
+	cd -;
+}
+
+
+# =====================================||===================================== #
+#									  Findutils									   #
+# ===============ft_linux==============||==============©Othello=============== #
+
+InstallFindutils()
+{
+	PACKAGE="findutils-4.10.0";
+
+	ExtractPackage	"${PDIR}${PACKAGE}.tar.xz"	"${PDIR}";
+
+	ConfigureFindutils;
+	InstallPackageFindutils;
+
+	# EchoInfo	"Testing $PACKAGE";
+	# ValidateFindutils;
+}
+
+ConfigureFindutils()
+{
+	if ! cd "${PDIR}${PACKAGE}"; then
+		return ;
+	fi
+
+	EchoInfo	"Configuring $PACKAGE...";
+	./configure	--prefix=/usr	\
+				--localstatedir=/var/lib/locate	\
+				--host=$LFS_TGT	\
+				--build=$(build-aux/config.guess)	\
+				1> /dev/null;
+
+	cd -;
+}
+
+InstallPackageFindutils()
+{
+	if ! cd "${PDIR}${PACKAGE}"; then
+		return ;
+	fi
+
+	EchoInfo	"Compiling $PACKAGE...";
+	echo		"${C_DGRAY}> make 1> /dev/null${C_RESET}";
+	time make 1> /dev/null;
+
+	EchoInfo	"Installing $PACKAGE...";
+	echo		"${C_DGRAY}> make DESTDIR=\$LFS install 1> /dev/null${C_RESET}";
+	time make DESTDIR=$LFS install 1> /dev/null;
+
+	cd -;
+}
+
+ValidateFindutils()
+{
+	PACKAGE="findutils-4.10.0";
+	if ! cd "${PDIR}${PACKAGE}"; then
+		return ;
+	fi
+
+	if make check >/dev/null 2>&1; then
+		EchoTest	OK	"$PACKAGE";
+	else
+		EchoTest	KO	"$PACKAGE";
+	fi
+
+	cd -;
+}
+
+# =====================================||===================================== #
+#									  Gawk									   #
+# ===============ft_linux==============||==============©Othello=============== #
+
+InstallGawk()
+{
+	PACKAGE="gawk-5.3.0";
+
+	ExtractPackage	"${PDIR}${PACKAGE}.tar.xz"	"${PDIR}";
+
+	ConfigureGawk;
+	InstallPackageGawk;
+
+	# EchoInfo	"Testing $PACKAGE";
+	# ValidateGawk;
+}
+
+ConfigureGawk()
+{
+	if ! cd "${PDIR}${PACKAGE}"; then
+		return ;
+	fi
+
+	# Ensure some unneeded files are not installed
+	sed -i 's/extras//' Makefile.in
+
+	EchoInfo	"Configuring $PACKAGE...";
+	./configure	--prefix=/usr	\
+				--host=$LFS_TGT	\
+				--build=$(build-aux/config.guess)	\
+				1> /dev/null
+
+	cd -;
+}
+
+InstallPackageGawk()
+{
+	if ! cd "${PDIR}${PACKAGE}"; then
+		return ;
+	fi
+
+	EchoInfo	"Compiling $PACKAGE...";
+	echo		"${C_DGRAY}> make 1> /dev/null${C_RESET}";
+	time make 1> /dev/null;
+
+	EchoInfo	"Installing $PACKAGE...";
+	echo		"${C_DGRAY}> make DESTDIR=\$LFS install 1> /dev/null${C_RESET}";
+	time make DESTDIR=$LFS install 1> /dev/null;
+
+	cd -;
+}
+
+ValidateGawk()
+{
+	PACKAGE="gawk-5.3.0";
+	if ! cd "${PDIR}${PACKAGE}"; then
+		return ;
+	fi
+
+	if make check >/dev/null 2>&1; then
+		EchoTest	OK	"$PACKAGE";
+	else
+		EchoTest	KO	"$PACKAGE";
+	fi
+
+	cd -;
+}
+
+# =====================================||===================================== #
+#									  Grep									   #
+# ===============ft_linux==============||==============©Othello=============== #
+
+InstallGrep()
+{
+	PACKAGE="grep-3.11";
+
+	ExtractPackage	"${PDIR}${PACKAGE}.tar.xz"	"${PDIR}";
+
+	if ! mkdir -pv "${PDIR}${PACKAGE}/build"; then
+		echo	"${C_RED}Error($?)${C_RESET}: Failed to make build directory.";
+		return ;
+	fi
+
+	ConfigureGrep;
+	InstallPackageGrep;
+
+	# EchoInfo	"Testing $PACKAGE";
+	# ValidateGrep;
+}
+
+ConfigureGrep()
+{
+	if ! cd "${PDIR}${PACKAGE}/build"; then
+		return ;
+	fi
+
+	EchoInfo	"Configuring $PACKAGE...";
+	./configure	--prefix=/usr	\
+				--host=$LFS_TGT	\
+				--build=$(./build-aux/config.guess)	\
+				1> /dev/null
+
+	cd -;
+}
+
+InstallPackageGrep()
+{
+	if ! cd "${PDIR}${PACKAGE}/build"; then
+		return ;
+	fi
+
+	EchoInfo	"Compiling $PACKAGE...";
+	echo		"${C_DGRAY}> make 1> /dev/null${C_RESET}";
+	time make 1> /dev/null;
+
+	EchoInfo	"Installing $PACKAGE...";
+	echo		"${C_DGRAY}> make DESTDIR=\$LFS install 1> /dev/null${C_RESET}";
+	time make DESTDIR=$LFS install 1> /dev/null;
+
+	cd -;
+}
+
+ValidateGrep()
+{
+	PACKAGE="grep-3.11";
+	if ! cd "${PDIR}${PACKAGE}/build"; then
+		return ;
+	fi
+
+	if make check >/dev/null 2>&1; then
+		EchoTest	OK	"$PACKAGE";
+	else
+		EchoTest	KO	"$PACKAGE";
+	fi
+
+	cd -;
+}
+
+# =====================================||===================================== #
+#									  Gzip									   #
+# ===============ft_linux==============||==============©Othello=============== #
+
+InstallGzip()
+{
+	PACKAGE="gzip-1.13";
+
+	ExtractPackage	"${PDIR}${PACKAGE}.tar.xz"	"${PDIR}";
+
+	ConfigureGzip;
+	InstallPackageGzip;
+
+	# EchoInfo	"Testing $PACKAGE";
+	# ValidateGzip;
+}
+
+ConfigureGzip()
+{
+	if ! cd "${PDIR}${PACKAGE}"; then
+		return ;
+	fi
+
+	EchoInfo	"Configuring $PACKAGE...";
+	./configure	--prefix=/usr	\
+				--host=$LFS_TGT	\
+				1> /dev/null
+
+	cd -;
+}
+
+InstallPackageGzip()
+{
+	if ! cd "${PDIR}${PACKAGE}"; then
+		return ;
+	fi
+
+	EchoInfo	"Compiling $PACKAGE...";
+	echo		"${C_DGRAY}> make 1> /dev/null${C_RESET}";
+	time make 1> /dev/null;
+
+	EchoInfo	"Installing $PACKAGE...";
+	echo		"${C_DGRAY}> make DESTDIR=\$LFS install 1> /dev/null${C_RESET}";
+	time make DESTDIR=$LFS install 1> /dev/null;
+
+	cd -;
+}
+
+ValidateGzip()
+{
+	PACKAGE="gzip-1.13";
+	if ! cd "${PDIR}${PACKAGE}"; then
+		return ;
+	fi
+
+	if make check >/dev/null 2>&1; then
+		EchoTest	OK	"$PACKAGE";
+	else
+		EchoTest	KO	"$PACKAGE";
+	fi
+
+	cd -;
+}
+
+# =====================================||===================================== #
+#									  Make									   #
+# ===============ft_linux==============||==============©Othello=============== #
+
+InstallMake()
+{
+	PACKAGE="make-4.4.1";
+
+	ExtractPackage	"${PDIR}${PACKAGE}.tar.gz"	"${PDIR}";
+
+	ConfigureMake;
+	InstallPackageMake;
+
+	# EchoInfo	"Testing $PACKAGE";
+	# ValidateMake;
+}
+
+ConfigureMake()
+{
+	if ! cd "${PDIR}${PACKAGE}"; then
+		return ;
+	fi
+
+	EchoInfo	"Configuring $PACKAGE...";
+	./configure	--prefix=/usr	\
+				--without-guile	\
+				--host=$LFS_TGT	\
+				--build=$(build-aux/config.guess)	\
+				1> /dev/null
+
+	cd -;
+}
+
+InstallPackageMake()
+{
+	if ! cd "${PDIR}${PACKAGE}"; then
+		return ;
+	fi
+
+	EchoInfo	"Compiling $PACKAGE...";
+	echo		"${C_DGRAY}> make 1> /dev/null${C_RESET}";
+	time make 1> /dev/null;
+
+	EchoInfo	"Installing $PACKAGE...";
+	echo		"${C_DGRAY}> make DESTDIR=\$LFS install 1> /dev/null${C_RESET}";
+	time make DESTDIR=$LFS install 1> /dev/null;
+
+	cd -;
+}
+
+ValidateMake()
+{
+	PACKAGE="make-4.4.1";
+	if ! cd "${PDIR}${PACKAGE}"; then
+		return ;
+	fi
+
+	if make check >/dev/null 2>&1; then
+		EchoTest	OK	"$PACKAGE";
+	else
+		EchoTest	KO	"$PACKAGE";
+	fi
+
+	cd -;
+}
+
+# =====================================||===================================== #
+#									  Patch									   #
+# ===============ft_linux==============||==============©Othello=============== #
+
+InstallPatch()
+{
+	PACKAGE="patch-2.7.6";
+
+	ExtractPackage	"${PDIR}${PACKAGE}.tar.xz"	"${PDIR}";
+
+	ConfigurePatch;
+	InstallPackagePatch;
+
+	# EchoInfo	"Testing $PACKAGE";
+	# ValidatePatch;
+}
+
+ConfigurePatch()
+{
+	if ! cd "${PDIR}${PACKAGE}"; then
+		return ;
+	fi
+
+	EchoInfo	"Configuring $PACKAGE...";
+	./configure	--prefix=/usr	\
+				--host=$LFS_TGT	\
+				--build=$(build-aux/config.guess)	\
+				1> /dev/null
+
+	cd -;
+}
+
+InstallPackagePatch()
+{
+	if ! cd "${PDIR}${PACKAGE}"; then
+		return ;
+	fi
+
+	EchoInfo	"Compiling $PACKAGE...";
+	echo		"${C_DGRAY}> make 1> /dev/null${C_RESET}";
+	time make 1> /dev/null;
+
+	EchoInfo	"Installing $PACKAGE...";
+	echo		"${C_DGRAY}> make DESTDIR=\$LFS install 1> /dev/null${C_RESET}";
+	time make DESTDIR=$LFS install 1> /dev/null;
+
+	cd -;
+}
+
+ValidatePatch()
+{
+	PACKAGE="patch-2.7.6";
+	if ! cd "${PDIR}${PACKAGE}"; then
+		return ;
+	fi
+
+	if make check >/dev/null 2>&1; then
+		EchoTest	OK	"$PACKAGE";
+	else
+		EchoTest	KO	"$PACKAGE";
+	fi
+
+	cd -;
+}
+
+# =====================================||===================================== #
+#									  Sed									   #
+# ===============ft_linux==============||==============©Othello=============== #
+
+InstallSed()
+{
+	PACKAGE="sed-4.9";
+
+	ExtractPackage	"${PDIR}${PACKAGE}.tar.xz"	"${PDIR}";
+
+	ConfigureSed;
+	InstallPackageSed;
+
+	# EchoInfo	"Testing $PACKAGE";
+	# ValidateSed;
+}
+
+ConfigureSed()
+{
+	if ! cd "${PDIR}${PACKAGE}"; then
+		return ;
+	fi
+
+	EchoInfo	"Configuring $PACKAGE...";
+	./configure	--prefix=/usr	\
+				--host=$LFS_TGT	\
+				--build=$(./build-aux/config.guess)	\
+				1> /dev/null
+
+	cd -;
+}
+
+InstallPackageSed()
+{
+	if ! cd "${PDIR}${PACKAGE}"; then
+		return ;
+	fi
+
+	EchoInfo	"Compiling $PACKAGE...";
+	echo		"${C_DGRAY}> make 1> /dev/null${C_RESET}";
+	time make 1> /dev/null;
+
+	EchoInfo	"Installing $PACKAGE...";
+	echo		"${C_DGRAY}> make DESTDIR=\$LFS install 1> /dev/null${C_RESET}";
+	time make DESTDIR=$LFS install 1> /dev/null;
+
+	cd -;
+}
+
+ValidateSed()
+{
+	PACKAGE="sed-4.9";
+	if ! cd "${PDIR}${PACKAGE}"; then
+		return ;
+	fi
+
+	if make check >/dev/null 2>&1; then
+		EchoTest	OK	"$PACKAGE";
+	else
+		EchoTest	KO	"$PACKAGE";
+	fi
+
+	cd -;
+}
+
+# =====================================||===================================== #
+#									  Tar									   #
+# ===============ft_linux==============||==============©Othello=============== #
+
+InstallTar()
+{
+	PACKAGE="tar-1.35";
+
+	ExtractPackage	"${PDIR}${PACKAGE}.tar.xz"	"${PDIR}";
+
+	ConfigureTar;
+	InstallPackageTar;
+
+	# EchoInfo	"Testing $PACKAGE";
+	# ValidateTar;
+}
+
+ConfigureTar()
+{
+	if ! cd "${PDIR}${PACKAGE}"; then
+		return ;
+	fi
+
+	EchoInfo	"Configuring $PACKAGE...";
+	./configure	--prefix=/usr	\
+				--host=$LFS_TGT	\
+				--build=$(build-aux/config.guess)	\
+				1> /dev/null
+
+	cd -;
+}
+
+InstallPackageTar()
+{
+	if ! cd "${PDIR}${PACKAGE}"; then
+		return ;
+	fi
+
+	EchoInfo	"Compiling $PACKAGE...";
+	echo		"${C_DGRAY}> make 1> /dev/null${C_RESET}";
+	time make 1> /dev/null;
+
+	EchoInfo	"Installing $PACKAGE...";
+	echo		"${C_DGRAY}> make DESTDIR=\$LFS install 1> /dev/null${C_RESET}";
+	time make DESTDIR=$LFS install 1> /dev/null;
+
+	cd -;
+}
+
+ValidateTar()
+{
+	PACKAGE="tar-1.35";
+	if ! cd "${PDIR}${PACKAGE}"; then
+		return ;
+	fi
+
+	if make check >/dev/null 2>&1; then
+		EchoTest	OK	"$PACKAGE";
+	else
+		EchoTest	KO	"$PACKAGE";
+	fi
+
+	cd -;
+}
+
+# =====================================||===================================== #
+#									  Xz									   #
+# ===============ft_linux==============||==============©Othello=============== #
+
+InstallXz()
+{
+	PACKAGE="xz-5.6.2";
+
+	ExtractPackage	"${PDIR}${PACKAGE}.tar.xz"	"${PDIR}";
+
+	ConfigureXz;
+	InstallPackageXz;
+
+	# EchoInfo	"Testing $PACKAGE";
+	# ValidateXz;
+}
+
+ConfigureXz()
+{
+	if ! cd "${PDIR}${PACKAGE}"; then
+		return ;
+	fi
+
+	EchoInfo	"Configuring $PACKAGE...";
+	./configure	--prefix=/usr	\
+				--host=$LFS_TGT	\
+				--build=$(build-aux/config.guess)	\
+				--disable-static	\
+				--docdir=/usr/share/doc/xz-5.6.2	\
+				1> /dev/null
+
+	cd -;
+}
+
+InstallPackageXz()
+{
+	if ! cd "${PDIR}${PACKAGE}"; then
+		return ;
+	fi
+
+	EchoInfo	"Compiling $PACKAGE...";
+	echo		"${C_DGRAY}> make 1> /dev/null${C_RESET}";
+	time make 1> /dev/null;
+
+	EchoInfo	"Installing $PACKAGE...";
+	echo		"${C_DGRAY}> make DESTDIR=\$LFS install 1> /dev/null${C_RESET}";
+	time make DESTDIR=$LFS install 1> /dev/null;
+
+	# Remove the libtool archive file because it is harmful for cross compilation
+	rm -v $LFS/usr/lib/liblzma.la
+
+	cd -;
+}
+
+ValidateXz()
+{
+	PACKAGE="xz-5.6.2";
+	if ! cd "${PDIR}${PACKAGE}"; then
+		return ;
+	fi
+
+	if make check >/dev/null 2>&1; then
+		EchoTest	OK	"$PACKAGE";
+	else
+		EchoTest	KO	"$PACKAGE";
+	fi
 
 	cd -;
 }
@@ -819,11 +2067,34 @@ PressAnyKeyToContinue()
 	printf '%*s\n' "$width" '' | tr ' ' '-';
 }
 
+EchoError()
+{
+	echo	"[${C_RED}ERR${C_RESET} ]  $1"	>&2;
+}
+
+EchoInfo()
+{
+	echo	"[${C_CYAN}INFO${C_RESET}]$1";
+}
+
+EchoTest()
+{
+	if [ "$1" = OK ]; then
+		echo	"[${C_GREEN} OK ${C_RESET}] $2";
+	elif [ "$1" = KO ]; then
+		echo	"[${C_RED} KO ${C_RESET}] $2";
+	else
+		echo	"[${C_GRAY}TEST${C_RESET}] $1";
+	fi
+}
+
 # =====================================||===================================== #
 #																			   #
 #									  Menu									   #
 #																			   #
 # ===============ft_linux==============||==============©Othello=============== #
+
+PDIR="$LFS/sources/lfs-packages12.2/";
 
 MainMenu()
 {
@@ -842,8 +2113,11 @@ MainMenu()
 
 	case $input in
 		1)	MENU=1;;
-		2)	MENU=2;;
+		2)	ValidatePackages;
+			MENU=2;;
 		3)	MENU=3;;
+		4)	ValidateGcc;
+			PressAnyKeyToContinue;;
 		# 1)	ConfigureUser;
 		# 	PressAnyKeyToContinue;;
 		# 2)	MenuCrossToolchain;
@@ -868,7 +2142,7 @@ while true; do
 		1)	ConfigureUserMenu;;
 		2)	MenuCrossToolchain;;
 		3)	MenuTemporaryTools;;
-		*)	echo	"${C_RED}Error${C_RESET}: Invalid menu '$MENU;";
+		*)	EchoError	"Invalid menu '$MENU;";
 			exit $MENU;;
 	esac
 done
