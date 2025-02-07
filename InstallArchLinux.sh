@@ -990,11 +990,12 @@ LoginAs()
 	echo	"${C_ORANGE}User $1${C_RESET}";
 	printf '%*s\n' "$width" '' | tr ' ' '-';
 	echo	"To continue enter the following command:";
-	echo	"${CB_BLACK}> zsh ./ConfigureArchLinux.sh ${C_RESET}";
+	echo	"${CB_BLACK}> zsh ./ConfigCrossToolchain.sh ${C_RESET}";
 	printf '%*s\n' "$width" '' | tr ' ' '-';
 
-	cp /root/{ConfigureArchLinux.sh,colors.sh} "/home/$1/"
-	chmod +x "/home/$1/ConfigureArchLinux.sh"
+	cp /root/{ConfigCrossToolchain.sh,Util*.sh,colors.sh} "/home/$1/"
+	chmod +x /home/$1/ConfigCrossToolchain.sh
+	chmod +x /home/$1/Util*.sh
 	su - "$1";
 }
 
