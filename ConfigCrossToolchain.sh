@@ -2106,6 +2106,7 @@ while true; do
 	echo	"Menu:\t${MENU}";
 	echo	"Option:\t${-}";
 	printf '%*s\n' "$width" '' | tr ' ' '-';
+	echo	"0)\tInstall all";
 	# echo	"1)\tUser configuration";
 	echo	"2)\tCross-Toolchain compilling";
 	echo	"3)\tCross-compiling temporary tools"
@@ -2115,6 +2116,8 @@ while true; do
 	GetInput;
 
 	case $input in
+		0)		./Utils5CompilingCrossToolChain.sh "InstallAll" && \
+				./Utils6CrossCompilingTemporaryTools.sh "InstallAll";;
 		# 1)		MENU=1;;
 		2)		./Utils5CompilingCrossToolChain.sh || PressAnyKeyToContinue;;
 		3)		./Utils6CrossCompilingTemporaryTools.sh || PressAnyKeyToContinue;;

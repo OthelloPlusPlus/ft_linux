@@ -8,8 +8,12 @@ source Utils.sh
 #																			   #
 # ===============ft_linux==============||==============©Othello=============== #
 
+declare -A TempPackages;
+
 InstallPackages()
 {
+	RemoveAllPackages;
+
 	InstallM4;
 	InstallNcurses;
 	InstallBash;
@@ -46,41 +50,26 @@ ValidatePackages()
 	ValidateXz;
 }
 
-ExtractPackage()
+RemoveAllPackages()
 {
-	SRC="$1";
-	DST="$2";
+	RemovePackage	"${TempPackages[m4]}";
+	RemovePackage	"${TempPackages[ncurses]}";
+	RemovePackage	"${TempPackages[bash]}";
+	RemovePackage	"${TempPackages[coreutils]}";
+	RemovePackage	"${TempPackages[diffutils]}";
+	RemovePackage	"${TempPackages[file]}";
+	RemovePackage	"${TempPackages[findutils]}";
+	RemovePackage	"${TempPackages[gawk]}";
+	RemovePackage	"${TempPackages[grep]}";
+	RemovePackage	"${TempPackages[gzip]}";
+	RemovePackage	"${TempPackages[make]}";
+	RemovePackage	"${TempPackages[patch]}";
+	RemovePackage	"${TempPackages[sed]}";
+	RemovePackage	"${TempPackages[tar]}";
+	RemovePackage	"${TempPackages[xz]}";
 
-	if [[ -z "$SRC" || ! -f "$SRC"  || -z "$DST" ]]; then
-		EchoError	"No $SRC or $DST";
-		return 1;
-	fi
-
-	for FILENAME in $(tar -tf "$SRC"); do
-		if [ ! -e ${DST}/${FILENAME} ]; then
-			EchoInfo	"Unpacking $SRC($FILENAME)...";
-			mkdir -p "$DST";
-			tar -xf "$SRC" -C "$DST";
-			return $?;
-		fi
-	done
-	return 0;
-}
-
-RunMakeCheckTest()
-{
-	if make -n check &> /dev/null; then
-		if make check &> /dev/null; then
-			EchoTest	OK	"$1";
-		else
-			EchoTest	KO	"$1";
-			if [ -d "test" ]; then
-				ls test/_*;
-			fi
-		fi
-	else
-		EchoTest	"$1 ${C_DGRAY}make -n check failed${C_RESET}";
-	fi
+	RemovePackage	"${TempPackages[binutils]}";
+	RemovePackage	"${TempPackages[gcc]}";
 }
 
 # =====================================||===================================== #
@@ -92,6 +81,8 @@ RunMakeCheckTest()
 # # =====================================||===================================== #
 # #									  Temp									   #
 # # ===============ft_linux==============||==============©Othello=============== #
+
+# TempPackages[Temp]="";
 
 # InstallTemp()
 # {
@@ -157,16 +148,18 @@ RunMakeCheckTest()
 #									  M4									   #
 # ===============ft_linux==============||==============©Othello=============== #
 
+TempPackages[m4]="m4-1.4.19";
+
 InstallM4()
 {
-	PACKAGE="m4-1.4.19";
+	# PACKAGE="m4-1.4.19";
 
-	ExtractPackage	"${PDIR}${PACKAGE}.tar.xz"	"${PDIR}";
+	ExtractPackage	"${PDIR}${TempPackages[m4]}.tar.xz"	"${PDIR}";
 
 	ConfigureM4;
 	InstallPackageM4;
 
-	# EchoInfo	"Testing $PACKAGE";
+	# EchoInfo	"Testing ${TempPackages[m4]}";
 	# ValidateM4;
 
 	cd -;
@@ -174,11 +167,11 @@ InstallM4()
 
 ConfigureM4()
 {
-	if ! cd "${PDIR}${PACKAGE}"; then
+	if ! cd "${PDIR}${TempPackages[m4]}"; then
 		return ;
 	fi
 
-	EchoInfo	"Configuring $PACKAGE...";
+	EchoInfo	"Configuring $TempPackages[m4]...";
 	./configure	--prefix=/usr	\
 				--host=$LFS_TGT	\
 				--build=$(build-aux/config.guess)	\
@@ -189,28 +182,28 @@ ConfigureM4()
 
 InstallPackageM4()
 {
-	if ! cd "${PDIR}${PACKAGE}"; then
+	if ! cd "${PDIR}${TempPackages[m4]}"; then
 		return ;
 	fi
 
-	EchoInfo	"Compiling $PACKAGE...";
+	EchoInfo	"Compiling $TempPackages[m4]...";
 	echo		"${C_DGRAY}> make 1> /dev/null${C_RESET}";
-	time make 1> /dev/null || {EchoTest KO $PACKAGE && PressAnyKeyToContinue; return;};
-	EchoInfo	"Installing $PACKAGE...";
+	time make 1> /dev/null || {EchoTest KO $TempPackages[m4] && PressAnyKeyToContinue; return;};
+	EchoInfo	"Installing $TempPackages[m4]...";
 	echo		"${C_DGRAY}> DESTDIR=\$LFS install 1> /dev/null${C_RESET}";
-	time make DESTDIR=$LFS install 1> /dev/null || {EchoTest KO $PACKAGE && PressAnyKeyToContinue; return;};
+	time make DESTDIR=$LFS install 1> /dev/null || {EchoTest KO ${TempPackages[m4]} && PressAnyKeyToContinue; return;};
 
 	cd -;
 }
 
 ValidateM4()
 {
-	PACKAGE="m4-1.4.19";
-	if ! cd "${PDIR}${PACKAGE}"; then
+	# PACKAGE="m4-1.4.19";
+	if ! cd "${PDIR}${TempPackages[m4]}"; then
 		return ;
 	fi
 
-	RunMakeCheckTest	"$PACKAGE";
+	RunMakeCheckTest	"$TempPackages[m4]";
 
 	cd -;
 }
@@ -219,13 +212,15 @@ ValidateM4()
 #									  Ncurses									   #
 # ===============ft_linux==============||==============©Othello=============== #
 
+TempPackages[ncurses]="ncurses-6.5";
+
 InstallNcurses()
 {
-	PACKAGE="ncurses-6.5";
+	# PACKAGE="ncurses-6.5";
 
-	ExtractPackage	"${PDIR}${PACKAGE}.tar.gz"	"${PDIR}";
+	ExtractPackage	"${PDIR}${TempPackages[ncurses]}.tar.gz"	"${PDIR}";
 
-	if ! mkdir -pv "${PDIR}${PACKAGE}/build"; then
+	if ! mkdir -pv "${PDIR}${TempPackages[ncurses]}/build"; then
 		echo	"${C_RED}Error($?)${C_RESET}: Failed to make build directory.";
 		return ;
 	fi
@@ -233,23 +228,23 @@ InstallNcurses()
 	ConfigureNcurses;
 	InstallPackageNcurses;
 
-	# EchoInfo	"Testing $PACKAGE";
+	# EchoInfo	"Testing ${TempPackages[ncurses]}";
 	# ValidateNcurses;
 }
 
 ConfigureNcurses()
 {
-	if ! cd "${PDIR}${PACKAGE}"; then
+	if ! cd "${PDIR}${TempPackages[ncurses]}"; then
 		return ;
 	fi
 
 	sed -i s/mawk// configure;
 
-	if [ ! -d "${PDIR}${PACKAGE}/build"] ; then
+	if [ ! -d "${PDIR}${TempPackages[ncurses]}/build"] ; then
 		return ;
 	fi
 
-	EchoInfo	"Configuring $PACKAGE...";
+	EchoInfo	"Configuring ${TempPackages[ncurses]}...";
 	pushd build
 		../configure	1> /dev/null
 		make -C include	1> /dev/null
@@ -274,17 +269,17 @@ ConfigureNcurses()
 
 InstallPackageNcurses()
 {
-	if ! cd "${PDIR}${PACKAGE}"; then
+	if ! cd "${PDIR}${TempPackages[ncurses]}"; then
 		return ;
 	fi
 
-	EchoInfo	"Compiling $PACKAGE...";
+	EchoInfo	"Compiling ${TempPackages[ncurses]}...";
 	echo		"${C_DGRAY}> make 1> /dev/null${C_RESET}";
-	time make 1> /dev/null || {EchoTest KO $PACKAGE && PressAnyKeyToContinue; return;};
+	time make 1> /dev/null || {EchoTest KO ${TempPackages[ncurses]} && PressAnyKeyToContinue; return;};
 
-	EchoInfo	"Installing $PACKAGE...";
+	EchoInfo	"Installing ${TempPackages[ncurses]}...";
 	echo		"${C_DGRAY}> make DESTDIR=\$LFS TIC_PATH=\$(pwd)/build/progs/tic install 1> /dev/null${C_RESET}";
-	time make DESTDIR=$LFS TIC_PATH=$(pwd)/build/progs/tic install 1> /dev/null || {EchoTest KO $PACKAGE && PressAnyKeyToContinue; return;};
+	time make DESTDIR=$LFS TIC_PATH=$(pwd)/build/progs/tic install 1> /dev/null || {EchoTest KO ${TempPackages[ncurses]} && PressAnyKeyToContinue; return;};
 
 	EchoInfo	"Configuring libncurses library...";
 	# symlink to use libncursesw.so
@@ -298,12 +293,12 @@ InstallPackageNcurses()
 
 ValidateNcurses()
 {
-	PACKAGE="ncurses-6.5";
-	if ! cd "${PDIR}${PACKAGE}"; then
+	# PACKAGE="ncurses-6.5";
+	if ! cd "${PDIR}${TempPackages[ncurses]}"; then
 		return ;
 	fi
 
-	RunMakeCheckTest	"$PACKAGE";
+	RunMakeCheckTest	"${TempPackages[ncurses]}";
 
 	cd -;
 }
@@ -312,26 +307,28 @@ ValidateNcurses()
 #									  Bash									   #
 # ===============ft_linux==============||==============©Othello=============== #
 
+TempPackages[bash]="bash-5.2.32";
+
 InstallBash()
 {
-	PACKAGE="bash-5.2.32";
+	# PACKAGE="bash-5.2.32";
 
-	ExtractPackage	"${PDIR}${PACKAGE}.tar.gz"	"${PDIR}";
+	ExtractPackage	"${PDIR}${TempPackages[bash]}.tar.gz"	"${PDIR}";
 
 	ConfigureBash;
 	InstallPackageBash;
 
-	# EchoInfo	"Testing $PACKAGE";
+	# EchoInfo	"Testing ${TempPackages[bash]}";
 	# ValidateBash;
 }
 
 ConfigureBash()
 {
-	if ! cd "${PDIR}${PACKAGE}"; then
+	if ! cd "${PDIR}${TempPackages[bash]}"; then
 		return ;
 	fi
 
-	EchoInfo	"Configuring $PACKAGE...";
+	EchoInfo	"Configuring ${TempPackages[bash]}...";
 
 	./configure	--prefix=/usr	\
 				--build=$(sh support/config.guess) \
@@ -344,17 +341,17 @@ ConfigureBash()
 
 InstallPackageBash()
 {
-	if ! cd "${PDIR}${PACKAGE}"; then
+	if ! cd "${PDIR}${TempPackages[bash]}"; then
 		return ;
 	fi
 
-	EchoInfo	"Compiling $PACKAGE...";
+	EchoInfo	"Compiling ${TempPackages[bash]}...";
 	echo		"${C_DGRAY}> make 1> /dev/null${C_RESET}";
-	time make 1> /dev/null || {EchoTest KO $PACKAGE && PressAnyKeyToContinue; return;};
+	time make 1> /dev/null || {EchoTest KO ${TempPackages[bash]} && PressAnyKeyToContinue; return;};
 
-	EchoInfo	"Installing $PACKAGE...";
+	EchoInfo	"Installing ${TempPackages[bash]}...";
 	echo		"${C_DGRAY}> make DESTDIR=\$LFS install 1> /dev/null${C_RESET}";
-	time make DESTDIR=$LFS install 1> /dev/null || {EchoTest KO $PACKAGE && PressAnyKeyToContinue; return;};
+	time make DESTDIR=$LFS install 1> /dev/null || {EchoTest KO ${TempPackages[bash]} && PressAnyKeyToContinue; return;};
 
 	# Link for the programs that use sh for a shell
 	ln -sv bash $LFS/bin/sh
@@ -364,12 +361,12 @@ InstallPackageBash()
 
 ValidateBash()
 {
-	PACKAGE="bash-5.2.32";
-	if ! cd "${PDIR}${PACKAGE}"; then
+	# PACKAGE="bash-5.2.32";
+	if ! cd "${PDIR}${TempPackages[bash]}"; then
 		return ;
 	fi
 
-	RunMakeCheckTest	"$PACKAGE";
+	RunMakeCheckTest	"${TempPackages[bash]}";
 
 	cd -;
 }
@@ -378,26 +375,28 @@ ValidateBash()
 #									  Coreutils									   #
 # ===============ft_linux==============||==============©Othello=============== #
 
+TempPackages[coreutils]="coreutils-9.5";
+
 InstallCoreutils()
 {
-	PACKAGE="coreutils-9.5";
+	# PACKAGE="coreutils-9.5";
 
-	ExtractPackage	"${PDIR}${PACKAGE}.tar.xz"	"${PDIR}";
+	ExtractPackage	"${PDIR}${TempPackages[coreutils]}.tar.xz"	"${PDIR}";
 
 	ConfigureCoreutils;
 	InstallPackageCoreutils;
 
-	# EchoInfo	"Testing $PACKAGE";
+	# EchoInfo	"Testing ${TempPackages[coreutils]}";
 	# ValidateCoreutils;
 }
 
 ConfigureCoreutils()
 {
-	if ! cd "${PDIR}${PACKAGE}"; then
+	if ! cd "${PDIR}${TempPackages[coreutils]}"; then
 		return ;
 	fi
 
-	EchoInfo	"Configuring $PACKAGE...";
+	EchoInfo	"Configuring ${TempPackages[coreutils]}...";
 	./configure	--prefix=/usr	\
 				--host=$LFS_TGT	\
 				--build=$(build-aux/config.guess)	\
@@ -410,17 +409,17 @@ ConfigureCoreutils()
 
 InstallPackageCoreutils()
 {
-	if ! cd "${PDIR}${PACKAGE}"; then
+	if ! cd "${PDIR}${TempPackages[coreutils]}"; then
 		return ;
 	fi
 
-	EchoInfo	"Compiling $PACKAGE...";
+	EchoInfo	"Compiling ${TempPackages[coreutils]}...";
 	echo		"${C_DGRAY}> make 1> /dev/null${C_RESET}";
-	time make 1> /dev/null || {EchoTest KO $PACKAGE && PressAnyKeyToContinue; return;};
+	time make 1> /dev/null || {EchoTest KO ${TempPackages[coreutils]} && PressAnyKeyToContinue; return;};
 
-	EchoInfo	"Installing $PACKAGE...";
+	EchoInfo	"Installing ${TempPackages[coreutils]}...";
 	echo		"${C_DGRAY}> make DESTDIR=$LFS install 1> /dev/null${C_RESET}";
-	time make DESTDIR=$LFS install 1> /dev/null || {EchoTest KO $PACKAGE && PressAnyKeyToContinue; return;};
+	time make DESTDIR=$LFS install 1> /dev/null || {EchoTest KO ${TempPackages[coreutils]} && PressAnyKeyToContinue; return;};
 
 	# Move programs to their final expected locations
 	mv -v $LFS/usr/bin/chroot
@@ -435,12 +434,12 @@ InstallPackageCoreutils()
 
 ValidateCoreutils()
 {
-	PACKAGE="coreutils-9.5";
-	if ! cd "${PDIR}${PACKAGE}"; then
+	# PACKAGE="coreutils-9.5";
+	if ! cd "${PDIR}${TempPackages[coreutils]}"; then
 		return ;
 	fi
 
-	RunMakeCheckTest	"$PACKAGE";
+	RunMakeCheckTest	"${TempPackages[coreutils]}";
 
 	cd -;
 }
@@ -449,26 +448,28 @@ ValidateCoreutils()
 #									  Diffutils									   #
 # ===============ft_linux==============||==============©Othello=============== #
 
+TempPackages[diffutils]="diffutils-3.10";
+
 InstallDiffutils()
 {
-	PACKAGE="diffutils-3.10";
+	# PACKAGE="diffutils-3.10";
 
-	ExtractPackage	"${PDIR}${PACKAGE}.tar.xz"	"${PDIR}";
+	ExtractPackage	"${PDIR}${TempPackages[diffutils]}.tar.xz"	"${PDIR}";
 
 	ConfigureDiffutils;
 	InstallPackageDiffutils;
 
-	# EchoInfo	"Testing $PACKAGE";
+	# EchoInfo	"Testing ${TempPackages[diffutils]}";
 	# ValidateDiffutils;
 }
 
 ConfigureDiffutils()
 {
-	if ! cd "${PDIR}${PACKAGE}"; then
+	if ! cd "${PDIR}${TempPackages[diffutils]}"; then
 		return ;
 	fi
 
-	EchoInfo	"Configuring $PACKAGE...";
+	EchoInfo	"Configuring ${TempPackages[diffutils]}...";
 	./configure	--prefix=/usr	\
 				--host=$LFS_TGT	\
 				--build=$(./build-aux/config.guess)	\
@@ -479,29 +480,29 @@ ConfigureDiffutils()
 
 InstallPackageDiffutils()
 {
-	if ! cd "${PDIR}${PACKAGE}"; then
+	if ! cd "${PDIR}${TempPackages[diffutils]}"; then
 		return ;
 	fi
 
-	EchoInfo	"Compiling $PACKAGE...";
+	EchoInfo	"Compiling ${TempPackages[diffutils]}...";
 	echo		"${C_DGRAY}> make 1> /dev/null${C_RESET}";
-	time make 1> /dev/null || {EchoTest KO $PACKAGE && PressAnyKeyToContinue; return;};
+	time make 1> /dev/null || {EchoTest KO ${TempPackages[diffutils]} && PressAnyKeyToContinue; return;};
 
-	EchoInfo	"Installing $PACKAGE...";
+	EchoInfo	"Installing ${TempPackages[diffutils]}...";
 	echo		"${C_DGRAY}> make DESTDIR=$LFS install 1> /dev/null${C_RESET}";
-	time make DESTDIR=$LFS install 1> /dev/null || {EchoTest KO $PACKAGE && PressAnyKeyToContinue; return;};
+	time make DESTDIR=$LFS install 1> /dev/null || {EchoTest KO ${TempPackages[diffutils]} && PressAnyKeyToContinue; return;};
 
 	cd -;
 }
 
 ValidateDiffutils()
 {
-	PACKAGE="diffutils-3.10";
-	if ! cd "${PDIR}${PACKAGE}"; then
+	# PACKAGE="diffutils-3.10";
+	if ! cd "${PDIR}${TempPackages[diffutils]}"; then
 		return ;
 	fi
 
-	RunMakeCheckTest	"$PACKAGE";
+	RunMakeCheckTest	"${TempPackages[diffutils]}";
 
 	cd -;
 }
@@ -510,13 +511,15 @@ ValidateDiffutils()
 #									  File									   #
 # ===============ft_linux==============||==============©Othello=============== #
 
+TempPackages[file]="file-5.45";
+
 InstallFile()
 {
-	PACKAGE="file-5.45";
+	# PACKAGE="file-5.45";
 
-	ExtractPackage	"${PDIR}${PACKAGE}.tar.gz"	"${PDIR}";
+	ExtractPackage	"${PDIR}${TempPackages[file]}.tar.gz"	"${PDIR}";
 
-	if ! mkdir -pv "${PDIR}${PACKAGE}/build"; then
+	if ! mkdir -pv "${PDIR}${TempPackages[file]}/build"; then
 		echo	"${C_RED}Error($?)${C_RESET}: Failed to make build directory.";
 		return ;
 	fi
@@ -524,20 +527,20 @@ InstallFile()
 	ConfigureFile;
 	InstallPackageFile;
 
-	# EchoInfo	"Testing $PACKAGE";
+	# EchoInfo	"Testing ${TempPackages[file]}";
 	# ValidateFile;
 }
 
 ConfigureFile()
 {
-	if ! cd "${PDIR}${PACKAGE}"; then
+	if ! cd "${PDIR}${TempPackages[file]}"; then
 		return ;
 	fi
 
-	if [ ! -d "${PDIR}${PACKAGE}/build" ]; then
+	if [ ! -d "${PDIR}${TempPackages[file]}/build" ]; then
 		return ;
 	fi
-	EchoInfo	"Configuring $PACKAGE...";
+	EchoInfo	"Configuring ${TempPackages[file]}...";
 	pushd build
 		../configure	--disable-bzlib	\
 						--disable-libseccomp \
@@ -557,17 +560,17 @@ ConfigureFile()
 
 InstallPackageFile()
 {
-	if ! cd "${PDIR}${PACKAGE}"; then
+	if ! cd "${PDIR}${TempPackages[file]}"; then
 		return ;
 	fi
 
-	EchoInfo	"Compiling $PACKAGE...";
+	EchoInfo	"Compiling ${TempPackages[file]}...";
 	echo		"${C_DGRAY}> make FILE_COMPILE=\$(pwd)/build/src/file 1> /dev/null${C_RESET}";
 	time make FILE_COMPILE=$(pwd)/build/src/file 1> /dev/null;
 
-	EchoInfo	"Installing $PACKAGE...";
+	EchoInfo	"Installing ${TempPackages[file]}...";
 	echo		"${C_DGRAY}> make DESTDIR=\$LFS install 1> /dev/null${C_RESET}";
-	time make DESTDIR=$LFS install 1> /dev/null || {EchoTest KO $PACKAGE && PressAnyKeyToContinue; return;};
+	time make DESTDIR=$LFS install 1> /dev/null || {EchoTest KO ${TempPackages[file]} && PressAnyKeyToContinue; return;};
 
 	# Remove the libtool archive file because it is harmful for cross compilation
 	rm -v $LFS/usr/lib/libmagic.la
@@ -577,12 +580,12 @@ InstallPackageFile()
 
 ValidateFile()
 {
-	PACKAGE="file-5.45";
-	if ! cd "${PDIR}${PACKAGE}"; then
+	# PACKAGE="file-5.45";
+	if ! cd "${PDIR}${TempPackages[file]}"; then
 		return ;
 	fi
 
-	RunMakeCheckTest	"$PACKAGE";
+	RunMakeCheckTest	"${TempPackages[file]}";
 
 	cd -;
 }
@@ -592,26 +595,28 @@ ValidateFile()
 #									  Findutils									   #
 # ===============ft_linux==============||==============©Othello=============== #
 
+TempPackages[findutils]="findutils-4.10.0";
+
 InstallFindutils()
 {
-	PACKAGE="findutils-4.10.0";
+	# PACKAGE="findutils-4.10.0";
 
-	ExtractPackage	"${PDIR}${PACKAGE}.tar.xz"	"${PDIR}";
+	ExtractPackage	"${PDIR}${TempPackages[findutils]}.tar.xz"	"${PDIR}";
 
 	ConfigureFindutils;
 	InstallPackageFindutils;
 
-	# EchoInfo	"Testing $PACKAGE";
+	# EchoInfo	"Testing ${TempPackages[findutils]}";
 	# ValidateFindutils;
 }
 
 ConfigureFindutils()
 {
-	if ! cd "${PDIR}${PACKAGE}"; then
+	if ! cd "${PDIR}${TempPackages[findutils]}"; then
 		return ;
 	fi
 
-	EchoInfo	"Configuring $PACKAGE...";
+	EchoInfo	"Configuring ${TempPackages[findutils]}...";
 	./configure	--prefix=/usr	\
 				--localstatedir=/var/lib/locate	\
 				--host=$LFS_TGT	\
@@ -623,29 +628,29 @@ ConfigureFindutils()
 
 InstallPackageFindutils()
 {
-	if ! cd "${PDIR}${PACKAGE}"; then
+	if ! cd "${PDIR}${TempPackages[findutils]}"; then
 		return ;
 	fi
 
-	EchoInfo	"Compiling $PACKAGE...";
+	EchoInfo	"Compiling ${TempPackages[findutils]}...";
 	echo		"${C_DGRAY}> make 1> /dev/null${C_RESET}";
-	time make 1> /dev/null || {EchoTest KO $PACKAGE && PressAnyKeyToContinue; return;};
+	time make 1> /dev/null || {EchoTest KO ${TempPackages[findutils]} && PressAnyKeyToContinue; return;};
 
-	EchoInfo	"Installing $PACKAGE...";
+	EchoInfo	"Installing ${TempPackages[findutils]}...";
 	echo		"${C_DGRAY}> make DESTDIR=\$LFS install 1> /dev/null${C_RESET}";
-	time make DESTDIR=$LFS install 1> /dev/null || {EchoTest KO $PACKAGE && PressAnyKeyToContinue; return;};
+	time make DESTDIR=$LFS install 1> /dev/null || {EchoTest KO ${TempPackages[findutils]} && PressAnyKeyToContinue; return;};
 
 	cd -;
 }
 
 ValidateFindutils()
 {
-	PACKAGE="findutils-4.10.0";
-	if ! cd "${PDIR}${PACKAGE}"; then
+	# PACKAGE="findutils-4.10.0";
+	if ! cd "${PDIR}${TempPackages[findutils]}"; then
 		return ;
 	fi
 
-	RunMakeCheckTest	"$PACKAGE";
+	RunMakeCheckTest	"${TempPackages[findutils]}";
 
 	cd -;
 }
@@ -654,29 +659,31 @@ ValidateFindutils()
 #									  Gawk									   #
 # ===============ft_linux==============||==============©Othello=============== #
 
+TempPackages[gawk]="gawk-5.3.0";
+
 InstallGawk()
 {
-	PACKAGE="gawk-5.3.0";
+	# PACKAGE="gawk-5.3.0";
 
-	ExtractPackage	"${PDIR}${PACKAGE}.tar.xz"	"${PDIR}";
+	ExtractPackage	"${PDIR}${TempPackages[gawk]}.tar.xz"	"${PDIR}";
 
 	ConfigureGawk;
 	InstallPackageGawk;
 
-	# EchoInfo	"Testing $PACKAGE";
+	# EchoInfo	"Testing ${TempPackages[gawk]}";
 	# ValidateGawk;
 }
 
 ConfigureGawk()
 {
-	if ! cd "${PDIR}${PACKAGE}"; then
+	if ! cd "${PDIR}${TempPackages[gawk]}"; then
 		return ;
 	fi
 
 	# Ensure some unneeded files are not installed
 	sed -i 's/extras//' Makefile.in
 
-	EchoInfo	"Configuring $PACKAGE...";
+	EchoInfo	"Configuring ${TempPackages[gawk]}...";
 	./configure	--prefix=/usr	\
 				--host=$LFS_TGT	\
 				--build=$(build-aux/config.guess)	\
@@ -687,29 +694,29 @@ ConfigureGawk()
 
 InstallPackageGawk()
 {
-	if ! cd "${PDIR}${PACKAGE}"; then
+	if ! cd "${PDIR}${TempPackages[gawk]}"; then
 		return ;
 	fi
 
-	EchoInfo	"Compiling $PACKAGE...";
+	EchoInfo	"Compiling ${TempPackages[gawk]}...";
 	echo		"${C_DGRAY}> make 1> /dev/null${C_RESET}";
-	time make 1> /dev/null || {EchoTest KO $PACKAGE && PressAnyKeyToContinue; return;};
+	time make 1> /dev/null || {EchoTest KO ${TempPackages[gawk]} && PressAnyKeyToContinue; return;};
 
-	EchoInfo	"Installing $PACKAGE...";
+	EchoInfo	"Installing ${TempPackages[gawk]}...";
 	echo		"${C_DGRAY}> make DESTDIR=\$LFS install 1> /dev/null${C_RESET}";
-	time make DESTDIR=$LFS install 1> /dev/null || {EchoTest KO $PACKAGE && PressAnyKeyToContinue; return;};
+	time make DESTDIR=$LFS install 1> /dev/null || {EchoTest KO ${TempPackages[gawk]} && PressAnyKeyToContinue; return;};
 
 	cd -;
 }
 
 ValidateGawk()
 {
-	PACKAGE="gawk-5.3.0";
-	if ! cd "${PDIR}${PACKAGE}"; then
+	# PACKAGE="gawk-5.3.0";
+	if ! cd "${PDIR}${TempPackages[gawk]}"; then
 		return ;
 	fi
 
-	RunMakeCheckTest	"$PACKAGE";
+	RunMakeCheckTest	"${TempPackages[gawk]}";
 
 	cd -;
 }
@@ -718,26 +725,28 @@ ValidateGawk()
 #									  Grep									   #
 # ===============ft_linux==============||==============©Othello=============== #
 
+TempPackages[grep]="grep-3.11";
+
 InstallGrep()
 {
-	PACKAGE="grep-3.11";
+	# PACKAGE="grep-3.11";
 
-	ExtractPackage	"${PDIR}${PACKAGE}.tar.xz"	"${PDIR}";
+	ExtractPackage	"${PDIR}${TempPackages[grep]}.tar.xz"	"${PDIR}";
 
 	ConfigureGrep;
 	InstallPackageGrep;
 
-	# EchoInfo	"Testing $PACKAGE";
+	# EchoInfo	"Testing ${TempPackages[grep]}";
 	# ValidateGrep;
 }
 
 ConfigureGrep()
 {
-	if ! cd "${PDIR}${PACKAGE}"; then
+	if ! cd "${PDIR}${TempPackages[grep]}"; then
 		return ;
 	fi
 
-	EchoInfo	"Configuring $PACKAGE...";
+	EchoInfo	"Configuring ${TempPackages[grep]}...";
 	./configure	--prefix=/usr	\
 				--host=$LFS_TGT	\
 				--build=$(./build-aux/config.guess)	\
@@ -748,29 +757,29 @@ ConfigureGrep()
 
 InstallPackageGrep()
 {
-	if ! cd "${PDIR}${PACKAGE}"; then
+	if ! cd "${PDIR}${TempPackages[grep]}"; then
 		return ;
 	fi
 
-	EchoInfo	"Compiling $PACKAGE...";
+	EchoInfo	"Compiling ${TempPackages[grep]}...";
 	echo		"${C_DGRAY}> make 1> /dev/null${C_RESET}";
-	time make 1> /dev/null || {EchoTest KO $PACKAGE && PressAnyKeyToContinue; return;};
+	time make 1> /dev/null || {EchoTest KO ${TempPackages[grep]} && PressAnyKeyToContinue; return;};
 
-	EchoInfo	"Installing $PACKAGE...";
+	EchoInfo	"Installing ${TempPackages[grep]}...";
 	echo		"${C_DGRAY}> make DESTDIR=\$LFS install 1> /dev/null${C_RESET}";
-	time make DESTDIR=$LFS install 1> /dev/null || {EchoTest KO $PACKAGE && PressAnyKeyToContinue; return;};
+	time make DESTDIR=$LFS install 1> /dev/null || {EchoTest KO ${TempPackages[grep]} && PressAnyKeyToContinue; return;};
 
 	cd -;
 }
 
 ValidateGrep()
 {
-	PACKAGE="grep-3.11";
-	if ! cd "${PDIR}${PACKAGE}"; then
+	# PACKAGE="grep-3.11";
+	if ! cd "${PDIR}${TempPackages[grep]}"; then
 		return ;
 	fi
 
-	RunMakeCheckTest	"$PACKAGE";
+	RunMakeCheckTest	"${TempPackages[grep]}";
 
 	cd -;
 }
@@ -779,26 +788,28 @@ ValidateGrep()
 #									  Gzip									   #
 # ===============ft_linux==============||==============©Othello=============== #
 
+TempPackages[gzip]="gzip-1.13";
+
 InstallGzip()
 {
-	PACKAGE="gzip-1.13";
+	# PACKAGE="gzip-1.13";
 
-	ExtractPackage	"${PDIR}${PACKAGE}.tar.xz"	"${PDIR}";
+	ExtractPackage	"${PDIR}${TempPackages[gzip]}.tar.xz"	"${PDIR}";
 
 	ConfigureGzip;
 	InstallPackageGzip;
 
-	# EchoInfo	"Testing $PACKAGE";
+	# EchoInfo	"Testing ${TempPackages[gzip]}";
 	# ValidateGzip;
 }
 
 ConfigureGzip()
 {
-	if ! cd "${PDIR}${PACKAGE}"; then
+	if ! cd "${PDIR}${TempPackages[gzip]}"; then
 		return ;
 	fi
 
-	EchoInfo	"Configuring $PACKAGE...";
+	EchoInfo	"Configuring ${TempPackages[gzip]}...";
 	./configure	--prefix=/usr	\
 				--host=$LFS_TGT	\
 				1> /dev/null
@@ -808,29 +819,29 @@ ConfigureGzip()
 
 InstallPackageGzip()
 {
-	if ! cd "${PDIR}${PACKAGE}"; then
+	if ! cd "${PDIR}${TempPackages[gzip]}"; then
 		return ;
 	fi
 
-	EchoInfo	"Compiling $PACKAGE...";
+	EchoInfo	"Compiling ${TempPackages[gzip]}...";
 	echo		"${C_DGRAY}> make 1> /dev/null${C_RESET}";
-	time make 1> /dev/null || {EchoTest KO $PACKAGE && PressAnyKeyToContinue; return;};
+	time make 1> /dev/null || {EchoTest KO ${TempPackages[gzip]} && PressAnyKeyToContinue; return;};
 
-	EchoInfo	"Installing $PACKAGE...";
+	EchoInfo	"Installing ${TempPackages[gzip]}...";
 	echo		"${C_DGRAY}> make DESTDIR=\$LFS install 1> /dev/null${C_RESET}";
-	time make DESTDIR=$LFS install 1> /dev/null || {EchoTest KO $PACKAGE && PressAnyKeyToContinue; return;};
+	time make DESTDIR=$LFS install 1> /dev/null || {EchoTest KO ${TempPackages[gzip]} && PressAnyKeyToContinue; return;};
 
 	cd -;
 }
 
 ValidateGzip()
 {
-	PACKAGE="gzip-1.13";
-	if ! cd "${PDIR}${PACKAGE}"; then
+	# PACKAGE="gzip-1.13";
+	if ! cd "${PDIR}${TempPackages[gzip]}"; then
 		return ;
 	fi
 
-	RunMakeCheckTest	"$PACKAGE";
+	RunMakeCheckTest	"${TempPackages[gzip]}";
 
 	cd -;
 }
@@ -839,26 +850,28 @@ ValidateGzip()
 #									  Make									   #
 # ===============ft_linux==============||==============©Othello=============== #
 
+TempPackages[make]="make-4.4.1";
+
 InstallMake()
 {
-	PACKAGE="make-4.4.1";
+	# PACKAGE="make-4.4.1";
 
-	ExtractPackage	"${PDIR}${PACKAGE}.tar.gz"	"${PDIR}";
+	ExtractPackage	"${PDIR}${TempPackages[make]}.tar.gz"	"${PDIR}";
 
 	ConfigureMake;
 	InstallPackageMake;
 
-	# EchoInfo	"Testing $PACKAGE";
+	# EchoInfo	"Testing ${TempPackages[make]}";
 	# ValidateMake;
 }
 
 ConfigureMake()
 {
-	if ! cd "${PDIR}${PACKAGE}"; then
+	if ! cd "${PDIR}${TempPackages[make]}"; then
 		return ;
 	fi
 
-	EchoInfo	"Configuring $PACKAGE...";
+	EchoInfo	"Configuring ${TempPackages[make]}...";
 	./configure	--prefix=/usr	\
 				--without-guile	\
 				--host=$LFS_TGT	\
@@ -870,29 +883,29 @@ ConfigureMake()
 
 InstallPackageMake()
 {
-	if ! cd "${PDIR}${PACKAGE}"; then
+	if ! cd "${PDIR}${TempPackages[make]}"; then
 		return ;
 	fi
 
-	EchoInfo	"Compiling $PACKAGE...";
+	EchoInfo	"Compiling ${TempPackages[make]}...";
 	echo		"${C_DGRAY}> make 1> /dev/null${C_RESET}";
-	time make 1> /dev/null || {EchoTest KO $PACKAGE && PressAnyKeyToContinue; return;};
+	time make 1> /dev/null || {EchoTest KO ${TempPackages[make]} && PressAnyKeyToContinue; return;};
 
-	EchoInfo	"Installing $PACKAGE...";
+	EchoInfo	"Installing ${TempPackages[make]}...";
 	echo		"${C_DGRAY}> make DESTDIR=\$LFS install 1> /dev/null${C_RESET}";
-	time make DESTDIR=$LFS install 1> /dev/null || {EchoTest KO $PACKAGE && PressAnyKeyToContinue; return;};
+	time make DESTDIR=$LFS install 1> /dev/null || {EchoTest KO ${TempPackages[make]} && PressAnyKeyToContinue; return;};
 
 	cd -;
 }
 
 ValidateMake()
 {
-	PACKAGE="make-4.4.1";
-	if ! cd "${PDIR}${PACKAGE}"; then
+	# PACKAGE="make-4.4.1";
+	if ! cd "${PDIR}${TempPackages[make]}"; then
 		return ;
 	fi
 
-	RunMakeCheckTest	"$PACKAGE";
+	RunMakeCheckTest	"${TempPackages[make]}";
 
 	cd -;
 }
@@ -901,26 +914,28 @@ ValidateMake()
 #									  Patch									   #
 # ===============ft_linux==============||==============©Othello=============== #
 
+TempPackages[patch]="patch-2.7.6";
+
 InstallPatch()
 {
-	PACKAGE="patch-2.7.6";
+	# PACKAGE="patch-2.7.6";
 
-	ExtractPackage	"${PDIR}${PACKAGE}.tar.xz"	"${PDIR}";
+	ExtractPackage	"${PDIR}${TempPackages[patch]}.tar.xz"	"${PDIR}";
 
 	ConfigurePatch;
 	InstallPackagePatch;
 
-	# EchoInfo	"Testing $PACKAGE";
+	# EchoInfo	"Testing ${TempPackages[patch]}";
 	# ValidatePatch;
 }
 
 ConfigurePatch()
 {
-	if ! cd "${PDIR}${PACKAGE}"; then
+	if ! cd "${PDIR}${TempPackages[patch]}"; then
 		return ;
 	fi
 
-	EchoInfo	"Configuring $PACKAGE...";
+	EchoInfo	"Configuring ${TempPackages[patch]}...";
 	./configure	--prefix=/usr	\
 				--host=$LFS_TGT	\
 				--build=$(build-aux/config.guess)	\
@@ -931,29 +946,29 @@ ConfigurePatch()
 
 InstallPackagePatch()
 {
-	if ! cd "${PDIR}${PACKAGE}"; then
+	if ! cd "${PDIR}${TempPackages[patch]}"; then
 		return ;
 	fi
 
-	EchoInfo	"Compiling $PACKAGE...";
+	EchoInfo	"Compiling ${TempPackages[patch]}...";
 	echo		"${C_DGRAY}> make 1> /dev/null${C_RESET}";
-	time make 1> /dev/null || {EchoTest KO $PACKAGE && PressAnyKeyToContinue; return;};
+	time make 1> /dev/null || {EchoTest KO ${TempPackages[patch]} && PressAnyKeyToContinue; return;};
 
-	EchoInfo	"Installing $PACKAGE...";
+	EchoInfo	"Installing ${TempPackages[patch]}...";
 	echo		"${C_DGRAY}> make DESTDIR=\$LFS install 1> /dev/null${C_RESET}";
-	time make DESTDIR=$LFS install 1> /dev/null || {EchoTest KO $PACKAGE && PressAnyKeyToContinue; return;};
+	time make DESTDIR=$LFS install 1> /dev/null || {EchoTest KO ${TempPackages[patch]} && PressAnyKeyToContinue; return;};
 
 	cd -;
 }
 
 ValidatePatch()
 {
-	PACKAGE="patch-2.7.6";
-	if ! cd "${PDIR}${PACKAGE}"; then
+	# PACKAGE="patch-2.7.6";
+	if ! cd "${PDIR}${TempPackages[patch]}"; then
 		return ;
 	fi
 
-	RunMakeCheckTest	"$PACKAGE";
+	RunMakeCheckTest	"${TempPackages[patch]}";
 
 	cd -;
 }
@@ -962,26 +977,28 @@ ValidatePatch()
 #									  Sed									   #
 # ===============ft_linux==============||==============©Othello=============== #
 
+TempPackages[sed]="sed-4.9";
+
 InstallSed()
 {
-	PACKAGE="sed-4.9";
+	# PACKAGE="sed-4.9";
 
-	ExtractPackage	"${PDIR}${PACKAGE}.tar.xz"	"${PDIR}";
+	ExtractPackage	"${PDIR}${TempPackages[sed]}.tar.xz"	"${PDIR}";
 
 	ConfigureSed;
 	InstallPackageSed;
 
-	# EchoInfo	"Testing $PACKAGE";
+	# EchoInfo	"Testing ${TempPackages[sed]}";
 	# ValidateSed;
 }
 
 ConfigureSed()
 {
-	if ! cd "${PDIR}${PACKAGE}"; then
+	if ! cd "${PDIR}${TempPackages[sed]}"; then
 		return ;
 	fi
 
-	EchoInfo	"Configuring $PACKAGE...";
+	EchoInfo	"Configuring ${TempPackages[sed]}...";
 	./configure	--prefix=/usr	\
 				--host=$LFS_TGT	\
 				--build=$(./build-aux/config.guess)	\
@@ -992,29 +1009,29 @@ ConfigureSed()
 
 InstallPackageSed()
 {
-	if ! cd "${PDIR}${PACKAGE}"; then
+	if ! cd "${PDIR}${TempPackages[sed]}"; then
 		return ;
 	fi
 
-	EchoInfo	"Compiling $PACKAGE...";
+	EchoInfo	"Compiling ${TempPackages[sed]}...";
 	echo		"${C_DGRAY}> make 1> /dev/null${C_RESET}";
-	time make 1> /dev/null || {EchoTest KO $PACKAGE && PressAnyKeyToContinue; return;};
+	time make 1> /dev/null || {EchoTest KO ${TempPackages[sed]} && PressAnyKeyToContinue; return;};
 
-	EchoInfo	"Installing $PACKAGE...";
+	EchoInfo	"Installing ${TempPackages[sed]}...";
 	echo		"${C_DGRAY}> make DESTDIR=\$LFS install 1> /dev/null${C_RESET}";
-	time make DESTDIR=$LFS install 1> /dev/null || {EchoTest KO $PACKAGE && PressAnyKeyToContinue; return;};
+	time make DESTDIR=$LFS install 1> /dev/null || {EchoTest KO ${TempPackages[sed]} && PressAnyKeyToContinue; return;};
 
 	cd -;
 }
 
 ValidateSed()
 {
-	PACKAGE="sed-4.9";
-	if ! cd "${PDIR}${PACKAGE}"; then
+	# PACKAGE="sed-4.9";
+	if ! cd "${PDIR}${TempPackages[sed]}"; then
 		return ;
 	fi
 
-	RunMakeCheckTest	"$PACKAGE";
+	RunMakeCheckTest	"${TempPackages[sed]}";
 
 	cd -;
 }
@@ -1023,26 +1040,28 @@ ValidateSed()
 #									  Tar									   #
 # ===============ft_linux==============||==============©Othello=============== #
 
+TempPackages[tar]="tar-1.35";
+
 InstallTar()
 {
-	PACKAGE="tar-1.35";
+	# PACKAGE="tar-1.35";
 
-	ExtractPackage	"${PDIR}${PACKAGE}.tar.xz"	"${PDIR}";
+	ExtractPackage	"${PDIR}${TempPackages[tar]}.tar.xz"	"${PDIR}";
 
 	ConfigureTar;
 	InstallPackageTar;
 
-	# EchoInfo	"Testing $PACKAGE";
+	# EchoInfo	"Testing ${TempPackages[tar]}";
 	# ValidateTar;
 }
 
 ConfigureTar()
 {
-	if ! cd "${PDIR}${PACKAGE}"; then
+	if ! cd "${PDIR}${TempPackages[tar]}"; then
 		return ;
 	fi
 
-	EchoInfo	"Configuring $PACKAGE...";
+	EchoInfo	"Configuring ${TempPackages[tar]}...";
 	./configure	--prefix=/usr	\
 				--host=$LFS_TGT	\
 				--build=$(build-aux/config.guess)	\
@@ -1053,29 +1072,29 @@ ConfigureTar()
 
 InstallPackageTar()
 {
-	if ! cd "${PDIR}${PACKAGE}"; then
+	if ! cd "${PDIR}${TempPackages[tar]}"; then
 		return ;
 	fi
 
-	EchoInfo	"Compiling $PACKAGE...";
+	EchoInfo	"Compiling ${TempPackages[tar]}...";
 	echo		"${C_DGRAY}> make 1> /dev/null${C_RESET}";
-	time make 1> /dev/null || {EchoTest KO $PACKAGE && PressAnyKeyToContinue; return;};
+	time make 1> /dev/null || {EchoTest KO ${TempPackages[tar]} && PressAnyKeyToContinue; return;};
 
-	EchoInfo	"Installing $PACKAGE...";
+	EchoInfo	"Installing ${TempPackages[tar]}...";
 	echo		"${C_DGRAY}> make DESTDIR=\$LFS install 1> /dev/null${C_RESET}";
-	time make DESTDIR=$LFS install 1> /dev/null || {EchoTest KO $PACKAGE && PressAnyKeyToContinue; return;};
+	time make DESTDIR=$LFS install 1> /dev/null || {EchoTest KO ${TempPackages[tar]} && PressAnyKeyToContinue; return;};
 
 	cd -;
 }
 
 ValidateTar()
 {
-	PACKAGE="tar-1.35";
-	if ! cd "${PDIR}${PACKAGE}"; then
+	# PACKAGE="tar-1.35";
+	if ! cd "${PDIR}${TempPackages[tar]}"; then
 		return ;
 	fi
 
-	RunMakeCheckTest	"$PACKAGE";
+	RunMakeCheckTest	"${TempPackages[tar]}";
 
 	cd -;
 }
@@ -1084,26 +1103,28 @@ ValidateTar()
 #									  Xz									   #
 # ===============ft_linux==============||==============©Othello=============== #
 
+TempPackages[xz]="xz-5.6.2";
+
 InstallXz()
 {
-	PACKAGE="xz-5.6.2";
+	# PACKAGE="xz-5.6.2";
 
-	ExtractPackage	"${PDIR}${PACKAGE}.tar.xz"	"${PDIR}";
+	ExtractPackage	"${PDIR}${TempPackages[xz]}.tar.xz"	"${PDIR}";
 
 	ConfigureXz;
 	InstallPackageXz;
 
-	# EchoInfo	"Testing $PACKAGE";
+	# EchoInfo	"Testing ${TempPackages[xz]}";
 	# ValidateXz;
 }
 
 ConfigureXz()
 {
-	if ! cd "${PDIR}${PACKAGE}"; then
+	if ! cd "${PDIR}${TempPackages[xz]}"; then
 		return ;
 	fi
 
-	EchoInfo	"Configuring $PACKAGE...";
+	EchoInfo	"Configuring ${TempPackages[xz]}...";
 	./configure	--prefix=/usr	\
 				--host=$LFS_TGT	\
 				--build=$(build-aux/config.guess)	\
@@ -1116,17 +1137,17 @@ ConfigureXz()
 
 InstallPackageXz()
 {
-	if ! cd "${PDIR}${PACKAGE}"; then
+	if ! cd "${PDIR}${TempPackages[xz]}"; then
 		return ;
 	fi
 
-	EchoInfo	"Compiling $PACKAGE...";
+	EchoInfo	"Compiling ${TempPackages[xz]}...";
 	echo		"${C_DGRAY}> make 1> /dev/null${C_RESET}";
-	time make 1> /dev/null || {EchoTest KO $PACKAGE && PressAnyKeyToContinue; return;};
+	time make 1> /dev/null || {EchoTest KO ${TempPackages[xz]} && PressAnyKeyToContinue; return;};
 
-	EchoInfo	"Installing $PACKAGE...";
+	EchoInfo	"Installing ${TempPackages[xz]}...";
 	echo		"${C_DGRAY}> make DESTDIR=\$LFS install 1> /dev/null${C_RESET}";
-	time make DESTDIR=$LFS install 1> /dev/null || {EchoTest KO $PACKAGE && PressAnyKeyToContinue; return;};
+	time make DESTDIR=$LFS install 1> /dev/null || {EchoTest KO ${TempPackages[xz]} && PressAnyKeyToContinue; return;};
 
 	# Remove the libtool archive file because it is harmful for cross compilation
 	rm -v $LFS/usr/lib/liblzma.la
@@ -1136,12 +1157,12 @@ InstallPackageXz()
 
 ValidateXz()
 {
-	PACKAGE="xz-5.6.2";
-	if ! cd "${PDIR}${PACKAGE}"; then
+	# PACKAGE="xz-5.6.2";
+	if ! cd "${PDIR}${TempPackages[xz]}"; then
 		return ;
 	fi
 
-	RunMakeCheckTest	"$PACKAGE";
+	RunMakeCheckTest	"${TempPackages[xz]}";
 
 	cd -;
 }
@@ -1150,15 +1171,17 @@ ValidateXz()
 #								 BinutilsPass2								   #
 # ===============ft_linux==============||==============©Othello=============== #
 
+TempPackages[binutils]="binutils-2.43.1";
+
 InstallBinutilsPass2()
 {
-	PACKAGE="binutils-2.43.1";
+	# PACKAGE="binutils-2.43.1";
 
-	rm -rf binutils-2.43.1;
+	# rm -rf binutils-2.43.1;
 
-	ExtractPackage	"${PDIR}${PACKAGE}.tar.xz"	"${PDIR}";
+	ExtractPackage	"${PDIR}${TempPackages[binutils]}.tar.xz"	"${PDIR}";
 
-	if ! mkdir -pv "${PDIR}${PACKAGE}/build"; then
+	if ! mkdir -pv "${PDIR}${TempPackages[binutils]}/build"; then
 		echo	"${C_RED}Error($?)${C_RESET}: Failed to make build directory.";
 		return ;
 	fi
@@ -1173,18 +1196,18 @@ InstallBinutilsPass2()
 ConfigureBinutilsPass2()
 {
 	# Prevent binaries mistakenly linked against libraries from the host distro
-	if [ -f "${PDIR}${PACKAGE}/ltmain.sh" ]; then
-		sed '6009s/$add_dir//' -i ${PDIR}${PACKAGE}/ltmain.sh
+	if [ -f "${PDIR}${TempPackages[binutils]}/ltmain.sh" ]; then
+		sed '6009s/$add_dir//' -i ${PDIR}${TempPackages[binutils]}/ltmain.sh
 	else
-		EchoError	"Script ${PACKAGE}/ltmain.sh not found...";
+		EchoError	"Script ${TempPackages[binutils]}/ltmain.sh not found...";
 		return ;
 	fi
 
-	if ! cd "${PDIR}${PACKAGE}/build"; then
+	if ! cd "${PDIR}${TempPackages[binutils]}/build"; then
 		return ;
 	fi
 
-	EchoInfo	"Configuring $PACKAGE...";
+	EchoInfo	"Configuring ${TempPackages[binutils]}...";
 	../configure	--prefix=/usr	\
 					--build=$(../config.guess)	\
 					--host=$LFS_TGT	\
@@ -1202,17 +1225,17 @@ ConfigureBinutilsPass2()
 
 InstallPackageBinutilsPass2()
 {
-	if ! cd "${PDIR}${PACKAGE}/build"; then
+	if ! cd "${PDIR}${TempPackages[binutils]}/build"; then
 		return ;
 	fi
 
-	EchoInfo	"Compiling $PACKAGE...";
+	EchoInfo	"Compiling ${TempPackages[binutils]}...";
 	echo		"${C_DGRAY}> make 1> /dev/null${C_RESET}";
-	time make 1> /dev/null || {EchoTest KO $PACKAGE && PressAnyKeyToContinue; return;};
+	time make 1> /dev/null || {EchoTest KO ${TempPackages[binutils]} && PressAnyKeyToContinue; return;};
 
-	EchoInfo	"Installing $PACKAGE...";
+	EchoInfo	"Installing ${TempPackages[binutils]}...";
 	echo		"${C_DGRAY}> make DESTDIR=\$LFS install 1> /dev/null${C_RESET}";
-	time make DESTDIR=$LFS install 1> /dev/null || {EchoTest KO $PACKAGE && PressAnyKeyToContinue; return;};
+	time make DESTDIR=$LFS install 1> /dev/null || {EchoTest KO ${TempPackages[binutils]} && PressAnyKeyToContinue; return;};
 
 	# Remove the libtool archive files because they are harmful for cross compilation, and remove unnecessary static libraries
 	rm -v $LFS/usr/lib/lib{bfd,ctf,ctf-nobfd,opcodes,sframe}.{a,la}
@@ -1222,12 +1245,12 @@ InstallPackageBinutilsPass2()
 
 ValidateBinutilsPass2()
 {
-	PACKAGE="binutils-2.43.1";
-	if ! cd "${PDIR}${PACKAGE}/build"; then
+	# PACKAGE="binutils-2.43.1";
+	if ! cd "${PDIR}${TempPackages[binutils]}/build"; then
 		return ;
 	fi
 
-	RunMakeCheckTest	"$PACKAGE";
+	RunMakeCheckTest	"${TempPackages[binutils]}";
 
 	cd -;
 }
@@ -1236,13 +1259,17 @@ ValidateBinutilsPass2()
 #									GccPass2								   #
 # ===============ft_linux==============||==============©Othello=============== #
 
+TempPackages[gcc]="gcc-14.2.0";
+
 InstallGccPass2()
 {
-	PACKAGE="gcc-14.2.0";
+	# PACKAGE="gcc-14.2.0";
 
-	# ExtractPackage	"${PDIR}${PACKAGE}.tar.xz"	"${PDIR}";
+	if ! ExtracPackagesGccPass2; then
+		return ;
+	fi
 
-	if ! mkdir -pv "${PDIR}${PACKAGE}/build"; then
+	if ! mkdir -pv "${PDIR}${TempPackages[gcc]}/build"; then
 		echo	"${C_RED}Error($?)${C_RESET}: Failed to make build directory.";
 		return ;
 	fi
@@ -1254,13 +1281,39 @@ InstallGccPass2()
 	# ValidateGccPass2;
 }
 
+ExtracPackagesGccPass2()
+{
+	ExtractPackage	"${PDIR}${TempPackages[gcc]}.tar.xz"	"${PDIR}";
+
+	# PACKNAME="mpfr-4.2.1";
+	ExtractPackage	"${PDIR}mpfr-4.2.1.tar.xz"	"${PDIR}";
+	mv -fv "${PDIR}mpfr-4.2.1" "${PDIR}${TempPackages[gcc]}/mpfr";
+
+	# PACKNAME="gmp-6.3.0";
+	ExtractPackage	"${PDIR}gmp-6.3.0.tar.xz"	"${PDIR}";
+	mv -fv "${PDIR}gmp-6.3.0" "${PDIR}${TempPackages[gcc]}/gmp";
+
+	# PACKNAME="mpc-1.3.1.tar.gz";
+	ExtractPackage	"${PDIR}mpc-1.3.1.tar.gz"	"${PDIR}";
+	mv -fv "${PDIR}mpc-1.3.1" "${PDIR}${TempPackages[gcc]}/mpc";
+
+	if	[ ! -d "${PDIR}${TempPackages[gcc]}" ] ||
+		[ ! -d "${PDIR}${TempPackages[gcc]}/mpfr" ] ||
+		[ ! -d "${PDIR}${TempPackages[gcc]}/gmp" ] ||
+		[ ! -d "${PDIR}${TempPackages[gcc]}/mpc" ]; then
+		EchoError	"Failed to unpack a package for gcc{mpfr, gmp, mpc}...";
+		return false;
+	fi
+	return true;
+}
+
 ConfigureGccPass2()
 {
-	if ! cd "${PDIR}${PACKAGE}/build"; then
+	if ! cd "${PDIR}${TempPackages[gcc]}/build"; then
 		return ;
 	fi
 
-	EchoInfo	"Configuring $PACKAGE...";
+	EchoInfo	"Configuring ${TempPackages[gcc]}...";
 	../configure	--build=$(../config.guess)	\
 					--host=$LFS_TGT	\
 					--target=$LFS_TGT	\
@@ -1285,17 +1338,17 @@ ConfigureGccPass2()
 
 InstallPackageGccPass2()
 {
-	if ! cd "${PDIR}${PACKAGE}/build"; then
+	if ! cd "${PDIR}${TempPackages[gcc]}/build"; then
 		return ;
 	fi
 
-	EchoInfo	"Compiling $PACKAGE...";
+	EchoInfo	"Compiling ${TempPackages[gcc]}...";
 	echo		"${C_DGRAY}> make 1> /dev/null${C_RESET}";
-	time make 1> /dev/null || {EchoTest KO $PACKAGE && PressAnyKeyToContinue; return;};
+	time make 1> /dev/null || {EchoTest KO ${TempPackages[gcc]} && PressAnyKeyToContinue; return;};
 
-	EchoInfo	"Installing $PACKAGE...";
+	EchoInfo	"Installing ${TempPackages[gcc]}...";
 	echo		"${C_DGRAY}> make DESTDIR=$LFS install 1> /dev/null${C_RESET}";
-	time make DESTDIR=$LFS install 1> /dev/null || {EchoTest KO $PACKAGE && PressAnyKeyToContinue; return;};
+	time make DESTDIR=$LFS install 1> /dev/null || {EchoTest KO ${TempPackages[gcc]} && PressAnyKeyToContinue; return;};
 
 	# Create a utility symlink to cc
 	ln -sv gcc $LFS/usr/bin/cc
@@ -1305,15 +1358,31 @@ InstallPackageGccPass2()
 
 ValidateGccPass2()
 {
-	PACKAGE="gcc-14.2.0";
-	if ! cd "${PDIR}${PACKAGE}/build"; then
+	# PACKAGE="gcc-14.2.0";
+	if ! cd "${PDIR}${TempPackages[gcc]}/build"; then
 		return ;
 	fi
 
-	RunMakeCheckTest	"$PACKAGE";
+	RunMakeCheckTest	"${TempPackages[gcc]}";
 
 	cd -;
 }
+
+# =====================================||===================================== #
+#																			   #
+#								  Install All								   #
+#																			   #
+# ===============ft_linux==============||==============©Othello=============== #
+
+if [ "$1" = "InstallAll" ]; then
+	InstallPackages && \
+	InstallBinutilsPass2 && \
+	InstallGccPass2 && \
+	RemoveAllPackages || \
+	{EchoError "Chapter 6 failed" && PressAnyKeyToContinue};
+
+	exit $?;
+fi
 
 # =====================================||===================================== #
 #																			   #
@@ -1346,7 +1415,8 @@ while true; do
 		g|G)	InstallGccPass2;;
 		v|V)	ValidatePackages;
 				PressAnyKeyToContinue;;
-		q|Q)	exit 0;;
+		q|Q)	RemoveAllPackages;
+				exit 0;;
 		*)		MSG="${C_RED}Invalid input${C_RESET}: $input";
 				PRESSTOCONTINUE=false;;
 	esac

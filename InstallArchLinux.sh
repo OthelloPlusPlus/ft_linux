@@ -436,7 +436,7 @@ InstallTool()
 
 DisplayImage()
 {
-	echo "lorem";
+	# echo "lorem";
 	KERNELVERSION=$(uname -r | grep -E -o '^[0-9\.]+');
 	if printf '%s\n' $1 $KERNELVERSION | sort --version-sort --check &>/dev/null; then
 		return 23;
@@ -954,7 +954,7 @@ DisplayEnv()
 
 # =====================================||===================================== #
 #																			   #
-#									Resources								   #
+#								CrossCompiling								   #
 #																			   #
 # ===============ft_linux==============||==============©Othello=============== #
 
@@ -997,6 +997,87 @@ LoginAs()
 	chmod +x /home/$1/ConfigCrossToolchain.sh
 	chmod +x /home/$1/Util*.sh
 	su - "$1";
+}
+
+# =====================================||===================================== #
+#																			   #
+#								Preparing Chroot Env						   #
+#																			   #
+# ===============ft_linux==============||==============©Othello=============== #
+
+PrepareChrootEnvMenu()
+{
+	printf '%*s\n' "$width" '' | tr ' ' '-';
+	echo	"${C_ORANGE}Preparing Chroot Environment${C_RESET}";
+	printf '%*s\n' "$width" '' | tr ' ' '-';
+	findmnt --target $LFS --submounts;
+	printf '%*s\n' "$width" '' | tr ' ' '-';
+	ls -l $LFS
+	printf '%*s\n' "$width" '' | tr ' ' '-';
+	echo	"c)\tChange ownership to root";
+	echo	"d)\tCreate missing directories";
+	echo	"m)\tMouning file systems";
+	echo	"r)\tEnter chroot environment";
+	echo	"q)\tReturn to main menu";
+	printf '%*s\n' "$width" '' | tr ' ' '-';
+	GetInput;
+
+	case $input in
+		c|C)	ChangeOwnerShipToRoot;;
+		d|D)	mkdir -pv $LFS/{dev,proc,sys,run};;
+		m|M)	MountFileSystems;;
+		r|R)	EnterAsChroot;;
+		q|Q)	MENU=0;;
+		*)	MSG="${C_RED}Invalid input${C_RESET}: $input";;
+	esac
+
+}
+ChangeOwnerShipToRoot()
+{
+	chown --from $USER -R root:root $LFS/{usr,lib,var,etc,bin,sbin,tools}
+	case $(uname -m) in
+		x86_64) chown --from lfs -R root:root $LFS/lib64 ;;
+	esac
+}
+
+MountFileSystems()
+{
+	mount -v --bind /dev $LFS/dev
+
+	mount -vt devpts devpts -o gid=5,mode=0620 $LFS/dev/pts
+	mount -vt proc proc $LFS/proc
+	mount -vt sysfs sysfs $LFS/sys
+	mount -vt tmpfs tmpfs $LFS/run
+
+	if [ -h $LFS/dev/shm ]; then
+		install -v -d -m 1777 $LFS$(realpath /dev/shm)
+	else
+		mount -vt tmpfs -o nosuid,nodev tmpfs $LFS/dev/shm
+	fi
+}
+
+EnterAsChroot()
+{
+	# cat ConfigChroot.sh | chroot	"$LFS" /usr/bin/env -i	\
+	# 		HOME=/root	\
+	# 		TERM="$TERM"	\
+	# 		PS1='(lfs chroot) \u:\w\$ '	\
+	# 		PATH=/usr/bin:/usr/sbin	\
+	# 		MAKEFLAGS="-j$(nproc)"	\
+	# 		TESTSUITEFLAGS="-j$(nproc)"	\
+	# 		/bin/bash -i
+
+	cp /root/{ConfigChroot.sh,colors.sh} "$LFS";
+	chmod +x "$LFS/ConfigChroot.sh";
+
+	chroot	"$LFS" /usr/bin/env -i	\
+			HOME=/root	\
+			TERM="$TERM"	\
+			PS1='(lfs chroot) \u:\w\$ '	\
+			PATH=/usr/bin:/usr/sbin	\
+			MAKEFLAGS="-j$(nproc)"	\
+			TESTSUITEFLAGS="-j$(nproc)"	\
+			/bin/bash --login
 }
 
 # =====================================||===================================== #
@@ -1065,6 +1146,7 @@ MainMenu()
 	echo	"4)\tConfigurations";
 	echo	"5)\tPackages";
 	echo	"6)\tCross Compilation";
+	echo	"7)\tPrepare Chroot Environment";
 	printf '%*s\n' "$width" '' | tr ' ' '-';
 	echo	"vm)\tAccess VM shell";
 	echo	"env)\tDisplay env";
@@ -1086,6 +1168,7 @@ MainMenu()
 		4)	MENU=4;;
 		5)	MENU=5;;
 		6)	MENU=6;;
+		7)	MENU=7;;
 		vm|VM)	LoginAsUser;;
 		env|ENV)	MENU=50;;
 		m|M)	;;
@@ -1186,6 +1269,7 @@ while true; do
 		4)	ConfigurationsMenu;;
 		5)	PackagesMenu;;
 		6)	CrossCompilationMenu;;
+		7)	PrepareChrootEnvMenu;;
 		50) DisplayEnv;;
 		97)	ResourceMenu;;
 		98) SpaceMenu;;

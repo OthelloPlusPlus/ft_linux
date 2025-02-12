@@ -199,6 +199,7 @@ InstallBinutils()
 	binutils[time]=$(( $(date +%s) - $binutils[time] ));
 
 	ValidateBinutils;
+	RemovePackage	"${binutils[package]}";
 }
 
 ConfigureBinutils()
@@ -283,14 +284,15 @@ InstallGccPass1()
 	InstallPackageGccPass1;
 	gcc[time]=$(( $(date +%s) - $gcc[time] ));
 
-	ValidateGccPass1;
-
 	# Create a full version of the internal header
 	echo	"${C_ORANGE}Copying header files...${C_RESET}"
 	cat ${PDIR}${gcc[package]}/gcc/limitx.h \
 		${PDIR}${gcc[package]}/gcc/glimits.h \
 		${PDIR}${gcc[package]}/gcc/limity.h \
 		> $(dirname $($LFS_TGT-gcc -print-libgcc-file-name))/include/limits.h
+	
+	ValidateGccPass1;
+	RemovePackage	"${gcc[package]}";
 }
 
 ExtracPackagesGccPass1()
@@ -407,7 +409,7 @@ ExtractApiHeaders()
 	LinuxApiHeader[time]=$(( $(date +%s) - $LinuxApiHeader[time] ));
 
 	ValidateAPIHeaders;
-
+	RemovePackage	"${LinuxApiHeader[package]}";
 }
 
 MakeAndMoveApiHeaders()
@@ -498,8 +500,7 @@ InstallGlibc()
 	glibc[time]=$(( $(date +%s) - $glibc[time] ));
 
 	ValidateGlibc;
-
-	cd -;
+	RemovePackage	"${glibc[package]}";
 }
 
 PrepareGlibc()
@@ -611,6 +612,12 @@ InstallLibstdcpp()
 		MSG="${C_RED}Error${C_RESET}: Toolchain test failed. Aborting $PACKNAME...${C_RESET}"
 		return ;
 	fi
+
+	ExtracPackagesGccPass1;
+	if ! mkdir -pv "${PDIR}${gcc[package]}/build"; then
+		EchoError	"Failed to make build directory.";
+		return ;
+	fi
 	
 	libstdcpp[time]=$(date +%s);
 
@@ -620,8 +627,7 @@ InstallLibstdcpp()
 	libstdcpp[time]=$(( $(date +%s) - $libstdcpp[time] ));
 
 	ValidateLibstdcpp;
-
-	cd -
+	RemovePackage	"${libstdcpp[package]}";
 }
 
 ConfigureLibstdcpp()
@@ -681,6 +687,18 @@ ValidateLibstdcpp()
 	cd -;
 }
 
+# =====================================||===================================== #
+#																			   #
+#								  Install All								   #
+#																			   #
+# ===============ft_linux==============||==============©Othello=============== #
+
+if [ "$1" = "InstallAll" ]; then
+	InstallPackages || \
+	{EchoError "Chapter 6 failed" && PressAnyKeyToContinue};
+
+	exit $?;
+fi
 # =====================================||===================================== #
 #																			   #
 #									Main Loop								   #

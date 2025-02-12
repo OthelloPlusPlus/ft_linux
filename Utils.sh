@@ -5,6 +5,65 @@ source colors.sh
 PDIR="$LFS/sources/lfs-packages12.2/";
 CLEARING=true;
 
+# =====================================||===================================== #
+#																			   #
+#				 					Packages								   #
+#																			   #
+# ===============ft_linux==============||==============©Othello=============== #
+
+ExtractPackage()
+{
+	SRC="$1";
+	DST="$2";
+
+	if [[ -z "$SRC" || ! -f "$SRC"  || -z "$DST" ]]; then
+		EchoError	"No $SRC or $DST";
+		return 1;
+	fi
+
+	for FILENAME in $(tar -tf "$SRC"); do
+		if [ ! -e ${DST}/${FILENAME} ]; then
+			EchoInfo	"Unpacking $SRC($FILENAME)...";
+			mkdir -p "$DST";
+			tar -xf "$SRC" -C "$DST";
+			return $?;
+		fi
+	done
+	return 0;
+}
+
+RemovePackage()
+{
+	if [ -d "${PDIR}$1" ]; then
+		rm -rf "${PDIR}$1";
+	else
+		EchoError	"Destination ${C_ORANGE}$1${C_RESET} is not a directory";
+	fi
+}
+
+RunMakeCheckTest()
+{
+	if make -n check &> /dev/null; then
+		if make check &> /dev/null; then
+			EchoTest	OK	"$1";
+		else
+			EchoTest	KO	"$1";
+			if [ -d "test" ]; then
+				ls test/_*;
+			fi
+		fi
+	else
+		EchoTest	"$1 ${C_DGRAY}make -n check failed${C_RESET}";
+	fi
+}
+
+
+# =====================================||===================================== #
+#																			   #
+#				 					Terminal								   #
+#																			   #
+# ===============ft_linux==============||==============©Othello=============== #
+
 GetInput()
 {
 	echo	"$MSG";
