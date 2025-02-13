@@ -212,3 +212,6 @@ find /usr/{lib,libexec} -name \*.la -delete
 
 # Remove /tools
 rm -rf /tools
+
+
+colors=$(tput colors 2>/dev/null || echo 0)
