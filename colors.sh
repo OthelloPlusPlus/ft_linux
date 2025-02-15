@@ -536,16 +536,16 @@ CC_CLEARLINE="${ESC_SEQ}2K"		# Clear entire current line
 CC_CLEARREST="${ESC_SEQ}0J"		# Clear screen from cursor to end
 CC_CLEARSCREEN="${ESC_SEQ}2J"	# Clear entire screen
 
-CC_MPVEHOME="${ESC_SEQ}H"	# Move cursor to home position (0,0)
-CC_MPVEUP="${ESC_SEQ}A"		# Move cursor up 1 line
-CC_MPVEDOWN="${ESC_SEQ}B"	# Move cursor down 1 line
-CC_MPVERIGHT="${ESC_SEQ}C"	# Move cursor right 1 column
-CC_MPVELEFT="${ESC_SEQ}D"	# Move cursor left 1 column
+CC_MOVEHOME="${ESC_SEQ}H"	# Move cursor to home position (0,0)
+CC_MOVEUP="${ESC_SEQ}A"		# Move cursor up 1 line
+CC_MOVEDOWN="${ESC_SEQ}B"	# Move cursor down 1 line
+CC_MOVERIGHT="${ESC_SEQ}C"	# Move cursor right 1 column
+CC_MOVELEFT="${ESC_SEQ}D"	# Move cursor left 1 column
 
 # Inoperable because required arguments
 if false; then
 CC_MOVETOROW="${ESC_SEC}${row}H"		# Move cursors to specific row
-CC_MOVETOROW="${ESC_SEC}${col}g"		# Move cursors to specific col
+CC_MOVETOCOL="${ESC_SEC}${col}g"		# Move cursors to specific col
 CC_MOVETOPOS="${ESC_SEC}${row}l${col}H"	# Move cursors to specific row and col
 fi
 }
