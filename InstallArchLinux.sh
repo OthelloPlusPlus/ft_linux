@@ -1016,7 +1016,7 @@ PrepareChrootEnvMenu()
 	printf '%*s\n' "$width" '' | tr ' ' '-';
 	echo	"c)\tChange ownership to root";
 	echo	"d)\tCreate missing directories";
-	echo	"m)\tMouning file systems";
+	echo	"m)\tMounting file systems";
 	echo	"r)\tEnter chroot environment";
 	echo	"q)\tReturn to main menu";
 	printf '%*s\n' "$width" '' | tr ' ' '-';
@@ -1067,7 +1067,7 @@ EnterAsChroot()
 	# 		TESTSUITEFLAGS="-j$(nproc)"	\
 	# 		/bin/bash -i
 
-	cp /root/{ConfigChroot.sh,colors.sh} "$LFS";
+	cp /root/{BuildLFS.sh,ConfigChroot.sh,colors.sh} "$LFS";
 	chmod +x "$LFS/ConfigChroot.sh";
 
 	chroot	"$LFS" /usr/bin/env -i	\

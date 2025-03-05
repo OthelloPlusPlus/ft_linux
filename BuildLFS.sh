@@ -1,4 +1,8 @@
+#! /bin/bash
+
 PDIR=/sources/lfs-packages12.2/
+
+source colors.sh
 
 # =====================================||===================================== #
 #																			   #
@@ -8,15 +12,18 @@ PDIR=/sources/lfs-packages12.2/
 
 ReExtractPackage()
 {
-	local SRC="$1";
-	local DST="$2";
-	if [ ! -f "$SRC" ] || [ ! -f $"$DST" ]; then
-		EchoError	"ReExtractPackage SRD[$SRC] DST[$DST]";
-		return false;
+	local SRC="${1}${2}${3}";
+	local DST="${1}";
+	local RSLT="${1}${2}";
+
+	if [ ! -f "$SRC" ] || [ ! -d "$DST" ]; then
+		EchoError	"ReExtractPackage SRC[$SRC] DST[$DST]";
+		# return false;
+		return 1;
 	fi
 
-	if [ -d "$DST" ]; then
-		rm -rf "$DST";
+	if [ -d "$RSLT" ]; then
+		rm -rf "$RSLT";
 	fi
 
 	tar -xf "$SRC" -C "$DST";
@@ -30,22 +37,22 @@ ReExtractPackage()
 
 EchoError()
 {
-	echo	"[${C_RED}ERR${C_RESET} ]  $1"	>&2;
+	echo -e	"[${C_RED}ERR${C_RESET} ]  $1"	>&2;
 }
 
 EchoInfo()
 {
-	echo	"[${C_CYAN}INFO${C_RESET}]$1";
+	echo -e	"[${C_CYAN}INFO${C_RESET}]$1";
 }
 
 EchoTest()
 {
 	if [ "$1" = OK ]; then
-		echo	"[${C_GREEN} OK ${C_RESET}] $2";
+		echo -e	"[${C_GREEN} OK ${C_RESET}] $2";
 	elif [ "$1" = KO ]; then
-		echo	"[${C_RED} KO ${C_RESET}] $2";
+		echo -e	"[${C_RED} KO ${C_RESET}] $2";
 	else
-		echo	"[${C_GRAY}TEST${C_RESET}] $1";
+		echo -e	"[${C_GRAY}TEST${C_RESET}] $1";
 	fi
 }
 
@@ -64,6 +71,24 @@ PressAnyKeyToContinue()
 	printf '%*s\n' "$width" '' | tr ' ' '-';
 }
 
+GetInput()
+{
+	echo	"$MSG";
+	echo -n	"Choose an option: ";
+	unset MSG;
+	read	input;
+	printf '%*s\n' "$width" '' | tr ' ' '-';
+}
+
+GetKeyPress()
+{
+    read -rsn 1 input
+	if [[ "$input" == $'\e' ]]; then
+		read -rsn 2 -t 0.1 input
+		input=$'\e'"$input"
+	fi
+}
+
 # =====================================||===================================== #
 #																			   #
 #									Packages								   #
@@ -74,41 +99,43 @@ PressAnyKeyToContinue()
 #									Temp									   #
 # ===============ft_linux==============||==============©Othello=============== #
 
+declare -A Packagetemp;
+Packagetemp[Name]="Temp";
+Packagetemp[Version]="";
+Packagetemp[Extension]=".tar.xz";
+Packagetemp[Package]="${Packagetemp[Name]}-${Packagetemp[Version]}${Packagetemp[Extension]}";
+
 InstallTemp()
 {
-	local NAME="Temp";
-	local VERSION="";
-	local EXTENSION=".tar.xz";
-	local PACKAGE="${NAME}-${VERSION}${EXTENSION}";
+	EchoInfo	"Package ${Packagetemp[Name]}"
 
-	EchoInfo	"Package ${NAME}"
+	ReExtractPackage	"${PDIR}"	"${Packagetemp[Name]}-${Packagetemp[Version]}"	"${Packagetemp[Extension]}";
 
-	ReExtractPackage	"${PDIR}${PACKAGE}"	"${PDIR}";
-
-	if ! cd "${PDIR}${NAME}"; then
-		EchoError	"cd ${PDIR}${NAME}";
+	if ! cd "${PDIR}${Packagetemp[Name]}-${Packagetemp[Version]}"; then
+		EchoError	"cd ${PDIR}${Packagetemp[Name]}-${Packagetemp[Version]}";
 		return;
 	fi
 
-	EchoInfo	"${NAME}> Configure"
-	./configure --prefix=/usr 1> /dev/null || {EchoTest KO ${NAME} && PressAnyKeyToContinue; return;};
+	EchoInfo	"${Packagetemp[Name]}> Configure"
+	./configure --prefix=/usr 1> /dev/null || { EchoTest KO ${Packagetemp[Name]} && PressAnyKeyToContinue; return; };
 
-	EchoInfo	"${NAME}> make"
-	make  1> /dev/null || {EchoTest KO ${NAME} && PressAnyKeyToContinue; return;};
+	EchoInfo	"${Packagetemp[Name]}> make"
+	make  1> /dev/null || { Packagetemp[Status]=$?; EchoTest KO ${Packagetemp[Name]} && PressAnyKeyToContinue; return; };
 
-	EchoInfo	"${NAME}> make check"
-	make check 1> /dev/null || {EchoTest KO ${NAME} && PressAnyKeyToContinue; return;};
+	EchoInfo	"${Packagetemp[Name]}> make check"
+	make check 1> /dev/null || { Packagetemp[Status]=$?; EchoTest KO ${Packagetemp[Name]} && PressAnyKeyToContinue; return; };
 	
-	EchoInfo	"${NAME}> make install"
-	make install 1> /dev/null || {EchoTest KO ${NAME} && PressAnyKeyToContinue; return;};
+	EchoInfo	"${Packagetemp[Name]}> make install"
+	make install 1> /dev/null && Packagetemp[Status]=$? || { Packagetemp[Status]=$?; EchoTest KO ${Packagetemp[Name]} && PressAnyKeyToContinue; return; };
 
 	if ! mkdir -v build; then
-		EchoError	"Failed to make ${PDIR}${NAME}/build";
+		Packagetemp[Status]=1; 
+		EchoError	"Failed to make ${PDIR}${Packagetemp[Name]}/build";
 		cd -;
 		return ;
 	fi
 	cd -;
-	cd "${PDIR}${NAME}/build";
+	cd "${PDIR}${Packagetemp[Name]}-${Packagetemp[Version]}/build";
 
 	cd -;
 }
@@ -117,25 +144,28 @@ InstallTemp()
 #									  Man									   #
 # ===============ft_linux==============||==============©Othello=============== #
 
+declare -A PackageMan;
+PackageMan[Name]="man-pages";
+PackageMan[Version]="6.9.1";
+PackageMan[Extension]=".tar.xz";
+PackageMan[Package]="${PackageMan[Name]}-${PackageMan[Version]}${PackageMan[Extension]}";
+
 InstallMan()
 {
-	local NAME="man-pages";
-	local VERSION="6.9.1";
-	local EXTENSION=".tar.xz";
-	local PACKAGE="${NAME}-${VERSION}${EXTENSION}";
+	ReExtractPackage	"${PDIR}"	"${PackageMan[Name]}-${PackageMan[Version]}"	"${PackageMan[Extension]}";
 
-	ReExtractPackage	"${PDIR}${PACKAGE}"	"${PDIR}";
-
-	if ! cd "${PDIR}${NAME}"; then
-		EchoError	"cd ${PDIR}${NAME}";
+	if ! cd "${PDIR}${PackageMan[Name]}-${PackageMan[Version]}"; then
+		PackageMan[Status]=1;
+		EchoError	"cd ${PDIR}${PackageMan[Name]}-${PackageMan[Version]}";
 		return;
 	fi
 
 	# Remove two man pages for password hashing functions
 	rm -v man3/crypt*
 
-	EchoInfo	"${NAME}> make prefix=/usr install"
-	make prefix=/usr install	1> /dev/null
+	EchoInfo	"${PackageMan[Name]}> make prefix=/usr install"
+	make prefix=/usr install	1> /dev/null;
+	PackageMan[Status]=$?;
 
 	cd -;
 }
@@ -144,24 +174,27 @@ InstallMan()
 #									Iana-Etc								   #
 # ===============ft_linux==============||==============©Othello=============== #
 
-InstallIana-Etc()
+declare -A PackageIanaEtc;
+PackageIanaEtc[Name]="iana-etc";
+PackageIanaEtc[Version]="20240806";
+PackageIanaEtc[Extension]=".tar.gz";
+PackageIanaEtc[Package]="${PackageIanaEtc[Name]}-${PackageIanaEtc[Version]}${PackageIanaEtc[Extension]}";
+
+InstallIanaEtc()
 {
-	local NAME="iana-etc";
-	local VERSION="20240806";
-	local EXTENSION=".tar.gz";
-	local PACKAGE="${NAME}-${VERSION}${EXTENSION}";
+	EchoInfo	"Package ${PackageIanaEtc[Name]}"
 
-	EchoInfo	"Package ${NAME}"
+	ReExtractPackage	"${PDIR}"	"${PackageIanaEtc[Name]}-${PackageIanaEtc[Version]}"	"${PackageIanaEtc[Extension]}";
 
-	ReExtractPackage	"${PDIR}${PACKAGE}"	"${PDIR}";
-
-	if ! cd "${PDIR}${NAME}"; then
-		EchoError	"cd ${PDIR}${NAME}";
+	if ! cd "${PDIR}${PackageIanaEtc[Name]}-${PackageIanaEtc[Version]}"; then
+		PackageIanaEtc[Status]=1;
+		EchoError	"cd ${PDIR}${PackageIanaEtc[Name]}-${PackageIanaEtc[Version]}";
 		return;
 	fi
 
-	EchoInfo	"${NAME}> cp services protocols /etc"
-	cp services protocols /etc	1> /dev/null
+	EchoInfo	"${PackageIanaEtc[Name]}> cp services protocols /etc"
+	cp services protocols /etc	1> /dev/null;
+	PackageIanaEtc[Status]=$?;
 
 	cd -;
 }
@@ -170,32 +203,39 @@ InstallIana-Etc()
 #									Glibc									   #
 # ===============ft_linux==============||==============©Othello=============== #
 
+declare -A PackageGlibc;
+PackageGlibc[Name]="glibc";
+PackageGlibc[Version]="2.40";
+PackageGlibc[Extension]=".tar.xz";
+PackageGlibc[Package]="${PackageGlibc[Name]}-${PackageGlibc[Version]}${PackageGlibc[Extension]}";
+
 InstallGlibc()
 {
-	local NAME="glibc";
-	local VERSION="2.40";
-	local EXTENSION=".tar.xz";
-	local PACKAGE="${NAME}-${VERSION}${EXTENSION}";
+	# local NAME="glibc";
+	# local VERSION="2.40";
+	# local EXTENSION=".tar.xz";
+	# local PACKAGE="${NAME}-${VERSION}${EXTENSION}";
 
-	EchoInfo	"Package ${NAME}"
+	EchoInfo	"Package ${PackageGlibc[Name]}"
 
-	ReExtractPackage	"${PDIR}${PACKAGE}"	"${PDIR}";
+	ReExtractPackage	"${PDIR}"	"${PackageGlibc[Name]}-${PackageGlibc[Version]}"	"${PackageGlibc[Extension]}";
 
-	if ! cd "${PDIR}${NAME}"; then
-		EchoError	"cd ${PDIR}${NAME}";
+	if ! cd "${PDIR}${PackageGlibc[Name]}-${PackageGlibc[Version]}"; then
+		EchoError	"cd ${PDIR}${PackageGlibc[Name]}-${PackageGlibc[Version]}";
 		return;
 	fi
 
-	EchoInfo	"${NAME} patching..."
+	EchoInfo	"${PackageGlibc[Name]} patching..."
 	patch -Np1 -i ../glibc-2.40-fhs-1.patch
 
 	if ! mkdir -v build; then
-		EchoError	"Failed to make ${PDIR}${NAME}/build";
+		PackageGlibc[Status]=1;
+		EchoError	"Failed to make ${PDIR}${PackageGlibc[Name]}/build";
 		cd -;
 		return ;
 	fi
 	cd -;
-	cd "${PDIR}${NAME}/build";
+	cd "${PDIR}${PackageGlibc[Name]}-${PackageGlibc[Version]}/build";
 
 	InstallGlibcInstall;
 	InstallGlibcConfigure;
@@ -208,7 +248,7 @@ InstallGlibcInstall()
 	# Ensure that the ldconfig and sln utilities will be installed into /usr/sbin
 	echo "rootsbindir=/usr/sbin" > configparms
 
-	EchoInfo	"${NAME}> configure"
+	EchoInfo	"${PackageGlibc[Name]}> configure"
 	../configure	--prefix=/usr	\
 					--disable-werror	\
 					--enable-kernel=4.19	\
@@ -217,11 +257,12 @@ InstallGlibcInstall()
 					libc_cv_slibdir=/usr/lib	\
 					1> /dev/null
 
-	EchoInfo	"${NAME}> Compile"
-	time make 1> /dev/null || {EchoTest KO ${NAME} && PressAnyKeyToContinue; return;};
+	EchoInfo	"${PackageGlibc[Name]}> Compile"
+	time make 1> /dev/null || { EchoTest KO ${PackageGlibc[Name]} && PressAnyKeyToContinue; return; };
 
-	EchoInfo	"${NAME}> Check"
-	make check 1> /dev/null; EchoInfo "Check the test or ctrl C!"; PressAnyKeyToContinue; 
+	EchoInfo	"${PackageGlibc[Name]}> Check"
+	make test t=nptl/tst-thread_local1.o || { EchoError "$?"; PressAnyKeyToContinue; };
+	make check 1> /dev/null || { EchoError "Check the errors. Ctrl+C if crucial! ($?)"; }; EchoInfo "Check the test or ctrl C!"; PressAnyKeyToContinue; 
 
 	# Prevent harmless warning
 	touch /etc/ld.so.conf
@@ -229,22 +270,23 @@ InstallGlibcInstall()
 	# Fix the Makefile to skip an outdated sanity check that fails with a modern Glibc configuration
 	sed '/test-installation/s@$(PERL)@echo not running@' -i ../Makefile
 
-	EchoInfo	"${NAME}> Install"
-	time make 1> /dev/null || {EchoTest KO ${NAME} && PressAnyKeyToContinue; return;};
+	EchoInfo	"${PackageGlibc[Name]}> Install"
+	time make 1> /dev/null || { PackageGlibc[Status]=$?; EchoTest KO ${PackageGlibc[Name]} && PressAnyKeyToContinue; return; };
 
 	# Fix a hardcoded path to the executable loader in the ldd script
 	sed '/RTLDLIST=/s@/usr@@g' -i /usr/bin/ldd;
 
 	# Installing locales using the localedef program
 	if true; then
-		EchoInfo	"${NAME}> Installing all locales"
-		make localedata/install-locales
+		EchoInfo	"${PackageGlibc[Name]}> Installing all locales"
+		make localedata/install-locales;
+		PackageGlibc=$?;
 		# Locales missing from make
 		localedef -i C -f UTF-8 C.UTF-8
 		localedef -i ja_JP -f SHIFT_JIS ja_JP.SJIS 2> /dev/null || true
 	else
 		# Installing individual locales
-		EchoInfo	"${NAME}> Installing individual Locales"
+		EchoInfo	"${PackageGlibc[Name]}> Installing individual Locales"
 		localedef -i C -f UTF-8 C.UTF-8
 		localedef -i cs_CZ -f UTF-8 cs_CZ.UTF-8
 		localedef -i de_DE -f ISO-8859-1 de_DE
@@ -339,36 +381,163 @@ mkdir -pv /etc/ld.so.conf.d
 #									Zlib									   #
 # ===============ft_linux==============||==============©Othello=============== #
 
+declare -A PackageZlib;
+PackageZlib[Name]="zlib";
+PackageZlib[Version]="1.3.1";
+PackageZlib[Extension]=".tar.gz";
+PackageZlib[Package]="${PackageZlib[Name]}-${PackageZlib[Version]}${PackageZlib[Extension]}";
+
 InstallZlib()
 {
-	local NAME="zlib";
-	local VERSION="1.3.1";
-	local EXTENSION=".tar.gz";
-	local PACKAGE="${NAME}-${VERSION}${EXTENSION}";
+	# local NAME="zlib";
+	# local VERSION="1.3.1";
+	# local EXTENSION=".tar.gz";
+	# local PACKAGE="${NAME}-${VERSION}${EXTENSION}";
 
-	EchoInfo	"Package ${NAME}"
+	EchoInfo	"Package ${PackageZlib[Name]}"
 
-	ReExtractPackage	"${PDIR}${PACKAGE}"	"${PDIR}";
+	ReExtractPackage	"${PDIR}"	"${PackageZlib[Name]}-${PackageZlib[Version]}"	"${PackageZlib[Extension]}";
 
-	if ! cd "${PDIR}${NAME}"; then
-		EchoError	"cd ${PDIR}${NAME}";
+	if ! cd "${PDIR}${PackageZlib[Name]}-${PackageZlib[Version]}"; then
+		EchoError	"cd ${PDIR}${PackageZlib[Name]}-${PackageZlib[Version]}";
 		return;
 	fi
 	
-	EchoInfo	"${NAME}> Configure"
-	./configure --prefix=/usr 1> /dev/null || {EchoTest KO ${NAME} && PressAnyKeyToContinue; return;};
+	EchoInfo	"${PackageZlib[Name]}> Configure"
+	./configure --prefix=/usr 1> /dev/null || { PackageZlib[Status]=$?; EchoTest KO ${PackageZlib[Name]} && PressAnyKeyToContinue; return; };
 
-	EchoInfo	"${NAME}> make"
-	make  1> /dev/null || {EchoTest KO ${NAME} && PressAnyKeyToContinue; return;};
+	EchoInfo	"${PackageZlib[Name]}> make"
+	make  1> /dev/null || { PackageZlib[Status]=$?; EchoTest KO ${PackageZlib[Name]} && PressAnyKeyToContinue; return; };
 
-	EchoInfo	"${NAME}> make check"
-	make check 1> /dev/null || {EchoTest KO ${NAME} && PressAnyKeyToContinue; return;};
+	EchoInfo	"${PackageZlib[Name]}> make check"
+	make check 1> /dev/null || { PackageZlib[Status]=$?; EchoTest KO ${PackageZlib[Name]} && PressAnyKeyToContinue; return; };
 	
-	EchoInfo	"${NAME}> make install"
-	make install 1> /dev/null || {EchoTest KO ${NAME} && PressAnyKeyToContinue; return;};
+	EchoInfo	"${PackageZlib[Name]}> make install"
+	make install 1> /dev/null && PackageZlib[Status]=$? || { PackageZlib[Status]=$?; EchoTest KO ${PackageZlib[Name]} && PressAnyKeyToContinue; return; };
 	
 	# Remove a useless static lbrary
 	rm -fv /usr/lib/libz.a
 
 	cd -;
 }
+
+# =====================================||===================================== #
+#									Bzip2									   #
+# ===============ft_linux==============||==============©Othello=============== #
+
+declare -A PackageBzip2;
+PackageBzip2[Name]="bzip2";
+PackageBzip2[Version]="1.0.8";
+PackageBzip2[Extension]=".tar.gz";
+PackageBzip2[Package]="${PackageBzip2[Name]}-${PackageBzip2[Version]}${PackageBzip2[Extension]}";
+
+InstallBzip2()
+{
+	# local NAME="Bzip2";
+	# local VERSION="";
+	# local EXTENSION=".tar.xz";
+	# local PACKAGE="${NAME}-${VERSION}${EXTENSION}";
+
+	EchoInfo	"Package ${PackageBzip2[Name]}"
+
+	ReExtractPackage	"${PDIR}"	"${PackageBzip2[Name]}-${PackageBzip2[Version]}"	"${PackageBzip2[Extension]}";
+
+	if ! cd "${PDIR}${PackageBzip2[Name]}-${PackageBzip2[Version]}"; then
+		EchoError	"cd ${PDIR}${PackageBzip2[Name]}-${PackageBzip2[Version]}";
+		return;
+	fi
+
+	EchoInfo	"${PackageBzip2[Name]}> Patch"
+	patch -Np1 -i ../bzip2-1.0.8-install_docs-1.patch
+
+	EchoInfo	"${PackageBzip2[Name]}> sed Makefile"
+	sed -i 's@\(ln -s -f \)$(PREFIX)/bin/@\1@' Makefile
+	sed -i "s@(PREFIX)/man@(PREFIX)/share/man@g" Makefile
+
+	EchoInfo	"${PackageBzip2[Name]}> prepare make"
+	make -f Makefile-libbz2_so 1> /dev/null || { PackageBzip2[Status]=$?; EchoTest KO ${PackageBzip2[Name]} && PressAnyKeyToContinue; return; };
+	make clean 1> /dev/null || { PackageBzip2[Status]=$?; EchoTest KO ${PackageBzip2[Name]} && PressAnyKeyToContinue; return; };
+
+	EchoInfo	"${PackageBzip2[Name]}> make"
+	make  1> /dev/null || { PackageBzip2[Status]=$?; EchoTest KO ${PackageBzip2[Name]} && PressAnyKeyToContinue; return; };
+
+	# EchoInfo	"${PackageBzip2[Name]}> make check"
+	# make check 1> /dev/null || { PackageBzip2[Status]=$?; EchoTest KO ${PackageBzip2[Name]} && PressAnyKeyToContinue; return; };
+	
+	EchoInfo	"${PackageBzip2[Name]}> make PREFIX=/usr install"
+	make PREFIX=/usr install 1> /dev/null && PackageBzip2[Status]=$? || { PackageBzip2[Status]=$?; EchoTest KO ${PackageBzip2[Name]} && PressAnyKeyToContinue; return; };
+
+	# Install shared library
+	cp -av libbz2.so.* /usr/lib
+	ln -sv libbz2.so.1.0.8 /usr/lib/libbz2.so
+	# Install shared bzip binary
+	cp -v bzip2-shared /usr/bin/bzip2
+	for i in /usr/bin/{bzcat,bunzip2}; do
+		ln -sfv bzip2 $i
+	done
+
+	# Remove useless static library
+	rm -fv /usr/lib/libbz2.a
+
+	cd -;
+}
+
+# =====================================||===================================== #
+#																			   #
+#									  Menu									   #
+#																			   #
+# ===============ft_linux==============||==============©Othello=============== #
+
+PrintMenu()
+{
+	clear ;
+	
+	PrintMenuLine	"${PackageMan[Name]}-${PackageMan[Version]}"	$MenuIndex	0	"${PackageMan[Status]}";
+	PrintMenuLine	"${PackageIanaEtc[Name]}-${PackageIanaEtc[Version]}"	$MenuIndex	1	"${PackageIanaEtc[Status]}";
+	PrintMenuLine	"${PackageGlibc[Name]}-${PackageGlibc[Version]}"	$MenuIndex	2	"${PackageGlibc[Status]}";
+	PrintMenuLine	"${PackageZlib[Name]}-${PackageZlib[Version]}"	$MenuIndex	3	"${PackageZlib[Status]}";
+	PrintMenuLine	"${PackageBzip2[Name]}-${PackageBzip2[Version]}"	$MenuIndex	4	"${PackageBzip2[Status]}";
+	PrintMenuLine	"Quit"	$MenuIndex	5;
+
+	GetKeyPress;
+	case "$input" in
+		$'\e[A')	((--MenuIndex));;
+		$'\e[B')	((++MenuIndex));;
+		"")	case $MenuIndex in
+				0)	InstallMan;;
+				1)	InstallIanaEtc;;
+				2)	InstallGlibc;;
+				3)	InstallZlib;;
+				4)	InstallBzip2;;
+				5)	break ;;
+			esac;
+			PressAnyKeyToContinue;;
+	esac
+
+	MenuIndex=$(( MenuIndex % 6 ));
+	if [ $MenuIndex -lt 0 ]; then
+		MenuIndex=5;
+	fi	
+}
+
+PrintMenuLine()
+{
+	if [ ! -z "$4" ] ; then
+		if [ "$4" -eq 0 ]; then
+			echo -ne	"${C_GREEN}";
+		elif [ "$4" -gt 0 ]; then
+			echo -ne	"${C_RED}";
+		fi
+	fi
+
+	if [ "$2" = "$3" ]; then
+		echo -ne	"${CB_LGRAY}";
+	fi
+
+	printf	" %-18s${C_RESET}\n"	"$1";
+}
+
+MenuIndex=0;
+while true; do
+	PrintMenu;
+done
