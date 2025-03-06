@@ -520,7 +520,6 @@ PrepareGlibc()
 	patch -Np1 -i ../glibc-2.40-fhs-1.patch;
 
 	cd -;
-
 }
 
 ConfigureGlibc()
@@ -657,11 +656,11 @@ InstallPackageLibstdcpp()
 
 	EchoInfo	"Compiling ${libstdcpp[package]}...";
 	echo	"${C_DGRAY}> make 1> /dev/null${C_RESET}";
-	make 1> /dev/null || {EchoTest KO ${libstdcpp[name]} && PressAnyKeyToContinue; return;};
+	make 1> /dev/null || { EchoTest KO ${libstdcpp[name]} && PressAnyKeyToContinue; return; };
 
 	EchoInfo	"Installing ${PACKNAME} library...";
 	echo	"${C_DGRAY}> make DESTDIR=\$LFS install 1> /dev/null${C_RESET}";
-	make DESTDIR=$LFS install 1> /dev/null || {EchoTest KO ${libstdcpp[name]} && PressAnyKeyToContinue; return;};
+	make DESTDIR=$LFS install 1> /dev/null || { EchoTest KO ${libstdcpp[name]} && PressAnyKeyToContinue; return; };
 
 	EchoInfo	"Removing libtool archive files...";
 	echo	"${C_DGRAY}(they are harmful for cross-compilation)${C_RESET}";

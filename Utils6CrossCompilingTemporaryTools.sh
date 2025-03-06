@@ -1231,11 +1231,11 @@ InstallPackageBinutilsPass2()
 
 	EchoInfo	"Compiling ${TempPackages[binutils]}...";
 	echo		"${C_DGRAY}> make 1> /dev/null${C_RESET}";
-	time make 1> /dev/null || {EchoTest KO ${TempPackages[binutils]} && PressAnyKeyToContinue; return;};
+	time make 1> /dev/null || { EchoTest KO ${TempPackages[binutils]} && PressAnyKeyToContinue; return; };
 
 	EchoInfo	"Installing ${TempPackages[binutils]}...";
 	echo		"${C_DGRAY}> make DESTDIR=\$LFS install 1> /dev/null${C_RESET}";
-	time make DESTDIR=$LFS install 1> /dev/null || {EchoTest KO ${TempPackages[binutils]} && PressAnyKeyToContinue; return;};
+	time make DESTDIR=$LFS install 1> /dev/null || { EchoTest KO ${TempPackages[binutils]} && PressAnyKeyToContinue; return; };
 
 	# Remove the libtool archive files because they are harmful for cross compilation, and remove unnecessary static libraries
 	rm -v $LFS/usr/lib/lib{bfd,ctf,ctf-nobfd,opcodes,sframe}.{a,la}
@@ -1309,6 +1309,18 @@ ExtracPackagesGccPass2()
 
 ConfigureGccPass2()
 {
+	if ! cd "${PDIR}${TempPackages[gcc]}"; then
+		return ;
+	fi
+	case $(uname -m) in
+		x86_64)	sed	-e '/m64=/s/lib64/lib/' \
+					-i.orig gcc/config/i386/t-linux64;;
+	esac
+	sed	'/thread_header =/s/@.*@/gthr-posix.h/' \
+		-i libgcc/Makefile.in libstdc++-v3/include/Makefile.in;
+
+	cd -;
+
 	if ! cd "${PDIR}${TempPackages[gcc]}/build"; then
 		return ;
 	fi
@@ -1344,11 +1356,11 @@ InstallPackageGccPass2()
 
 	EchoInfo	"Compiling ${TempPackages[gcc]}...";
 	echo		"${C_DGRAY}> make 1> /dev/null${C_RESET}";
-	time make 1> /dev/null || {EchoTest KO ${TempPackages[gcc]} && PressAnyKeyToContinue; return;};
+	time make 1> /dev/null || { EchoTest KO ${TempPackages[gcc]} && PressAnyKeyToContinue; return; };
 
 	EchoInfo	"Installing ${TempPackages[gcc]}...";
 	echo		"${C_DGRAY}> make DESTDIR=$LFS install 1> /dev/null${C_RESET}";
-	time make DESTDIR=$LFS install 1> /dev/null || {EchoTest KO ${TempPackages[gcc]} && PressAnyKeyToContinue; return;};
+	time make DESTDIR=$LFS install 1> /dev/null || { EchoTest KO ${TempPackages[gcc]} && PressAnyKeyToContinue; return; };
 
 	# Create a utility symlink to cc
 	ln -sv gcc $LFS/usr/bin/cc
@@ -1375,11 +1387,11 @@ ValidateGccPass2()
 # ===============ft_linux==============||==============©Othello=============== #
 
 if [ "$1" = "InstallAll" ]; then
-	InstallPackages && \
-	InstallBinutilsPass2 && \
-	InstallGccPass2 && \
-	RemoveAllPackages || \
-	{EchoError "Chapter 6 failed" && PressAnyKeyToContinue};
+	InstallPackages &&	\
+	InstallBinutilsPass2 &&	\
+	InstallGccPass2 &&	\
+	RemoveAllPackages ||	\
+	{ EchoError "Chapter 6 failed" && PressAnyKeyToContinue; };
 
 	exit $?;
 fi

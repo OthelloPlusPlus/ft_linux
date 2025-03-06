@@ -255,13 +255,13 @@ InstallGlibcInstall()
 					--enable-stack-protector=strong	\
 					--disable-nscd	\
 					libc_cv_slibdir=/usr/lib	\
-					1> /dev/null
+					1> /dev/null || { PackageGlibc[Status]=$?; EchoError "Issues with glibc configure"; PressAnyKeyToContinue; return; };
 
 	EchoInfo	"${PackageGlibc[Name]}> Compile"
-	time make 1> /dev/null || { EchoTest KO ${PackageGlibc[Name]} && PressAnyKeyToContinue; return; };
+	make 1> /dev/null || { PackageGlibc[Status]=$?; EchoTest KO ${PackageGlibc[Name]}; PressAnyKeyToContinue; return; };
 
 	EchoInfo	"${PackageGlibc[Name]}> Check"
-	make test t=nptl/tst-thread_local1.o || { EchoError "$?"; PressAnyKeyToContinue; };
+	# make test t=nptl/tst-thread_local1.o || { EchoError "$?"; PressAnyKeyToContinue; };
 	make check 1> /dev/null || { EchoError "Check the errors. Ctrl+C if crucial! ($?)"; }; EchoInfo "Check the test or ctrl C!"; PressAnyKeyToContinue; 
 
 	# Prevent harmless warning
@@ -271,7 +271,7 @@ InstallGlibcInstall()
 	sed '/test-installation/s@$(PERL)@echo not running@' -i ../Makefile
 
 	EchoInfo	"${PackageGlibc[Name]}> Install"
-	time make 1> /dev/null || { PackageGlibc[Status]=$?; EchoTest KO ${PackageGlibc[Name]} && PressAnyKeyToContinue; return; };
+	make install 1> /dev/null && PackageGlibc[Status]=$? || { PackageGlibc[Status]=$?; EchoTest KO ${PackageGlibc[Name]}; PressAnyKeyToContinue; return; };
 
 	# Fix a hardcoded path to the executable loader in the ldd script
 	sed '/RTLDLIST=/s@/usr@@g' -i /usr/bin/ldd;
@@ -330,15 +330,19 @@ InstallGlibcConfigure()
 # Adding nsswitch.conf
 cat > /etc/nsswitch.conf << "EOF"
 # Begin /etc/nsswitch.conf
+
 passwd: files
 group: files
 shadow: files
+
 hosts: files dns
 networks: files
+
 protocols: files
 services: files
 ethers: files
 rpc: files
+
 # End /etc/nsswitch.conf
 EOF
 
@@ -358,10 +362,9 @@ EOF
 	zic -d $ZONEINFO -p America/New_York
 	unset ZONEINFO
 
-	PressAnyKeyToContinue;
-	EchoError	"Timezoneneeds to be configured!"
 	# tzselect
-	# ln -sfv /usr/share/zoneinfo/<xxx> /etc/localtime
+	TZ='Europe/Brussels';
+	ln -sfv /usr/share/zoneinfo/${TZ} /etc/localtime
 
 	# Configuring the Dynamic Loader
 cat > /etc/ld.so.conf << "EOF"
@@ -509,7 +512,8 @@ PrintMenu()
 				2)	InstallGlibc;;
 				3)	InstallZlib;;
 				4)	InstallBzip2;;
-				5)	break ;;
+				5)	MenuIndex=-1;
+					return ;;
 			esac;
 			PressAnyKeyToContinue;;
 	esac
@@ -538,6 +542,6 @@ PrintMenuLine()
 }
 
 MenuIndex=0;
-while true; do
+while [ "$MenuIndex" -ge 0 ]; do
 	PrintMenu;
 done

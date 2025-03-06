@@ -1,13 +1,35 @@
+#! /bin/bash
+
 history -c
-# C_RESET="\x1b[0m";
-# C_RED="\x1b[38;2;255;0;0m";
+
+C_RESET="\x1b[0m";
+C_RED="\x1b[38;2;255;0;0m";
+C_GREEN="\x1b[38;2;0;255;0m";
+C_CYAN="\x1b[38;2;0;255;255m";
 
 EchoError()
 {
-	echo "[${C_RED}ERR${C_RESET} ]  $1" >&2;
+	echo -e	"[${C_RED}ERR${C_RESET} ]  $1" >&2;
 	PressAnyKeyToContinue;
 	exit;
 }
+
+EchoInfo()
+{
+	echo -e	"[${C_CYAN}INFO${C_RESET}]$1";
+}
+
+EchoTest()
+{
+	if [ "$1" = OK ]; then
+		echo -e	"[${C_GREEN} OK ${C_RESET}] $2";
+	elif [ "$1" = KO ]; then
+		echo -e	"[${C_RED} KO ${C_RESET}] $2";
+	else
+		echo -e	"[${C_GRAY}TEST${C_RESET}] $1";
+	fi
+}
+
 
 PressAnyKeyToContinue()
 {
@@ -16,7 +38,11 @@ PressAnyKeyToContinue()
 	fi
 }
 
-# 7.5. Creating Directories
+# =====================================||===================================== #
+#																			   #
+#							7.5. Creating Directories						   #
+#																			   #
+# ===============ft_linux==============||==============©Othello=============== #
 
 # Create some root-level directories {boot,home,mnt,opt,srv}
 mkdir -pv /{boot,home,mnt,opt,srv};
@@ -40,18 +66,25 @@ ln -sfv /run/lock /var/lock
 install -dv -m 0750 /root
 install -dv -m 1777 /tmp /var/tmp
 
-# 7.6. Creating Essential Files and Symlinks
+# =====================================||===================================== #
+#																			   #
+#				7.6. Creating Essential Files and Symlinks					   #
+#																			   #
+# ===============ft_linux==============||==============©Othello=============== # 
 
 # Create a symbolic link for mounts
+echo "Create a symbolic link for mounts"
 ln -sv /proc/self/mounts /etc/mtab
 
 # Create a basic /etc/hosts file
+EchoInfo "# Create a basic /etc/hosts file"
 cat > /etc/hosts << EOF
 127.0.0.1 localhost $(hostname)
 ::1       localhost
 EOF
 
 # Create the /etc/passwd file
+EchoInfo "# Create the /etc/passwd file"
 cat > /etc/passwd << "EOF"
 root:x:0:0:root:/root:/bin/bash
 bin:x:1:1:bin:/dev/null:/usr/bin/false
@@ -62,6 +95,7 @@ nobody:x:65534:65534:Unprivileged User:/dev/null:/usr/bin/false
 EOF
 
 # Create the /etc/group file
+EchoInfo "# Create the /etc/group file"
 cat > /etc/group << "EOF"
 root:x:0:
 bin:x:1:daemon
@@ -90,14 +124,28 @@ nogroup:x:65534:
 EOF
 
 # Defining locale
+EchoInfo "# Defining locale"
 localedef -i C -f UTF-8 C.UTF-8
 
 # Creating temporary 'tester' user
+EchoInfo "# Creating temporary 'tester' user"
 echo "tester:x:101:101::/home/tester:/bin/bash" >> /etc/passwd
 echo "tester:x:101:" >> /etc/group
 install -o tester -d /home/tester
 
+# group name resolution
+EchoInfo "# group name resolution"
+if false; then
+	exec /usr/bin/bash --login
+else
+	EchoInfo	"Alternative method for group name resolution";
+	getent passwd
+	getent group
+	PressAnyKeyToContinue;
+fi
+
 # Create log files
+EchoInfo "# Create log files"
 touch /var/log/{btmp,lastlog,faillog,wtmp}
 chgrp -v utmp /var/log/lastlog
 chmod -v 664 /var/log/lastlog
@@ -105,113 +153,229 @@ chmod -v 600 /var/log/btmp
 
 PDIR="/sources/lfs-packages12.2/";
 
-# 7.7 - 7.12 Packages
+# =====================================||===================================== #
+#																			   #
+#								7.7 - 7.12 Packages							   #
+#																			   #
+# ===============ft_linux==============||==============©Othello=============== #
+InstallChrootPackages()
+{
+	InstallGettext;
+	InstallBison;
+	InstallPerl;
+	InstallPython;
+	InstallTexinfo;
+	InstallUtilLinux;
+}
+
 ExtractPackage()
 {
 	tar -xf "${PDIR}${1}" -C "${PDIR}";
 }
 
+VerifyPackages()
+{
+	SCREENWIDTH=$(tput cols);
+	WORDWIDTH=$(echo "util-linux:" | wc -c);
+	CURRENT=0;
+
+	# IsInstalled	"gettext";
+	printf	"%-${WORDWIDTH}s"	"gettext:";
+	IsInstalled	"msgfmt";
+	IsInstalled	"msgmerge";
+	IsInstalled	"xgettext";
+	echo;
+	CURRENT=0;
+
+	IsInstalled	"bison";
+	IsInstalled	"perl";
+	IsInstalled	"python3";
+	IsInstalled	"texinfo";
+	echo;
+	CURRENT=0;
+
+	# IsInstalled	"util-linux";
+	printf	"%-${WORDWIDTH}s"	"util-linux:";
+	IsInstalled	"hwclock";
+	IsInstalled	"lsblk";
+	IsInstalled	"fdisk";
+	echo;
+}
+
+IsInstalled()
+{
+	# printf	"Testing %-50s"	"$1 ...";
+	if [[ $(echo "$1" | wc -c) -gt $WORDWIDTH ]]; then
+		WORDWIDTH=$(echo "$1" | wc -c);
+	fi
+
+	# TOTAL=$((TOTAL+1));
+	if test "$(whereis $1)" = "$1:"; then
+		printf	"${C_RED}%-${WORDWIDTH}s${C_RESET}"	"$1" >&2;
+	else
+		# SUCCESS=$((SUCCESS+1));
+		printf	"${C_GREEN}%-${WORDWIDTH}s${C_RESET}"	"$1";
+	fi
+
+	CURRENT=$((CURRENT+WORDWIDTH));
+	if [[ $((CURRENT+WORDWIDTH)) -gt $SCREENWIDTH ]]; then
+		echo;
+		CURRENT=0;
+	fi
+}
+
 # gettext
-PACKAGE="gettext";
-VERSION="0.22.5";
-EXTENSION=".tar.xz";
+InstallGettext()
+{
+	EchoInfo "# gettext"
+	PressAnyKeyToContinue;
+	PACKAGE="gettext";
+	VERSION="0.22.5";
+	EXTENSION=".tar.xz";
 
-ExtractPackage "${PACKAGE}-${VERSION}${EXTENSION}";
-cd "${PDIR}${PACKAGE}-${VERSION}";
+	ExtractPackage "${PACKAGE}-${VERSION}${EXTENSION}";
+	cd "${PDIR}${PACKAGE}-${VERSION}";
 
-./configure --disable-shared || EchoError "Configure ${PACKAGE}" >&2;
-make || EchoError "make ${PACKAGE}" >&2;
-cp -v gettext-tools/src/{msgfmt,msgmerge,xgettext} /usr/bin
+	./configure --disable-shared 1> /dev/null || { EchoError "Configure ${PACKAGE}" >&2; PressAnyKeyToContinue; };
+	make 1> /dev/null || { EchoError "make ${PACKAGE}" >&2; PressAnyKeyToContinue; };
+	cp -v gettext-tools/src/{msgfmt,msgmerge,xgettext} /usr/bin
 
-cd -;
-rm -rf "${PDIR}${PACKAGE}-${VERSION}"
+	whereis gettext
+	PressAnyKeyToContinue;
+
+	cd -;
+	rm -rf "${PDIR}${PACKAGE}-${VERSION}"
+}
 
 # bison
-PACKAGE="bison";
-VERSION="3.8.2";
-EXTENSION=".tar.xz";
+InstallBison()
+{
+	EchoInfo "# bison"
+	PACKAGE="bison";
+	VERSION="3.8.2";
+	EXTENSION=".tar.xz";
 
-ExtractPackage "${PACKAGE}-${VERSION}${EXTENSION}";
-cd "${PDIR}${PACKAGE}-${VERSION}";
+	ExtractPackage "${PACKAGE}-${VERSION}${EXTENSION}";
+	cd "${PDIR}${PACKAGE}-${VERSION}";
 
-./configure --prefix=/usr --docdir=/usr/share/doc/bison-3.8.2 || EchoError "Configure ${PACKAGE}" >&2;
-make || EchoError "make ${PACKAGE}" >&2;
-make install || EchoError "make install ${PACKAGE}" >&2;
+	./configure --prefix=/usr --docdir=/usr/share/doc/bison-3.8.2 || { EchoError "Configure ${PACKAGE}" >&2; PressAnyKeyToContinue; };
+	make || { EchoError "make ${PACKAGE}" >&2; PressAnyKeyToContinue; };
+	make install || { EchoError "make install ${PACKAGE}" >&2; PressAnyKeyToContinue; };
+	bison --version
 
-cd -;
-rm -rf "${PDIR}${PACKAGE}-${VERSION}"
+
+	cd -;
+	rm -rf "${PDIR}${PACKAGE}-${VERSION}"
+}
 
 # perl
-PACKAGE="perl";
-VERSION="5.40.0";
-EXTENSION=".tar.xz";
+InstallPerl()
+{
+	EchoInfo "# perl"
+	PACKAGE="perl";
+	VERSION="5.40.0";
+	EXTENSION=".tar.xz";
 
-ExtractPackage "${PACKAGE}-${VERSION}${EXTENSION}";
-cd "${PDIR}${PACKAGE}-${VERSION}";
+	ExtractPackage "${PACKAGE}-${VERSION}${EXTENSION}";
+	cd "${PDIR}${PACKAGE}-${VERSION}";
 
-sh Configure -des -D prefix=/usr -D vendorprefix=/usr -D useshrplib -D privlib=/usr/lib/perl5/5.40/core_perl -D archlib=/usr/lib/perl5/5.40/core_perl -D sitelib=/usr/lib/perl5/5.40/site_perl -D sitearch=/usr/lib/perl5/5.40/site_perl -D vendorlib=/usr/lib/perl5/5.40/vendor_perl -D vendorarch=/usr/lib/perl5/5.40/vendor_perl || EchoError "Configure ${PACKAGE}" >&2;
-make || EchoError "make ${PACKAGE}" >&2;
-make install || EchoError "make install ${PACKAGE}" >&2;
+	sh Configure -des -D prefix=/usr -D vendorprefix=/usr -D useshrplib -D privlib=/usr/lib/perl5/5.40/core_perl -D archlib=/usr/lib/perl5/5.40/core_perl -D sitelib=/usr/lib/perl5/5.40/site_perl -D sitearch=/usr/lib/perl5/5.40/site_perl -D vendorlib=/usr/lib/perl5/5.40/vendor_perl -D vendorarch=/usr/lib/perl5/5.40/vendor_perl || { EchoError "Configure ${PACKAGE}" >&2; PressAnyKeyToContinue; };
+	make || { EchoError "make ${PACKAGE}" >&2; PressAnyKeyToContinue; };
+	make install || { EchoError "make install ${PACKAGE}" >&2; PressAnyKeyToContinue; };
 
-cd -;
-rm -rf "${PDIR}${PACKAGE}-${VERSION}"
+	cd -;
+	rm -rf "${PDIR}${PACKAGE}-${VERSION}"
+}
 
 # python
-PACKAGE="Python";
-VERSION="3.12.5";
-EXTENSION=".tar.xz";
+InstallPython()
+{
+	EchoInfo "# python"
+	PACKAGE="Python";
+	VERSION="3.12.5";
+	EXTENSION=".tar.xz";
 
-ExtractPackage "${PACKAGE}-${VERSION}${EXTENSION}";
-cd "${PDIR}${PACKAGE}-${VERSION}";
+	ExtractPackage "${PACKAGE}-${VERSION}${EXTENSION}";
+	cd "${PDIR}${PACKAGE}-${VERSION}";
 
-./configure --prefix=/usr --enable-shared --without-ensurepip || EchoError "Configure ${PACKAGE}" >&2;
-make || EchoError "make ${PACKAGE}" >&2;
-make install || EchoError "make install ${PACKAGE}" >&2;
+	./configure --prefix=/usr --enable-shared --without-ensurepip || { EchoError "Configure ${PACKAGE}" >&2; PressAnyKeyToContinue; };
+	make || { EchoError "make ${PACKAGE}" >&2; PressAnyKeyToContinue; };
+	make install || { EchoError "make install ${PACKAGE}" >&2; PressAnyKeyToContinue; };
 
-cd -;
-rm -rf "${PDIR}${PACKAGE}-${VERSION}"
+	cd -;
+	rm -rf "${PDIR}${PACKAGE}-${VERSION}"
+}
 
 # texinfo
-PACKAGE="texinfo";
-VERSION="7.1";
-EXTENSION=".tar.xz";
+InstallTexinfo()
+{
+	EchoInfo "# texinfo"
+	PACKAGE="texinfo";
+	VERSION="7.1";
+	EXTENSION=".tar.xz";
 
-ExtractPackage "${PACKAGE}-${VERSION}${EXTENSION}";
-cd "${PDIR}${PACKAGE}-${VERSION}";
+	ExtractPackage "${PACKAGE}-${VERSION}${EXTENSION}";
+	cd "${PDIR}${PACKAGE}-${VERSION}";
 
-./configure --prefix=/usr || EchoError "Configure ${PACKAGE}" >&2;
-make || EchoError "make ${PACKAGE}" >&2;
-make install || EchoError "make install ${PACKAGE}" >&2;
+	./configure --prefix=/usr || { EchoError "Configure ${PACKAGE}" >&2; PressAnyKeyToContinue; };
+	make || { EchoError "make ${PACKAGE}" >&2; PressAnyKeyToContinue; };
+	make install || { EchoError "make install ${PACKAGE}" >&2; PressAnyKeyToContinue; };
 
-cd -;
-rm -rf "${PDIR}${PACKAGE}-${VERSION}"
+	cd -;
+	rm -rf "${PDIR}${PACKAGE}-${VERSION}"
+}
 
 # util-linux
-PACKAGE="util-linux";
-VERSION="2.40.2";
-EXTENSION=".tar.xz";
+InstallUtilLinux()
+{
+	EchoInfo "# util-linux"
+	PACKAGE="util-linux";
+	VERSION="2.40.2";
+	EXTENSION=".tar.xz";
 
-ExtractPackage "${PACKAGE}-${VERSION}${EXTENSION}";
-cd "${PDIR}${PACKAGE}-${VERSION}";
+	ExtractPackage "${PACKAGE}-${VERSION}${EXTENSION}";
+	cd "${PDIR}${PACKAGE}-${VERSION}";
 
-mkdir -pv /var/lib/hwclock
-./configure --libdir=/usr/lib --runstatedir=/run --disable-chfn-chsh --disable-login --disable-nologin --disable-su --disable-setpriv --disable-runuser --disable-pylibmount --disable-static --disable-liblastlog2 --without-python ADJTIME_PATH=/var/lib/hwclock/adjtime --docdir=/usr/share/doc/util-linux-2.40.2 || EchoError "Configure ${PACKAGE}";
-make || EchoError "make ${PACKAGE}" >&2;
-make install || EchoError "make install ${PACKAGE}" >&2;
+	mkdir -pv /var/lib/hwclock
+	./configure --libdir=/usr/lib --runstatedir=/run --disable-chfn-chsh --disable-login --disable-nologin --disable-su --disable-setpriv --disable-runuser --disable-pylibmount --disable-static --disable-liblastlog2 --without-python ADJTIME_PATH=/var/lib/hwclock/adjtime --docdir=/usr/share/doc/util-linux-2.40.2 || { EchoError "Configure ${PACKAGE}"; PressAnyKeyToContinue; };
+	make || { EchoError "make ${PACKAGE}" >&2; PressAnyKeyToContinue; };
+	make install || { EchoError "make install ${PACKAGE}" >&2; PressAnyKeyToContinue; };
 
-cd -;
-rm -rf "${PDIR}${PACKAGE}-${VERSION}"
+	cd -;
+	rm -rf "${PDIR}${PACKAGE}-${VERSION}"
+}
 
-# 7.13 Cleanup
+# =====================================||===================================== #
+#																			   #
+#									7.13 Cleanup							   #
+#																			   #
+# ===============ft_linux==============||==============©Othello=============== #
 
-# Remove installed documentatoin files
-rm -rf /usr/share/{info,man,doc}/*;
+EchoInfo "# 7.13 Cleanup"
 
-# Remove libtool .la files
-find /usr/{lib,libexec} -name \*.la -delete
+CleanupConfigChroot()
+{
+	# Remove installed documentation files
+	EchoInfo "# Remove installed documentation files"
+	rm -rf /usr/share/{info,man,doc}/*;
 
-# Remove /tools
-rm -rf /tools
+	# Remove libtool .la files
+	EchoInfo "# Remove libtool .la files"
+	find /usr/{lib,libexec} -name \*.la -delete
 
+	# Remove /tools
+	EchoInfo "# Remove /tools"
+	rm -rf /tools
+}
+
+# =====================================||===================================== #
+#																			   #
+#									  Run									   #
+#																			   #
+# ===============ft_linux==============||==============©Othello=============== #
+
+# InstallChrootPackages;
+CleanupConfigChroot;
+VerifyPackages;
 
 colors=$(tput colors 2>/dev/null || echo 0)

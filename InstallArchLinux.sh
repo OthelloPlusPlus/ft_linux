@@ -1070,6 +1070,10 @@ EnterAsChroot()
 	cp /root/{BuildLFS.sh,ConfigChroot.sh,colors.sh} "$LFS";
 	chmod +x "$LFS/ConfigChroot.sh";
 
+	echo	"To continue enter the following command:";
+	echo	"${CB_BLACK}> ./ConfigChroot.sh ${C_RESET}";
+	echo	"${CB_BLACK}> ./BuildLFS.sh ${C_RESET}";
+
 	chroot	"$LFS" /usr/bin/env -i	\
 			HOME=/root	\
 			TERM="$TERM"	\
