@@ -5,6 +5,12 @@ source colors.sh
 PDIR="$LFS/sources/lfs-packages12.2/";
 CLEARING=true;
 
+SHELLTYPE="$(basename $(readlink -f /proc/$$/exe))"
+
+case "$SHELLTYPE" in
+	bash)	ECHOFLAG='-e';;
+esac
+
 # =====================================||===================================== #
 #																			   #
 #				 					Packages								   #
@@ -65,7 +71,7 @@ RunMakeCheckTest()
 
 GetInput()
 {
-	echo	"$MSG";
+	echo ${ECHOFLAG}	"$MSG";
 	echo -n	"Choose an option: ";
 	unset MSG;
 	read	input;
@@ -89,21 +95,21 @@ PressAnyKeyToContinue()
 
 EchoError()
 {
-	echo	"[${C_RED}ERR${C_RESET} ]  $1"	>&2;
+	echo ${ECHOFLAG}	"[${C_RED}ERR${C_RESET} ]  $1"	>&2;
 }
 
 EchoInfo()
 {
-	echo	"[${C_CYAN}INFO${C_RESET}]$1";
+	echo ${ECHOFLAG}	"[${C_CYAN}INFO${C_RESET}]$1";
 }
 
 EchoTest()
 {
 	if [ "$1" = OK ]; then
-		echo	"[${C_GREEN} OK ${C_RESET}] $2";
+		echo ${ECHOFLAG}	"[${C_GREEN} OK ${C_RESET}] $2";
 	elif [ "$1" = KO ]; then
-		echo	"[${C_RED} KO ${C_RESET}] $2";
+		echo ${ECHOFLAG}	"[${C_RED} KO ${C_RESET}] $2";
 	else
-		echo	"[${C_GRAY}TEST${C_RESET}] $1";
+		echo ${ECHOFLAG}	"[${C_GRAY}TEST${C_RESET}] $1";
 	fi
 }

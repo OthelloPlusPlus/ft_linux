@@ -95,6 +95,7 @@ GetKeyPress()
 #																			   #
 # ===============ft_linux==============||==============©Othello=============== #
 
+
 # =====================================||===================================== #
 #									Temp									   #
 # ===============ft_linux==============||==============©Othello=============== #
@@ -128,7 +129,7 @@ InstallTemp()
 	EchoInfo	"${Packagetemp[Name]}> make install"
 	make install 1> /dev/null && Packagetemp[Status]=$? || { Packagetemp[Status]=$?; EchoTest KO ${Packagetemp[Name]} && PressAnyKeyToContinue; return; };
 
-	if ! mkdir -v build; then
+	if ! mkdir -p build; then
 		Packagetemp[Status]=1; 
 		EchoError	"Failed to make ${PDIR}${Packagetemp[Name]}/build";
 		cd -;
@@ -228,7 +229,7 @@ InstallGlibc()
 	EchoInfo	"${PackageGlibc[Name]} patching..."
 	patch -Np1 -i ../glibc-2.40-fhs-1.patch
 
-	if ! mkdir -v build; then
+	if ! mkdir -p build; then
 		PackageGlibc[Status]=1;
 		EchoError	"Failed to make ${PDIR}${PackageGlibc[Name]}/build";
 		cd -;
@@ -486,21 +487,1020 @@ InstallBzip2()
 }
 
 # =====================================||===================================== #
+#									   Xz									   #
+# ===============ft_linux==============||==============©Othello=============== #
+
+declare -A PackageXz;
+PackageXz[Name]="xz";
+PackageXz[Version]="5.6.2";
+PackageXz[Extension]=".tar.xz";
+PackageXz[Package]="${PackageXz[Name]}-${PackageXz[Version]}${PackageXz[Extension]}";
+
+InstallXz()
+{
+	EchoInfo	"Package ${PackageXz[Name]}"
+
+	ReExtractPackage	"${PDIR}"	"${PackageXz[Name]}-${PackageXz[Version]}"	"${PackageXz[Extension]}";
+
+	if ! cd "${PDIR}${PackageXz[Name]}-${PackageXz[Version]}"; then
+		EchoError	"cd ${PDIR}${PackageXz[Name]}-${PackageXz[Version]}";
+		return;
+	fi
+
+	EchoInfo	"${PackageXz[Name]}> Configure"
+	./configure --prefix=/usr \
+				--disable-static \
+				--docdir=/usr/share/doc/xz-5.6.2 \
+				1> /dev/null || { EchoTest KO ${PackageXz[Name]} && PressAnyKeyToContinue; return; };
+
+	EchoInfo	"${PackageXz[Name]}> make"
+	make  1> /dev/null || { PackageXz[Status]=$?; EchoTest KO ${PackageXz[Name]} && PressAnyKeyToContinue; return; };
+
+	EchoInfo	"${PackageXz[Name]}> make check"
+	make check 1> /dev/null || { PackageXz[Status]=$?; EchoTest KO ${PackageXz[Name]} && PressAnyKeyToContinue; return; };
+	
+	EchoInfo	"${PackageXz[Name]}> make install"
+	make install 1> /dev/null && PackageXz[Status]=$? || { PackageXz[Status]=$?; EchoTest KO ${PackageXz[Name]} && PressAnyKeyToContinue; return; };
+
+	cd -;
+}
+
+# =====================================||===================================== #
+#									  Lz4									   #
+# ===============ft_linux==============||==============©Othello=============== #
+
+declare -A PackageLz4;
+PackageLz4[Name]="lz4";
+PackageLz4[Version]="1.10.0";
+PackageLz4[Extension]=".tar.gz";
+PackageLz4[Package]="${PackageLz4[Name]}-${PackageLz4[Version]}${PackageLz4[Extension]}";
+
+InstallLz4()
+{
+	EchoInfo	"Package ${PackageLz4[Name]}"
+
+	ReExtractPackage	"${PDIR}"	"${PackageLz4[Name]}-${PackageLz4[Version]}"	"${PackageLz4[Extension]}";
+
+	if ! cd "${PDIR}${PackageLz4[Name]}-${PackageLz4[Version]}"; then
+		EchoError	"cd ${PDIR}${PackageLz4[Name]}-${PackageLz4[Version]}";
+		return;
+	fi
+
+	EchoInfo	"${PackageLz4[Name]}> make BUILD_STATIC=no PREFIX=/usr"
+	make BUILD_STATIC=no PREFIX=/usr 1> /dev/null || { PackageLz4[Status]=$?; EchoTest KO ${PackageLz4[Name]} && PressAnyKeyToContinue; return; };
+
+	EchoInfo	"${PackageLz4[Name]}> make -j1 check"
+	make -j1 check 1> /dev/null || { PackageLz4[Status]=$?; EchoTest KO ${PackageLz4[Name]} && PressAnyKeyToContinue; return; };
+	
+	EchoInfo	"${PackageLz4[Name]}> make BUILD_STATIC=no PREFIX=/usr install"
+	make BUILD_STATIC=no PREFIX=/usr install 1> /dev/null && PackageLz4[Status]=$? || { PackageLz4[Status]=$?; EchoTest KO ${PackageLz4[Name]} && PressAnyKeyToContinue; return; };
+
+	cd -;
+}
+
+# =====================================||===================================== #
+#									  Zstd									   #
+# ===============ft_linux==============||==============©Othello=============== #
+
+declare -A PackageZstd;
+PackageZstd[Name]="zstd";
+PackageZstd[Version]="1.5.6";
+PackageZstd[Extension]=".tar.gz";
+PackageZstd[Package]="${PackageZstd[Name]}-${PackageZstd[Version]}${PackageZstd[Extension]}";
+
+InstallZstd()
+{
+	EchoInfo	"Package ${PackageZstd[Name]}"
+
+	ReExtractPackage	"${PDIR}"	"${PackageZstd[Name]}-${PackageZstd[Version]}"	"${PackageZstd[Extension]}";
+
+	if ! cd "${PDIR}${PackageZstd[Name]}-${PackageZstd[Version]}"; then
+		EchoError	"cd ${PDIR}${PackageZstd[Name]}-${PackageZstd[Version]}";
+		return;
+	fi
+
+	EchoInfo	"${PackageZstd[Name]}> make prefix=/usr"
+	make prefix=/usr 1> /dev/null || { PackageZstd[Status]=$?; EchoTest KO ${PackageZstd[Name]} && PressAnyKeyToContinue; return; };
+
+	EchoInfo	"${PackageZstd[Name]}> make check"
+	make check 1> /dev/null || { PackageZstd[Status]=$?; EchoTest KO ${PackageZstd[Name]} && PressAnyKeyToContinue; return; };
+	
+	EchoInfo	"${PackageZstd[Name]}> make prefix=/usr install"
+	make prefix=/usr install 1> /dev/null && PackageZstd[Status]=$? || { PackageZstd[Status]=$?; EchoTest KO ${PackageZstd[Name]} && PressAnyKeyToContinue; return; };
+
+	EchoInfo	"${PackageZstd[Name]}> Remove the static library"
+	rm -v /usr/lib/libzstd.a
+
+	cd -;
+}
+
+# =====================================||===================================== #
+#									File									   #
+# ===============ft_linux==============||==============©Othello=============== #
+
+declare -A PackageFile;
+PackageFile[Name]="file";
+PackageFile[Version]="5.45";
+PackageFile[Extension]=".tar.gz";
+PackageFile[Package]="${PackageFile[Name]}-${PackageFile[Version]}${PackageFile[Extension]}";
+
+InstallFile()
+{
+	EchoInfo	"Package ${PackageFile[Name]}"
+
+	ReExtractPackage	"${PDIR}"	"${PackageFile[Name]}-${PackageFile[Version]}"	"${PackageFile[Extension]}";
+
+	if ! cd "${PDIR}${PackageFile[Name]}-${PackageFile[Version]}"; then
+		EchoError	"cd ${PDIR}${PackageFile[Name]}-${PackageFile[Version]}";
+		return;
+	fi
+
+	EchoInfo	"${PackageFile[Name]}> Configure"
+	./configure --prefix=/usr 1> /dev/null || { EchoTest KO ${PackageFile[Name]} && PressAnyKeyToContinue; return; };
+
+	EchoInfo	"${PackageFile[Name]}> make"
+	make  1> /dev/null || { PackageFile[Status]=$?; EchoTest KO ${PackageFile[Name]} && PressAnyKeyToContinue; return; };
+
+	EchoInfo	"${PackageFile[Name]}> make check"
+	make check 1> /dev/null || { PackageFile[Status]=$?; EchoTest KO ${PackageFile[Name]} && PressAnyKeyToContinue; return; };
+	
+	EchoInfo	"${PackageFile[Name]}> make install"
+	make install 1> /dev/null && PackageFile[Status]=$? || { PackageFile[Status]=$?; EchoTest KO ${PackageFile[Name]} && PressAnyKeyToContinue; return; };
+
+	cd -;
+}
+
+# =====================================||===================================== #
+#									Readline									   #
+# ===============ft_linux==============||==============©Othello=============== #
+
+declare -A PackageReadline;
+PackageReadline[Name]="readline";
+PackageReadline[Version]="8.2.13";
+PackageReadline[Extension]=".tar.gz";
+PackageReadline[Package]="${PackageReadline[Name]}-${PackageReadline[Version]}${PackageReadline[Extension]}";
+
+InstallReadline()
+{
+	EchoInfo	"Package ${PackageReadline[Name]}"
+
+	ReExtractPackage	"${PDIR}"	"${PackageReadline[Name]}-${PackageReadline[Version]}"	"${PackageReadline[Extension]}";
+
+	if ! cd "${PDIR}${PackageReadline[Name]}-${PackageReadline[Version]}"; then
+		EchoError	"cd ${PDIR}${PackageReadline[Name]}-${PackageReadline[Version]}";
+		return;
+	fi
+
+	EchoInfo	"${PackageReadline[Name]}> Preventing linking bug with ldconfig";
+	sed -i '/MV.*old/d' Makefile.in;
+	sed -i '/{OLDSUFF}/c:' support/shlib-install;
+	EchoInfo	"${PackageReadline[Name]}> Preventing hardcoding search path";
+	sed -i 's/-Wl,-rpath,[^ ]*//' support/shobj-conf;
+
+	EchoInfo	"${PackageReadline[Name]}> Configure"
+	./configure --prefix=/usr \
+				--disable-static \
+				--with-curses \
+				--docdir=/usr/share/doc/readline-8.2.13 \
+				1> /dev/null || { EchoTest KO ${PackageReadline[Name]} && PressAnyKeyToContinue; return; };
+
+	EchoInfo	"${PackageReadline[Name]}> make SHLIB_LIBS=\"-lncursesw\""
+	make SHLIB_LIBS="-lncursesw" 1> /dev/null || { PackageReadline[Status]=$?; EchoTest KO ${PackageReadline[Name]} && PressAnyKeyToContinue; return; };
+
+	EchoInfo	"${PackageReadline[Name]}> make SHLIB_LIBS=\"-lncursesw\" install"
+	make SHLIB_LIBS="-lncursesw" install 1> /dev/null && PackageReadline[Status]=$? || { PackageReadline[Status]=$?; EchoTest KO ${PackageReadline[Name]} && PressAnyKeyToContinue; return; };
+
+	EchoInfo	"${PackageReadline[Name]}> Install documentation"
+	install -v -m644 doc/*.{ps,pdf,html,dvi} /usr/share/doc/readline-8.2.13 1> /dev/null && PackageReadline[Status]=$? || { PackageReadline[Status]=$?; EchoTest KO ${PackageReadline[Name]} && PressAnyKeyToContinue; return; };
+
+	cd -;
+}
+
+# =====================================||===================================== #
+#									   M4									   #
+# ===============ft_linux==============||==============©Othello=============== #
+
+declare -A PackageM4;
+PackageM4[Name]="m4";
+PackageM4[Version]="1.4.19";
+PackageM4[Extension]=".tar.xz";
+PackageM4[Package]="${PackageM4[Name]}-${PackageM4[Version]}${PackageM4[Extension]}";
+
+InstallM4()
+{
+	EchoInfo	"Package ${PackageM4[Name]}"
+
+	ReExtractPackage	"${PDIR}"	"${PackageM4[Name]}-${PackageM4[Version]}"	"${PackageM4[Extension]}";
+
+	if ! cd "${PDIR}${PackageM4[Name]}-${PackageM4[Version]}"; then
+		EchoError	"cd ${PDIR}${PackageM4[Name]}-${PackageM4[Version]}";
+		return;
+	fi
+
+	EchoInfo	"${PackageM4[Name]}> Configure"
+	./configure --prefix=/usr 1> /dev/null || { EchoTest KO ${PackageM4[Name]} && PressAnyKeyToContinue; return; };
+
+	EchoInfo	"${PackageM4[Name]}> make"
+	make  1> /dev/null || { PackageM4[Status]=$?; EchoTest KO ${PackageM4[Name]} && PressAnyKeyToContinue; return; };
+
+	EchoInfo	"${PackageM4[Name]}> make check"
+	make check 1> /dev/null || { PackageM4[Status]=$?; EchoTest KO ${PackageM4[Name]} && PressAnyKeyToContinue; return; };
+	
+	EchoInfo	"${PackageM4[Name]}> make install"
+	make install 1> /dev/null && PackageM4[Status]=$? || { PackageM4[Status]=$?; EchoTest KO ${PackageM4[Name]} && PressAnyKeyToContinue; return; };
+	
+	cd -;
+}
+
+# =====================================||===================================== #
+#									   Bc									   #
+# ===============ft_linux==============||==============©Othello=============== #
+
+declare -A PackageBc;
+PackageBc[Name]="bc";
+PackageBc[Version]="6.7.6";
+PackageBc[Extension]=".tar.xz";
+PackageBc[Package]="${PackageBc[Name]}-${PackageBc[Version]}${PackageBc[Extension]}";
+
+InstallBc()
+{
+	EchoInfo	"Package ${PackageBc[Name]}"
+
+	ReExtractPackage	"${PDIR}"	"${PackageBc[Name]}-${PackageBc[Version]}"	"${PackageBc[Extension]}";
+
+	if ! cd "${PDIR}${PackageBc[Name]}-${PackageBc[Version]}"; then
+		EchoError	"cd ${PDIR}${PackageBc[Name]}-${PackageBc[Version]}";
+		return;
+	fi
+
+	EchoInfo	"${PackageBc[Name]}> CC=gcc ./configure --prefix=/usr -G -O3 -r"
+	CC=gcc ./configure --prefix=/usr -G -O3 -r 1> /dev/null || { EchoTest KO ${PackageBc[Name]} && PressAnyKeyToContinue; return; };
+
+	EchoInfo	"${PackageBc[Name]}> make"
+	make  1> /dev/null || { PackageBc[Status]=$?; EchoTest KO ${PackageBc[Name]} && PressAnyKeyToContinue; return; };
+
+	EchoInfo	"${PackageBc[Name]}> make test"
+	make test 1> /dev/null || { PackageBc[Status]=$?; EchoTest KO ${PackageBc[Name]} && PressAnyKeyToContinue; return; };
+	
+	EchoInfo	"${PackageBc[Name]}> make install"
+	make install 1> /dev/null && PackageBc[Status]=$? || { PackageBc[Status]=$?; EchoTest KO ${PackageBc[Name]} && PressAnyKeyToContinue; return; };
+
+	cd -;
+}
+
+# =====================================||===================================== #
+#									Flex									   #
+# ===============ft_linux==============||==============©Othello=============== #
+
+declare -A PackageFlex;
+PackageFlex[Name]="flex";
+PackageFlex[Version]="2.6.4";
+PackageFlex[Extension]=".tar.gz";
+PackageFlex[Package]="${PackageFlex[Name]}-${PackageFlex[Version]}${PackageFlex[Extension]}";
+
+InstallFlex()
+{
+	EchoInfo	"Package ${PackageFlex[Name]}"
+
+	ReExtractPackage	"${PDIR}"	"${PackageFlex[Name]}-${PackageFlex[Version]}"	"${PackageFlex[Extension]}";
+
+	if ! cd "${PDIR}${PackageFlex[Name]}-${PackageFlex[Version]}"; then
+		EchoError	"cd ${PDIR}${PackageFlex[Name]}-${PackageFlex[Version]}";
+		return;
+	fi
+
+	EchoInfo	"${PackageFlex[Name]}> Configure"
+	./configure --prefix=/usr \
+				--docdir=/usr/share/doc/flex-2.6.4 \
+				--disable-static \
+				1> /dev/null || { EchoTest KO ${PackageFlex[Name]} && PressAnyKeyToContinue; return; };
+
+	EchoInfo	"${PackageFlex[Name]}> make"
+	make  1> /dev/null || { PackageFlex[Status]=$?; EchoTest KO ${PackageFlex[Name]} && PressAnyKeyToContinue; return; };
+
+	EchoInfo	"${PackageFlex[Name]}> make check"
+	make check 1> /dev/null || { PackageFlex[Status]=$?; EchoTest KO ${PackageFlex[Name]} && PressAnyKeyToContinue; return; };
+	
+	EchoInfo	"${PackageFlex[Name]}> make install"
+	make install 1> /dev/null && PackageFlex[Status]=$? || { PackageFlex[Status]=$?; EchoTest KO ${PackageFlex[Name]} && PressAnyKeyToContinue; return; };
+
+	EchoInfo	"${PackageFlex[Name]}> Symbolic link from predecessor lex to flex"
+	ln -sv flex	/usr/bin/lex
+	ln -sv flex.1 /usr/share/man/man1/lex.1
+
+	cd -;
+}
+
+# =====================================||===================================== #
+#									  Tcl									   #
+# ===============ft_linux==============||==============©Othello=============== #
+
+declare -A PackageTcl;
+PackageTcl[Name]="tcl";
+PackageTcl[Version]="8.6.14";
+PackageTcl[Extension]=".tar.gz";
+PackageTcl[Package]="${PackageTcl[Name]}-${PackageTcl[Version]}${PackageTcl[Extension]}";
+
+InstallTcl()
+{
+	EchoInfo	"Package ${PackageTcl[Name]}"
+
+	# ReExtractPackage	"${PDIR}"	"${PackageTcl[Name]}-${PackageTcl[Version]}"	"${PackageTcl[Extension]}";
+	ReExtractPackage	"${PDIR}"	"${PackageTcl[Name]}${PackageTcl[Version]}-html"	"${PackageTcl[Extension]}";
+	ReExtractPackage	"${PDIR}"	"${PackageTcl[Name]}${PackageTcl[Version]}-src"	"${PackageTcl[Extension]}";
+
+	if ! cd "${PDIR}${PackageTcl[Name]}${PackageTcl[Version]}"; then
+		EchoError	"cd ${PDIR}${PackageTcl[Name]}-${PackageTcl[Version]}";
+		return;
+	fi
+
+	local SRCDIR=$(pwd);
+
+	EchoInfo	"${PackageTcl[Name]}> Configure"
+	cd unix;
+	./configure --prefix=/usr \
+				--mandir=/usr/share/man \
+				--disable-rpath \
+				1> /dev/null || { EchoTest KO ${PackageTcl[Name]} && PressAnyKeyToContinue; return; };
+
+	EchoInfo	"${PackageTcl[Name]}> make"
+	make  1> /dev/null || { PackageTcl[Status]=$?; EchoTest KO ${PackageTcl[Name]} && PressAnyKeyToContinue; return; };
+
+	EchoInfo	"${PackageTcl[Name]}> Remove references to build directory"
+	sed -e "s|$SRCDIR/unix|/usr/lib|" \
+		-e "s|$SRCDIR|/usr/include|" \
+		-i tclConfig.sh
+	sed -e "s|$SRCDIR/unix/pkgs/tdbc1.1.7|/usr/lib/tdbc1.1.7|" \
+		-e "s|$SRCDIR/pkgs/tdbc1.1.7/generic|/usr/include|" \
+		-e "s|$SRCDIR/pkgs/tdbc1.1.7/library|/usr/lib/tcl8.6|" \
+		-e "s|$SRCDIR/pkgs/tdbc1.1.7|/usr/include|" \
+		-i pkgs/tdbc1.1.7/tdbcConfig.sh
+	sed -e "s|$SRCDIR/unix/pkgs/itcl4.2.4|/usr/lib/itcl4.2.4|" \
+		-e "s|$SRCDIR/pkgs/itcl4.2.4/generic|/usr/include|" \
+		-e "s|$SRCDIR/pkgs/itcl4.2.4|/usr/include|" \
+		-i pkgs/itcl4.2.4/itclConfig.sh
+
+	EchoInfo	"${PackageTcl[Name]}> make test"
+	make test 1> /dev/null || { PackageTcl[Status]=$?; EchoTest KO ${PackageTcl[Name]} && PressAnyKeyToContinue; return; };
+	
+	EchoInfo	"${PackageTcl[Name]}> make install"
+	make install 1> /dev/null && PackageTcl[Status]=$? || { PackageTcl[Status]=$?; EchoTest KO ${PackageTcl[Name]} && PressAnyKeyToContinue; return; };
+
+	chmod -v u+w /usr/lib/libtcl8.6.so
+	make install-private-headers
+	ln -sfv tclsh8.6 /usr/bin/tclsh
+	mv /usr/share/man/man3/{Thread,Tcl_Thread}.3
+
+	EchoInfo	"${PackageTcl[Name]}> Installing documentation"s
+	cd ..
+	tar -xf ../tcl8.6.14-html.tar.gz --strip-components=1
+	mkdir -v -p /usr/share/doc/tcl-8.6.14
+	cp -v -r ./html/* /usr/share/doc/tcl-8.6.14
+
+	cd $SRCDIR;
+}
+
+# =====================================||===================================== #
+#									 Expect									   #
+# ===============ft_linux==============||==============©Othello=============== #
+
+declare -A PackageExpect;
+PackageExpect[Name]="expect";
+PackageExpect[Version]="5.45.4";
+PackageExpect[Extension]=".tar.gz";
+PackageExpect[Package]="${PackageExpect[Name]}${PackageExpect[Version]}${PackageExpect[Extension]}";
+
+InstallExpect()
+{
+	EchoInfo	"Package ${PackageExpect[Name]}"
+
+	ReExtractPackage	"${PDIR}"	"${PackageExpect[Name]}${PackageExpect[Version]}"	"${PackageExpect[Extension]}";
+
+	if ! cd "${PDIR}${PackageExpect[Name]}${PackageExpect[Version]}"; then
+		EchoError	"cd ${PDIR}${PackageExpect[Name]}${PackageExpect[Version]}";
+		return;
+	fi
+
+	EchoInfo	"${PackageExpect[Name]}> Verify PTYs are working";
+	python3 -c 'from pty import spawn; spawn(["echo", "ok"])' 1> /dev/null || { EchoTest KO ${PackageExpect[Name]} && PressAnyKeyToContinue; return; };
+
+	EchoInfo	"${PackageExpect[Name]}> Patch"
+	patch -Np1 -i ../expect-5.45.4-gcc14-1.patch;
+
+	EchoInfo	"${PackageExpect[Name]}> Configure"
+	./configure --prefix=/usr \
+				--with-tcl=/usr/lib \
+				--enable-shared \
+				--disable-rpath \
+				--mandir=/usr/share/man \
+				--with-tclinclude=/usr/include \
+				1> /dev/null || { EchoTest KO ${PackageExpect[Name]} && PressAnyKeyToContinue; return; };
+
+	EchoInfo	"${PackageExpect[Name]}> make"
+	make  1> /dev/null || { PackageExpect[Status]=$?; EchoTest KO ${PackageExpect[Name]} && PressAnyKeyToContinue; return; };
+
+	EchoInfo	"${PackageExpect[Name]}> make test"
+	make test 1> /dev/null || { PackageExpect[Status]=$?; EchoTest KO ${PackageExpect[Name]} && PressAnyKeyToContinue; return; };
+	
+	EchoInfo	"${PackageExpect[Name]}> make install"
+	make install 1> /dev/null && PackageExpect[Status]=$? || { PackageExpect[Status]=$?; EchoTest KO ${PackageExpect[Name]} && PressAnyKeyToContinue; return; };
+
+	ln -svf expect5.45.4/libexpect5.45.4.so /usr/lib
+
+	cd -;
+}
+#start
+# =====================================||===================================== #
+#									DejaGNU									   #
+# ===============ft_linux==============||==============©Othello=============== #
+
+declare -A PackageDejaGNU;
+PackageDejaGNU[Name]="dejagnu";
+PackageDejaGNU[Version]="1.6.3";
+PackageDejaGNU[Extension]=".tar.gz";
+PackageDejaGNU[Package]="${PackageDejaGNU[Name]}-${PackageDejaGNU[Version]}${PackageDejaGNU[Extension]}";
+
+InstallDejaGNU()
+{
+	EchoInfo	"Package ${PackageDejaGNU[Name]}"
+
+	ReExtractPackage	"${PDIR}"	"${PackageDejaGNU[Name]}-${PackageDejaGNU[Version]}"	"${PackageDejaGNU[Extension]}";
+
+	
+	if ! cd "${PDIR}${PackageDejaGNU[Name]}-${PackageDejaGNU[Version]}"; then
+		EchoError	"cd ${PDIR}${PackageDejaGNU[Name]}-${PackageDejaGNU[Version]}";
+		return;
+	fi
+
+	if ! mkdir -p "build"; then
+		PackageDejaGNU[Status]=1; 
+		EchoError	"Failed to make ${PDIR}${PackageDejaGNU[Name]}/build";
+		cd -;
+		return ;
+	fi
+
+	cd -
+	cd "${PDIR}${PackageDejaGNU[Name]}-${PackageDejaGNU[Version]}/build";
+
+	EchoInfo	"${PackageDejaGNU[Name]}> Configure"
+	../configure --prefix=/usr 1> /dev/null || { EchoTest KO ${PackageDejaGNU[Name]} && PressAnyKeyToContinue; return; };
+	makeinfo --html --no-split	-o doc/dejagnu.html	../doc/dejagnu.texi
+	makeinfo --plaintext		-o doc/dejagnu.txt	../doc/dejagnu.texi
+
+	EchoInfo	"${PackageDejaGNU[Name]}> make check"
+	make check 1> /dev/null || { PackageDejaGNU[Status]=$?; EchoTest KO ${PackageDejaGNU[Name]} && PressAnyKeyToContinue; return; };
+	
+	EchoInfo	"${PackageDejaGNU[Name]}> make install"
+	make install 1> /dev/null && PackageDejaGNU[Status]=$? || { PackageDejaGNU[Status]=$?; EchoTest KO ${PackageDejaGNU[Name]} && PressAnyKeyToContinue; return; };
+	install -v -dm755	/usr/share/doc/dejagnu-1.6.3
+	install -v -m644	doc/dejagnu.{html,txt} /usr/share/doc/dejagnu-1.6.3
+
+	cd -;
+}
+
+# =====================================||===================================== #
+#									Pkgconf									   #
+# ===============ft_linux==============||==============©Othello=============== #
+
+declare -A PackagePkgconf;
+PackagePkgconf[Name]="pkgconf";
+PackagePkgconf[Version]="2.3.0";
+PackagePkgconf[Extension]=".tar.xz";
+PackagePkgconf[Package]="${PackagePkgconf[Name]}-${PackagePkgconf[Version]}${PackagePkgconf[Extension]}";
+
+InstallPkgconf()
+{
+	EchoInfo	"Package ${PackagePkgconf[Name]}"
+
+	ReExtractPackage	"${PDIR}"	"${PackagePkgconf[Name]}-${PackagePkgconf[Version]}"	"${PackagePkgconf[Extension]}";
+
+	if ! cd "${PDIR}${PackagePkgconf[Name]}-${PackagePkgconf[Version]}"; then
+		EchoError	"cd ${PDIR}${PackagePkgconf[Name]}-${PackagePkgconf[Version]}";
+		return;
+	fi
+
+	EchoInfo	"${PackagePkgconf[Name]}> Configure"
+	./configure --prefix=/usr \
+				--disable-static \
+				--docdir=/usr/share/doc/pkgconf-2.3.0 \
+				1> /dev/null || { EchoTest KO ${PackagePkgconf[Name]} && PressAnyKeyToContinue; return; };
+
+	EchoInfo	"${PackagePkgconf[Name]}> make"
+	make  1> /dev/null || { PackagePkgconf[Status]=$?; EchoTest KO ${PackagePkgconf[Name]} && PressAnyKeyToContinue; return; };
+
+	EchoInfo	"${PackagePkgconf[Name]}> make install"
+	make install 1> /dev/null && PackagePkgconf[Status]=$? || { PackagePkgconf[Status]=$?; EchoTest KO ${PackagePkgconf[Name]} && PressAnyKeyToContinue; return; };
+
+	EchoInfo	"${PackagePkgconf[Name]}> Maintain compatability with original Pkg-config";
+	ln -sv pkgconf	/usr/bin/pkg-config
+	ln -sv pkgconf.1 /usr/share/man/man1/pkg-config.1
+
+	cd -;
+}
+
+# =====================================||===================================== #
+#									Binutils									   #
+# ===============ft_linux==============||==============©Othello=============== #
+
+declare -A PackageBinutils;
+PackageBinutils[Name]="binutils";
+PackageBinutils[Version]="2.43.1";
+PackageBinutils[Extension]=".tar.xz";
+PackageBinutils[Package]="${PackageBinutils[Name]}-${PackageBinutils[Version]}${PackageBinutils[Extension]}";
+
+InstallBinutils()
+{
+	EchoInfo	"Package ${PackageBinutils[Name]}"
+
+	ReExtractPackage	"${PDIR}"	"${PackageBinutils[Name]}-${PackageBinutils[Version]}"	"${PackageBinutils[Extension]}";
+
+	if ! cd "${PDIR}${PackageBinutils[Name]}-${PackageBinutils[Version]}"; then
+		EchoError	"cd ${PDIR}${PackageBinutils[Name]}-${PackageBinutils[Version]}";
+		return;
+	fi
+
+	if ! mkdir -p build; then
+		PackageBinutils[Status]=1; 
+		EchoError	"Failed to make ${PDIR}${PackageBinutils[Name]}/build";
+		cd -;
+		return ;
+	fi
+	cd -;
+	cd "${PDIR}${PackageBinutils[Name]}-${PackageBinutils[Version]}/build";
+
+	EchoInfo	"${PackageBinutils[Name]}> Configure"
+	../configure --prefix=/usr \
+					--sysconfdir=/etc \
+					--enable-gold \
+					--enable-ld=default \
+					--enable-plugins \
+					--enable-shared \
+					--disable-werror \
+					--enable-64-bit-bfd \
+					--enable-new-dtags \
+					--with-system-zlib \
+					--enable-default-hash-style=gnu \
+					1> /dev/null || { EchoTest KO ${PackageBinutils[Name]} && PressAnyKeyToContinue; return; };
+
+	EchoInfo	"${PackageBinutils[Name]}> make tooldir=/usr"
+	make tooldir=/usr 1> /dev/null || { PackageBinutils[Status]=$?; EchoTest KO ${PackageBinutils[Name]} && PressAnyKeyToContinue; return; };
+
+	EchoInfo	"${PackageBinutils[Name]}> make -k check"
+	$(make -k check | grep '^FAIL:' $(find -name '*.log') | grep -vE 'gold/testsuite/test-suite.log:FAIL: (weak_undef_test|initpri3a|script_test_1|script_test_2|justsyms|justsyms_exec|binary_test|script_test_3|tls_phdrs_script_test|script_test_12i|incremental_test_2|incremental_test_5)' | wc -l) -gt 0 || echo Error;
+	grep '^FAIL:' $(find -name '*.log') | grep -vE 'gold/testsuite/test-suite.log:FAIL: (weak_undef_test|initpri3a|script_test_1|script_test_2|justsyms|justsyms_exec|binary_test|script_test_3|tls_phdrs_script_test|script_test_12i|incremental_test_2|incremental_test_5)'
+	make -k check 1> /dev/null || \
+		if [ $(grep '^FAIL:' $(find -name '*.log') | grep -vE 'gold/testsuite/test-suite.log:FAIL: (weak_undef_test|initpri3a|script_test_1|script_test_2|justsyms|justsyms_exec|binary_test|script_test_3|tls_phdrs_script_test|script_test_12i|incremental_test_2|incremental_test_5)' | wc -l) -gt 0 ]; then
+			PackageBinutils[Status]=$?;
+			EchoTest KO ${PackageBinutils[Name]};
+			PressAnyKeyToContinue;
+			return;
+		else
+			EchoTest OK "${PackageBinutils[Name]} Only the 12 valid errors";
+		fi
+	
+	EchoInfo	"${PackageBinutils[Name]}> make tooldir=/usr install"
+	make tooldir=/usr install 1> /dev/null && PackageBinutils[Status]=$? || { PackageBinutils[Status]=$?; EchoTest KO ${PackageBinutils[Name]} && PressAnyKeyToContinue; return; };
+
+	EchoInfo	"${PackageBinutils[Name]}> Remove uselss static libraries";
+	rm -fv /usr/lib/lib{bfd,ctf,ctf-nobfd,gprofng,opcodes,sframe}.a;
+
+	cd -;
+}
+
+# =====================================||===================================== #
+#									  GMP									   #
+# ===============ft_linux==============||==============©Othello=============== #
+
+declare -A PackageGMP;
+PackageGMP[Name]="gmp";
+PackageGMP[Version]="6.3.0";
+PackageGMP[Extension]=".tar.xz";
+PackageGMP[Package]="${PackageGMP[Name]}-${PackageGMP[Version]}${PackageGMP[Extension]}";
+
+InstallGMP()
+{
+	EchoInfo	"Package ${PackageGMP[Name]}"
+
+	ReExtractPackage	"${PDIR}"	"${PackageGMP[Name]}-${PackageGMP[Version]}"	"${PackageGMP[Extension]}";
+
+	if ! cd "${PDIR}${PackageGMP[Name]}-${PackageGMP[Version]}"; then
+		EchoError	"cd ${PDIR}${PackageGMP[Name]}-${PackageGMP[Version]}";
+		return;
+	fi
+
+	EchoInfo	"${PackageGMP[Name]}> Configure"
+	./configure --prefix=/usr \
+				--enable-cxx \
+				--disable-static \
+				--docdir=/usr/share/doc/gmp-6.3.0 \
+				1> /dev/null || { EchoTest KO ${PackageGMP[Name]} && PressAnyKeyToContinue; return; };
+
+	EchoInfo	"${PackageGMP[Name]}> make"
+	make  1> /dev/null || { PackageGMP[Status]=$?; EchoTest KO ${PackageGMP[Name]} && PressAnyKeyToContinue; return; };
+
+	EchoInfo	"${PackageGMP[Name]}> make html"
+	make html 1> /dev/null && PackageGMP[Status]=$? || { PackageGMP[Status]=$?; EchoTest KO ${PackageGMP[Name]} && PressAnyKeyToContinue; return; };
+
+	EchoInfo	"${PackageGMP[Name]}> make check"
+	make check 1> /dev/null | tee gmp-check-log
+	if grep -q "Illegal instruction" "gmp-check-log"; then
+		PackageGMP[Status]=$?;
+		EchoTest KO "${PackageGMP[Name]} Need to be reconfigured with --host=none-linux-gnu and rebuilt";
+		PressAnyKeyToContinue;
+		return;
+	elif [ $(awk '/# PASS:/{total+=$3} ; END{print total}' gmp-check-log) -lt 199 ]; then
+		PackageGMP[Status]=$?;
+		EchoTest KO "${PackageGMP[Name]} Insufficient PASS";
+		PressAnyKeyToContinue;
+		return;
+	fi
+
+	EchoInfo	"${PackageGMP[Name]}> make install"
+	make install 1> /dev/null && PackageGMP[Status]=$? || { PackageGMP[Status]=$?; EchoTest KO ${PackageGMP[Name]} && PressAnyKeyToContinue; return; };
+
+	EchoInfo	"${PackageGMP[Name]}> make install-html"
+	make install-html 1> /dev/null && PackageGMP[Status]=$? || { PackageGMP[Status]=$?; EchoTest KO ${PackageGMP[Name]} && PressAnyKeyToContinue; return; };
+
+	cd -;
+}
+
+# =====================================||===================================== #
+#									  MPFR									   #
+# ===============ft_linux==============||==============©Othello=============== #
+
+declare -A PackageMPFR;
+PackageMPFR[Name]="mpfr";
+PackageMPFR[Version]="4.2.1";
+PackageMPFR[Extension]=".tar.xz";
+PackageMPFR[Package]="${PackageMPFR[Name]}-${PackageMPFR[Version]}${PackageMPFR[Extension]}";
+
+InstallMPFR()
+{
+	EchoInfo	"Package ${PackageMPFR[Name]}"
+
+	ReExtractPackage	"${PDIR}"	"${PackageMPFR[Name]}-${PackageMPFR[Version]}"	"${PackageMPFR[Extension]}";
+
+	if ! cd "${PDIR}${PackageMPFR[Name]}-${PackageMPFR[Version]}"; then
+		EchoError	"cd ${PDIR}${PackageMPFR[Name]}-${PackageMPFR[Version]}";
+		return;
+	fi
+
+	EchoInfo	"${PackageMPFR[Name]}> Configure"
+	./configure --prefix=/usr \
+				--disable-static \
+				--enable-thread-safe \
+				--docdir=/usr/share/doc/mpfr-4.2.1 \
+				1> /dev/null || { EchoTest KO ${PackageMPFR[Name]} && PressAnyKeyToContinue; return; };
+
+	EchoInfo	"${PackageMPFR[Name]}> make"
+	make  1> /dev/null || { PackageMPFR[Status]=$?; EchoTest KO ${PackageMPFR[Name]} && PressAnyKeyToContinue; return; };
+
+	EchoInfo	"${PackageMPFR[Name]}> make html"
+	make html  1> /dev/null || { PackageMPFR[Status]=$?; EchoTest KO ${PackageMPFR[Name]} && PressAnyKeyToContinue; return; };
+
+	EchoInfo	"${PackageMPFR[Name]}> make check"
+	make check 1> /dev/null || { PackageMPFR[Status]=$?; EchoTest KO ${PackageMPFR[Name]} && PressAnyKeyToContinue; return; };
+	
+	EchoInfo	"${PackageMPFR[Name]}> make install"
+	make install 1> /dev/null && PackageMPFR[Status]=$? || { PackageMPFR[Status]=$?; EchoTest KO ${PackageMPFR[Name]} && PressAnyKeyToContinue; return; };
+
+	EchoInfo	"${PackageMPFR[Name]}> make install-html"
+	make install-html 1> /dev/null && PackageMPFR[Status]=$? || { PackageMPFR[Status]=$?; EchoTest KO ${PackageMPFR[Name]} && PressAnyKeyToContinue; return; };
+
+	cd -;
+}
+
+# =====================================||===================================== #
+#									  MPC									   #
+# ===============ft_linux==============||==============©Othello=============== #
+
+declare -A PackageMPC;
+PackageMPC[Name]="mpc";
+PackageMPC[Version]="1.3.1";
+PackageMPC[Extension]=".tar.gz";
+PackageMPC[Package]="${PackageMPC[Name]}-${PackageMPC[Version]}${PackageMPC[Extension]}";
+
+InstallMPC()
+{
+	EchoInfo	"Package ${PackageMPC[Name]}"
+
+	ReExtractPackage	"${PDIR}"	"${PackageMPC[Name]}-${PackageMPC[Version]}"	"${PackageMPC[Extension]}";
+
+	if ! cd "${PDIR}${PackageMPC[Name]}-${PackageMPC[Version]}"; then
+		EchoError	"cd ${PDIR}${PackageMPC[Name]}-${PackageMPC[Version]}";
+		return;
+	fi
+
+	EchoInfo	"${PackageMPC[Name]}> Configure"
+	./configure --prefix=/usr \
+				--disable-static \
+				--docdir=/usr/share/doc/mpc-1.3.1 \
+				1> /dev/null || { EchoTest KO ${PackageMPC[Name]} && PressAnyKeyToContinue; return; };
+
+	EchoInfo	"${PackageMPC[Name]}> make"
+	make  1> /dev/null || { PackageMPC[Status]=$?; EchoTest KO ${PackageMPC[Name]} && PressAnyKeyToContinue; return; };
+
+	EchoInfo	"${PackageMPC[Name]}> make html"
+	make html 1> /dev/null || { PackageMPC[Status]=$?; EchoTest KO ${PackageMPC[Name]} && PressAnyKeyToContinue; return; };
+
+	EchoInfo	"${PackageMPC[Name]}> make check"
+	make check 1> /dev/null || { PackageMPC[Status]=$?; EchoTest KO ${PackageMPC[Name]} && PressAnyKeyToContinue; return; };
+	
+	EchoInfo	"${PackageMPC[Name]}> make install"
+	make install 1> /dev/null && PackageMPC[Status]=$? || { PackageMPC[Status]=$?; EchoTest KO ${PackageMPC[Name]} && PressAnyKeyToContinue; return; };
+
+	EchoInfo	"${PackageMPC[Name]}> make install-html"
+	make install-html 1> /dev/null && PackageMPC[Status]=$? || { PackageMPC[Status]=$?; EchoTest KO ${PackageMPC[Name]} && PressAnyKeyToContinue; return; };
+
+	cd -;
+}
+
+# =====================================||===================================== #
+#									  Attr									   #
+# ===============ft_linux==============||==============©Othello=============== #
+
+declare -A PackageAttr;
+PackageAttr[Name]="attr";
+PackageAttr[Version]="2.5.2";
+PackageAttr[Extension]=".tar.gz";
+PackageAttr[Package]="${PackageAttr[Name]}-${PackageAttr[Version]}${PackageAttr[Extension]}";
+
+InstallAttr()
+{
+	EchoInfo	"Package ${PackageAttr[Name]}"
+
+	ReExtractPackage	"${PDIR}"	"${PackageAttr[Name]}-${PackageAttr[Version]}"	"${PackageAttr[Extension]}";
+
+	if ! cd "${PDIR}${PackageAttr[Name]}-${PackageAttr[Version]}"; then
+		EchoError	"cd ${PDIR}${PackageAttr[Name]}-${PackageAttr[Version]}";
+		return;
+	fi
+
+	EchoInfo	"${PackageAttr[Name]}> Configure"
+	./configure --prefix=/usr \
+				--disable-static \
+				--sysconfdir=/etc \
+				--docdir=/usr/share/doc/attr-2.5.2 \
+				1> /dev/null || { EchoTest KO ${PackageAttr[Name]} && PressAnyKeyToContinue; return; };
+
+	EchoInfo	"${PackageAttr[Name]}> make"
+	make  1> /dev/null || { PackageAttr[Status]=$?; EchoTest KO ${PackageAttr[Name]} && PressAnyKeyToContinue; return; };
+
+	EchoInfo	"${PackageAttr[Name]}> make check"
+	make check 1> /dev/null || { PackageAttr[Status]=$?; EchoTest KO ${PackageAttr[Name]} && PressAnyKeyToContinue; return; };
+	
+	EchoInfo	"${PackageAttr[Name]}> make install"
+	make install 1> /dev/null && PackageAttr[Status]=$? || { PackageAttr[Status]=$?; EchoTest KO ${PackageAttr[Name]} && PressAnyKeyToContinue; return; };
+
+	cd -;
+}
+
+# =====================================||===================================== #
+#									  Acl									   #
+# ===============ft_linux==============||==============©Othello=============== #
+
+declare -A PackageAcl;
+PackageAcl[Name]="acl";
+PackageAcl[Version]="2.3.2";
+PackageAcl[Extension]=".tar.xz";
+PackageAcl[Package]="${PackageAcl[Name]}-${PackageAcl[Version]}${PackageAcl[Extension]}";
+
+InstallAcl()
+{
+	EchoInfo	"Package ${PackageAcl[Name]}"
+
+	ReExtractPackage	"${PDIR}"	"${PackageAcl[Name]}-${PackageAcl[Version]}"	"${PackageAcl[Extension]}";
+
+	if ! cd "${PDIR}${PackageAcl[Name]}-${PackageAcl[Version]}"; then
+		EchoError	"cd ${PDIR}${PackageAcl[Name]}-${PackageAcl[Version]}";
+		return;
+	fi
+
+	EchoInfo	"${PackageAcl[Name]}> Configure"
+	./configure --prefix=/usr \
+				--disable-static \
+				--docdir=/usr/share/doc/acl-2.3.2 \
+				1> /dev/null || { EchoTest KO ${PackageAcl[Name]} && PressAnyKeyToContinue; return; };
+
+	EchoInfo	"${PackageAcl[Name]}> make"
+	make  1> /dev/null || { PackageAcl[Status]=$?; EchoTest KO ${PackageAcl[Name]} && PressAnyKeyToContinue; return; };
+
+	EchoInfo	"${PackageAcl[Name]}> make install"
+	make install 1> /dev/null && PackageAcl[Status]=$? || { PackageAcl[Status]=$?; EchoTest KO ${PackageAcl[Name]} && PressAnyKeyToContinue; return; };
+
+	cd -;
+}
+
+# =====================================||===================================== #
+#									 Libcap									   #
+# ===============ft_linux==============||==============©Othello=============== #
+
+declare -A PackageLibcap;
+PackageLibcap[Name]="libcap";
+PackageLibcap[Version]="2.70";
+PackageLibcap[Extension]=".tar.xz";
+PackageLibcap[Package]="${PackageLibcap[Name]}-${PackageLibcap[Version]}${PackageLibcap[Extension]}";
+
+InstallLibcap()
+{
+	EchoInfo	"Package ${PackageLibcap[Name]}"
+
+	ReExtractPackage	"${PDIR}"	"${PackageLibcap[Name]}-${PackageLibcap[Version]}"	"${PackageLibcap[Extension]}";
+
+	if ! cd "${PDIR}${PackageLibcap[Name]}-${PackageLibcap[Version]}"; then
+		EchoError	"cd ${PDIR}${PackageLibcap[Name]}-${PackageLibcap[Version]}";
+		return;
+	fi
+
+	EchoInfo	"${PackageLibcap[Name]}> Prevent static libraries form being installed"
+	sed -i '/install -m.*STA/d' libcap/Makefile
+
+	EchoInfo	"${PackageLibcap[Name]}> make prefix=/usr lib=lib"
+	make prefix=/usr lib=lib 1> /dev/null || { PackageLibcap[Status]=$?; EchoTest KO ${PackageLibcap[Name]} && PressAnyKeyToContinue; return; };
+
+	EchoInfo	"${PackageLibcap[Name]}> make test"
+	make test 1> /dev/null || { PackageLibcap[Status]=$?; EchoTest KO ${PackageLibcap[Name]} && PressAnyKeyToContinue; return; };
+	
+	EchoInfo	"${PackageLibcap[Name]}> make prefix=/usr lib=lib install"
+	make prefix=/usr lib=lib install 1> /dev/null && PackageLibcap[Status]=$? || { PackageLibcap[Status]=$?; EchoTest KO ${PackageLibcap[Name]} && PressAnyKeyToContinue; return; };
+
+	cd -;
+}
+
+# =====================================||===================================== #
+#								   Libxcrypt								   #
+# ===============ft_linux==============||==============©Othello=============== #
+
+declare -A PackageLibxcrypt;
+PackageLibxcrypt[Name]="libxcrypt";
+PackageLibxcrypt[Version]="4.4.36";
+PackageLibxcrypt[Extension]=".tar.xz";
+PackageLibxcrypt[Package]="${PackageLibxcrypt[Name]}-${PackageLibxcrypt[Version]}${PackageLibxcrypt[Extension]}";
+
+InstallLibxcrypt()
+{
+	EchoInfo	"Package ${PackageLibxcrypt[Name]}"
+
+	ReExtractPackage	"${PDIR}"	"${PackageLibxcrypt[Name]}-${PackageLibxcrypt[Version]}"	"${PackageLibxcrypt[Extension]}";
+
+	if ! cd "${PDIR}${PackageLibxcrypt[Name]}-${PackageLibxcrypt[Version]}"; then
+		EchoError	"cd ${PDIR}${PackageLibxcrypt[Name]}-${PackageLibxcrypt[Version]}";
+		return;
+	fi
+
+	EchoInfo	"${PackageLibxcrypt[Name]}> Configure"
+	./configure --prefix=/usr \
+				--enable-hashes=strong,glibc \
+				--enable-obsolete-api=no \
+				--disable-static \
+				--disable-failure-tokens \
+				1> /dev/null || { EchoTest KO ${PackageLibxcrypt[Name]} && PressAnyKeyToContinue; return; };
+
+	EchoInfo	"${PackageLibxcrypt[Name]}> make"
+	make  1> /dev/null || { PackageLibxcrypt[Status]=$?; EchoTest KO ${PackageLibxcrypt[Name]} && PressAnyKeyToContinue; return; };
+
+	EchoInfo	"${PackageLibxcrypt[Name]}> make check"
+	make check 1> /dev/null || { PackageLibxcrypt[Status]=$?; EchoTest KO ${PackageLibxcrypt[Name]} && PressAnyKeyToContinue; return; };
+	
+	EchoInfo	"${PackageLibxcrypt[Name]}> make install"
+	make install 1> /dev/null && PackageLibxcrypt[Status]=$? || { PackageLibxcrypt[Status]=$?; EchoTest KO ${PackageLibxcrypt[Name]} && PressAnyKeyToContinue; return; };
+
+	cd -;
+}
+
+# =====================================||===================================== #
+#									 Shadow									   #
+# ===============ft_linux==============||==============©Othello=============== #
+
+declare -A PackageShadow;
+PackageShadow[Name]="shadow";
+PackageShadow[Version]="4.16.0";
+PackageShadow[Extension]=".tar.xz";
+PackageShadow[Package]="${PackageShadow[Name]}-${PackageShadow[Version]}${PackageShadow[Extension]}";
+
+InstallShadow()
+{
+	EchoInfo	"Package ${PackageShadow[Name]}"
+
+	# Extraction
+	ReExtractPackage	"${PDIR}"	"${PackageShadow[Name]}-${PackageShadow[Version]}"	"${PackageShadow[Extension]}";
+
+	if ! cd "${PDIR}${PackageShadow[Name]}-${PackageShadow[Version]}"; then
+		EchoError	"cd ${PDIR}${PackageShadow[Name]}-${PackageShadow[Version]}";
+		return;
+	fi
+
+	#Installation
+	EchoInfo	"${PackageShadow[Name]}> Disable the installation of the groups program and its man page"
+	sed -i 's/groups$(EXEEXT) //' src/Makefile.in
+	find man -name Makefile.in -exec sed -i 's/groups\.1 / /'	{} \;
+	find man -name Makefile.in -exec sed -i 's/getspnam\.3 / /'	{} \;
+	find man -name Makefile.in -exec sed -i 's/passwd\.5 / /'	{} \;
+
+	EchoInfo	"${PackageShadow[Name]}> Configure etc/login.defs"
+	sed -e 's:#ENCRYPT_METHOD DES:ENCRYPT_METHOD YESCRYPT:' \
+		-e 's:/var/spool/mail:/var/mail:' \
+		-e '/PATH=/{s@/sbin:@@;s@/bin:@@}' \
+		-i etc/login.defs
+
+	EchoInfo	"${PackageShadow[Name]}> Configure"
+	touch /usr/bin/passwd
+	./configure --sysconfdir=/etc \
+				--disable-static \
+				--with-{b,yes}crypt \
+				--without-libbsd \
+				--with-group-name-max-length=32 \
+				1> /dev/null || { EchoTest KO ${PackageShadow[Name]} && PressAnyKeyToContinue; return; };
+
+	EchoInfo	"${PackageShadow[Name]}> make"
+	make  1> /dev/null || { PackageShadow[Status]=$?; EchoTest KO ${PackageShadow[Name]} && PressAnyKeyToContinue; return; };
+
+	EchoInfo	"${PackageShadow[Name]}> make exec_prefix=/usr install"
+	make exec_prefix=/usr install 1> /dev/null && PackageShadow[Status]=$? || { PackageShadow[Status]=$?; EchoTest KO ${PackageShadow[Name]} && PressAnyKeyToContinue; return; };
+
+	EchoInfo	"${PackageShadow[Name]}> make -C man install-man"
+	make -C man install-man 1> /dev/null && PackageShadow[Status]=$? || { PackageShadow[Status]=$?; EchoTest KO ${PackageShadow[Name]} && PressAnyKeyToContinue; return; };
+
+	# Configuration
+	EchoInfo	"${PackageShadow[Name]}> Enabling Shadow passwords"
+	pwconv
+	grpconv
+	mkdir -p /etc/default
+	useradd -D --gid 999
+	cd -;
+
+	EchoInfo	"${PackageShadow[Name]}> Enabling Shadow passwords"
+	passwd root
+}
+
+# =====================================||===================================== #
 #																			   #
 #									  Menu									   #
 #																			   #
 # ===============ft_linux==============||==============©Othello=============== #
 
+InstallAll()
+{
+	InstallMan;
+	InstallIanaEtc;
+	InstallGlibc;
+	InstallZlib;
+	InstallBzip2;
+	InstallXz;
+	InstallLz4;
+	InstallZstd;
+	InstallFile;
+	InstallReadline;
+	InstallM4;
+	InstallBc;
+	InstallFlex;
+	InstallTcl;
+	InstallExpect;
+	InstallDejaGNU;
+	InstallPkgconf;
+	InstallBinutils;
+	InstallGMP;
+	InstallMPFR;
+	InstallMPC;
+	InstallAttr;
+	InstallAcl;
+	InstallLibcap;
+	InstallLibxcrypt;
+	InstallShadow;
+}
+
 PrintMenu()
 {
 	clear ;
 	
-	PrintMenuLine	"${PackageMan[Name]}-${PackageMan[Version]}"	$MenuIndex	0	"${PackageMan[Status]}";
+	PrintMenuLine	"${PackageMan[Name]}-${PackageMan[Version]}"			$MenuIndex	0	"${PackageMan[Status]}";
 	PrintMenuLine	"${PackageIanaEtc[Name]}-${PackageIanaEtc[Version]}"	$MenuIndex	1	"${PackageIanaEtc[Status]}";
-	PrintMenuLine	"${PackageGlibc[Name]}-${PackageGlibc[Version]}"	$MenuIndex	2	"${PackageGlibc[Status]}";
-	PrintMenuLine	"${PackageZlib[Name]}-${PackageZlib[Version]}"	$MenuIndex	3	"${PackageZlib[Status]}";
-	PrintMenuLine	"${PackageBzip2[Name]}-${PackageBzip2[Version]}"	$MenuIndex	4	"${PackageBzip2[Status]}";
-	PrintMenuLine	"Quit"	$MenuIndex	5;
+	PrintMenuLine	"${PackageGlibc[Name]}-${PackageGlibc[Version]}"		$MenuIndex	2	"${PackageGlibc[Status]}";
+	PrintMenuLine	"${PackageZlib[Name]}-${PackageZlib[Version]}"			$MenuIndex	3	"${PackageZlib[Status]}";
+	PrintMenuLine	"${PackageBzip2[Name]}-${PackageBzip2[Version]}"		$MenuIndex	4	"${PackageBzip2[Status]}";
+	PrintMenuLine	"${PackageXz[Name]}-${PackageXz[Version]}"				$MenuIndex	5	"${PackageXz[Status]}";
+	PrintMenuLine	"${PackageLz4[Name]}-${PackageLz4[Version]}"			$MenuIndex	6	"${PackageLz4[Status]}";
+	PrintMenuLine	"${PackageZstd[Name]}-${PackageZstd[Version]}"			$MenuIndex	7	"${PackageZstd[Status]}";
+	PrintMenuLine	"${PackageFile[Name]}-${PackageFile[Version]}"			$MenuIndex	8	"${PackageFile[Status]}";
+	PrintMenuLine	"${PackageReadline[Name]}-${PackageReadline[Version]}"	$MenuIndex	9	"${PackageReadline[Status]}";
+	PrintMenuLine	"${PackageM4[Name]}-${PackageM4[Version]}"				$MenuIndex	10	"${PackageM4[Status]}";
+	PrintMenuLine	"${PackageBc[Name]}-${PackageBc[Version]}"				$MenuIndex	11	"${PackageBc[Status]}";
+	PrintMenuLine	"${PackageFlex[Name]}-${PackageFlex[Version]}"			$MenuIndex	12	"${PackageFlex[Status]}";
+	PrintMenuLine	"${PackageTcl[Name]}-${PackageTcl[Version]}"			$MenuIndex	13	"${PackageTcl[Status]}";
+	PrintMenuLine	"${PackageExpect[Name]}-${PackageExpect[Version]}"		$MenuIndex	14	"${PackageExpect[Status]}";
+	PrintMenuLine	"${PackageDejaGNU[Name]}-${PackageDejaGNU[Version]}"		$MenuIndex	15	"${PackageDejaGNU[Status]}";
+	PrintMenuLine	"${PackagePkgconf[Name]}-${PackagePkgconf[Version]}"		$MenuIndex	16	"${PackagePkgconf[Status]}";
+	PrintMenuLine	"${PackageBinutils[Name]}-${PackageBinutils[Version]}"		$MenuIndex	17	"${PackageBinutils[Status]}";
+	PrintMenuLine	"${PackageGMP[Name]}-${PackageGMP[Version]}"		$MenuIndex	18	"${PackageGMP[Status]}";
+	PrintMenuLine	"${PackageMPFR[Name]}-${PackageMPFR[Version]}"		$MenuIndex	19	"${PackageMPFR[Status]}";
+	PrintMenuLine	"${PackageMPC[Name]}-${PackageMPC[Version]}"		$MenuIndex	20	"${PackageMPC[Status]}";
+	PrintMenuLine	"${PackageAttr[Name]}-${PackageAttr[Version]}"		$MenuIndex	21	"${PackageAttr[Status]}";
+	PrintMenuLine	"${PackageAcl[Name]}-${PackageAcl[Version]}"		$MenuIndex	22	"${PackageAcl[Status]}";
+	PrintMenuLine	"${PackageLibcap[Name]}-${PackageLibcap[Version]}"		$MenuIndex	23	"${PackageLibcap[Status]}";
+	PrintMenuLine	"${PackageLibxcrypt[Name]}-${PackageLibxcrypt[Version]}"		$MenuIndex	24	"${PackageLibxcrypt[Status]}";
+	PrintMenuLine	"${PackageShadow[Name]}-${PackageShadow[Version]}"		$MenuIndex	25	"${PackageShadow[Status]}";
+	PrintMenuLine	"Install All"	$MenuIndex	26;
+	PrintMenuLine	"Quit"	$MenuIndex	27;
 
 	GetKeyPress;
 	case "$input" in
@@ -512,15 +1512,37 @@ PrintMenu()
 				2)	InstallGlibc;;
 				3)	InstallZlib;;
 				4)	InstallBzip2;;
-				5)	MenuIndex=-1;
+				5)	InstallXz;;
+				6)	InstallLz4;;
+				7)	InstallZstd;;
+				8)	InstallFile;;
+				9)	InstallReadline;;
+				10)	InstallM4;;
+				11)	InstallBc;;
+				12)	InstallFlex;;
+				13)	InstallTcl;;
+				14)	InstallExpect;;
+				15)	InstallDejaGNU;;
+				16)	InstallPkgconf;;
+				17)	InstallBinutils;;
+				18)	InstallGMP;;
+				19)	InstallMPFR;;
+				20)	InstallMPC;;
+				21)	InstallAttr;;
+				22)	InstallAcl;;
+				23)	InstallLibcap;;
+				24)	InstallLibxcrypt;;
+				25)	InstallShadow;;
+				26)	InstallAll;;
+				27)	MenuIndex=-1;
 					return ;;
 			esac;
 			PressAnyKeyToContinue;;
 	esac
 
-	MenuIndex=$(( MenuIndex % 6 ));
+	MenuIndex=$(( MenuIndex % 28 ));
 	if [ $MenuIndex -lt 0 ]; then
-		MenuIndex=5;
+		MenuIndex=27;
 	fi	
 }
 

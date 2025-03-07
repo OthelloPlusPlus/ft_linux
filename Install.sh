@@ -32,7 +32,7 @@ USER=root
 ADDRESS=127.0.0.1
 PASSWD=xxxx
 
-COPYFILES="colors.sh default.zshrc BuildLFS.sh ConfigCrossToolchain.sh Util*.sh ConfigChroot.sh"
+COPYFILES="colors.sh default.zshrc BuildLFS.sh ConfigCrossToolchain.sh Util*.sh ConfigChroot.sh ConfigChrootPackages.sh eval/CheckBinaries.sh"
 RUNFILES="InstallArchLinux.sh"
 
 scp -P $PORT $COPYFILES $RUNFILES $USER@$ADDRESS:/root;

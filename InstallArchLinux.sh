@@ -1067,11 +1067,14 @@ EnterAsChroot()
 	# 		TESTSUITEFLAGS="-j$(nproc)"	\
 	# 		/bin/bash -i
 
-	cp /root/{BuildLFS.sh,ConfigChroot.sh,colors.sh} "$LFS";
+	cp /root/{BuildLFS.sh,ConfigChroot.sh,ConfigChrootPackages.sh,Utils.sh,colors.sh,CheckBinaries.sh} "$LFS";
 	chmod +x "$LFS/ConfigChroot.sh";
+	chmod +x "$LFS/ConfigChrootPackages.sh";
+	chmod +x "$LFS/BuildLFS.sh";
 
 	echo	"To continue enter the following command:";
 	echo	"${CB_BLACK}> ./ConfigChroot.sh ${C_RESET}";
+	echo	"${CB_BLACK}> ./ConfigChrootPackages.sh ${C_RESET}";
 	echo	"${CB_BLACK}> ./BuildLFS.sh ${C_RESET}";
 
 	chroot	"$LFS" /usr/bin/env -i	\
