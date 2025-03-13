@@ -95,7 +95,6 @@ GetKeyPress()
 #																			   #
 # ===============ft_linux==============||==============©Othello=============== #
 
-
 # =====================================||===================================== #
 #									Temp									   #
 # ===============ft_linux==============||==============©Othello=============== #
@@ -1434,6 +1433,180 @@ InstallShadow()
 }
 
 # =====================================||===================================== #
+#									Gcc									   #
+# ===============ft_linux==============||==============©Othello=============== #
+
+declare -A PackageGcc;
+PackageGcc[Name]="gcc";
+PackageGcc[Version]="14.2.0";
+PackageGcc[Extension]=".tar.xz";
+PackageGcc[Package]="${PackageGcc[Name]}-${PackageGcc[Version]}${PackageGcc[Extension]}";
+
+InstallGcc()
+{
+	EchoInfo	"Package ${PackageGcc[Name]}"
+
+	ReExtractPackage	"${PDIR}"	"${PackageGcc[Name]}-${PackageGcc[Version]}"	"${PackageGcc[Extension]}";
+
+	if ! cd "${PDIR}${PackageGcc[Name]}-${PackageGcc[Version]}"; then
+		EchoError	"cd ${PDIR}${PackageGcc[Name]}-${PackageGcc[Version]}";
+		return;
+	fi
+
+	# Change the default directory name for 64-bit libraries to “lib” for x86_64
+	case $(uname -m) in
+		x86_64)	sed -e '/m64=/s/lib64/lib/' -i.orig gcc/config/i386/t-linux64;;
+	esac
+
+	if ! mkdir -p build; then
+		PackageGcc[Status]=1; 
+		EchoError	"Failed to make ${PDIR}${PackageGcc[Name]}/build";
+		cd -;
+		return ;
+	fi
+	cd -;
+	cd "${PDIR}${PackageGcc[Name]}-${PackageGcc[Version]}/build";
+
+
+	EchoInfo	"${PackageGcc[Name]}> Configure"
+	../configure	--prefix=/usr \
+					LD=ld \
+					--enable-languages=c,c++ \
+					--enable-default-pie \
+					--enable-default-ssp \
+					--enable-host-pie \
+					--disable-multilib \
+					--disable-bootstrap \
+					--disable-fixincludes \
+					--with-system-zlib \
+					1> /dev/null || { EchoTest KO ${PackageGcc[Name]} && PressAnyKeyToContinue; return; };
+
+	EchoInfo	"${PackageGcc[Name]}> make"
+	make  1> /dev/null || { PackageGcc[Status]=$?; EchoTest KO ${PackageGcc[Name]} && PressAnyKeyToContinue; return; };
+
+	# Set stack space for gcc requirements
+	ulimit -s -H unlimited
+
+	sed -e '/cpython/d' \
+		-i ../gcc/testsuite/gcc.dg/plugin/plugin.exp
+	sed -e 's/no-pic /&-no-pie /' \
+		-i ../gcc/testsuite/gcc.target/i386/pr113689-1.c
+	sed -e 's/300000/(1|300000)/' \
+		-i ../libgomp/testsuite/libgomp.c-c++-common/pr109062.c
+	sed -e 's/{ target nonpic } //' \
+		-e '/GOTPCREL/d' \
+		-i ../gcc/testsuite/gcc.target/i386/fentryname3.c
+
+	EchoInfo	"${PackageGcc[Name]}> su tester -c \"PATH=$PATH make -k check\"";
+	EchoInfo	"${PackageGcc[Name]}> (Takes xx/46 SBU (1:43:27.617))";
+	chown -R tester .
+	time su tester -c "PATH=$PATH make -k check"
+	if [ $(../contrib/test_summary | grep "unexpected" | wc -l) -gt 0 ]; then
+		EchoError	"${PackageGcc[Name]}> Unexpected test results:";
+		../contrib/test_summary | grep "^FAIL" -B4 -A9;
+		if [ $(../contrib/test_summary | grep "^FAIL" | grep -v "/tsan/" | wc -l) -gt 0 ]; then
+			PressAnyKeyToContinue ;
+			return ;
+		else
+			EchoInfo	"${PackageGcc[Name]}> tsan errors are ignored.";
+		fi
+	fi
+
+	EchoInfo	"${PackageGcc[Name]}> make install"
+	make install 1> /dev/null && PackageGcc[Status]=$? || { PackageGcc[Status]=$?; EchoTest KO ${PackageGcc[Name]} && PressAnyKeyToContinue; return; };
+	
+	EchoInfo	"${PackageGcc[Name]}> Change owner to root"
+	chown -v -R root:root /usr/lib/gcc/$(gcc -dumpmachine)/14.2.0/include{,-fixed}
+
+	EchoInfo	"${PackageGcc[Name]}> Create symbolic links"
+	ln -svr /usr/bin/cpp /usr/lib
+	ln -sv gcc.1 /usr/share/man/man1/cc.1
+	ln -sfv ../../libexec/gcc/$(gcc -dumpmachine)/14.2.0/liblto_plugin.so /usr/lib/bfd-plugins/
+
+	EchoInfo	"${PackageGcc[Name]}> Sanity check"
+
+	echo 'int main(){}' | cc -x c - -v -Wl,--verbose -o gcctest.out &> gcctest.log
+	if [ ! -f "gcctest.out" ]; then
+		EchoError	"${PackageGcc[Name]}> Failed to create gcctest.out";
+		PressAnyKeyToContinue;
+		return ;
+	fi
+
+	readelf -l gcctest.out | grep "\[Requesting program interpreter: /lib"
+	if [ $? -gt 0 ]; then
+		EchoError	"${PackageGcc[Name]}> Failed to run gcctest.out";
+		PressAnyKeyToContinue;
+		return ;
+	else
+		EchoTest	"OK" "${PackageGcc[Name]} ran succesfully";
+	fi
+
+	if [ $(grep -E "crt[1in].* succeeded" gcctest.log -c) -ne 3 ]; then
+		EchoError	"${PackageGcc[Name]}> Failed to access crt[1in] libraries";
+		grep -E "crt[1in].* failed" gcctest.log;
+		PressAnyKeyToContinue;
+		return ;
+	else
+		EchoTest	OK	"crt[1in] libraries accessed"
+	fi
+
+	if [ $(grep -A9 "#include *...* search starts here:" gcctest.log | grep -B9 "End of search list." | grep "/usr/.*include" -c ) -lt 4 ]; then
+		
+		EchoError	"${PackageGcc[Name]}> Compiler fails to search for correct header files";
+		grep -A9 "#include *...* search starts here:" gcctest.log | grep -B9 "End of search list.";
+		PressAnyKeyToContinue;
+		return ;
+	else
+		EchoTest	OK	"Correct header failes found"
+	fi
+
+	local ExpectedOutput='SEARCH_DIR("/usr/x86_64-pc-linux-gnu/lib64")
+SEARCH_DIR("/usr/local/lib64")
+SEARCH_DIR("/lib64")
+SEARCH_DIR("/usr/lib64")
+SEARCH_DIR("/usr/x86_64-pc-linux-gnu/lib")
+SEARCH_DIR("/usr/local/lib")
+SEARCH_DIR("/lib")
+SEARCH_DIR("/usr/lib");'
+	local ActualOutput=$(grep 'SEARCH.*/usr/lib' gcctest.log | sed 's|; |\n|g')
+	if [ "$ActualOutput" != "$ExpectedOutput" ]; then
+		EchoError	"${PackageGcc[Name]}> Linker is using incorrect search paths";
+		echo	"$ActualOutput";
+		PressAnyKeyToContinue;
+		return ;
+	else
+		EchoTest	OK	"Correct search paths"
+	fi
+
+	if [ $(grep "/lib.*/libc.so.6 succeeded" gcctest.log -c) -ne 1 ]; then
+		EchoError	"${PackageGcc[Name]}> Using incorrect libc";
+		grep "/lib.*/libc.so.6 succeeded" gcctest.log
+		PressAnyKeyToContinue;
+		return ;
+	else
+		EchoTest	OK	"correct libc used"
+	fi
+
+	if [ "/usr/lib/$(grep "found" gcctest.log | awk '{print $2}')" != "$(grep "found" gcctest.log | awk '{print $4}')" ]; then
+		EchoError	"${PackageGcc[Name]}> Incorrect dynamic linker";
+		grep "found" gcctest.log
+		PressAnyKeyToContinue;
+		return ;
+	fi
+
+	rm gcctest.out gcctest.log
+
+	mkdir -pv /usr/share/gdb/auto-load/usr/lib
+	if ls /usr/lib/*gdb.py &> /dev/null; then
+		mv -v /usr/lib/*gdb.py /usr/share/gdb/auto-load/usr/lib
+	elif ! ls /usr/share/gdb/auto-load/usr/lib/*gdb.py &> /dev/null; then
+		EchoError	"${PackageGcc[Name]}> File '*gdb.py' not found";
+	fi
+
+	cd -;
+}
+
+# =====================================||===================================== #
 #																			   #
 #									  Menu									   #
 #																			   #
@@ -1467,6 +1640,7 @@ InstallAll()
 	InstallLibcap;
 	InstallLibxcrypt;
 	InstallShadow;
+	InstallGcc;
 }
 
 PrintMenu()
@@ -1499,8 +1673,9 @@ PrintMenu()
 	PrintMenuLine	"${PackageLibcap[Name]}-${PackageLibcap[Version]}"		$MenuIndex	23	"${PackageLibcap[Status]}";
 	PrintMenuLine	"${PackageLibxcrypt[Name]}-${PackageLibxcrypt[Version]}"		$MenuIndex	24	"${PackageLibxcrypt[Status]}";
 	PrintMenuLine	"${PackageShadow[Name]}-${PackageShadow[Version]}"		$MenuIndex	25	"${PackageShadow[Status]}";
-	PrintMenuLine	"Install All"	$MenuIndex	26;
-	PrintMenuLine	"Quit"	$MenuIndex	27;
+	PrintMenuLine	"${PackageGcc[Name]}-${PackageGcc[Version]}"		$MenuIndex	26	"${PackageGcc[Status]}";
+	PrintMenuLine	"Install All"	$MenuIndex	27;
+	PrintMenuLine	"Quit"	$MenuIndex	28;
 
 	GetKeyPress;
 	case "$input" in
@@ -1533,16 +1708,17 @@ PrintMenu()
 				23)	InstallLibcap;;
 				24)	InstallLibxcrypt;;
 				25)	InstallShadow;;
-				26)	InstallAll;;
-				27)	MenuIndex=-1;
+				26) InstallGcc;;
+				27)	InstallAll;;
+				28)	MenuIndex=-1;
 					return ;;
 			esac;
 			PressAnyKeyToContinue;;
 	esac
 
-	MenuIndex=$(( MenuIndex % 28 ));
+	MenuIndex=$(( MenuIndex % 29 ));
 	if [ $MenuIndex -lt 0 ]; then
-		MenuIndex=27;
+		MenuIndex=28;
 	fi	
 }
 
@@ -1567,3 +1743,271 @@ MenuIndex=0;
 while [ "$MenuIndex" -ge 0 ]; do
 	PrintMenu;
 done
+
+exit 
+# ---------------------------------------------------------------------------- #
+
+# Man-pages
+# Iana-Etc
+Glibc
+Zlib
+Bzip2
+Xz
+Lz4
+Zstd
+File
+Readline
+# M4
+# Bc
+Flex
+Tcl
+Expect
+Pkgconf
+Binutils
+GMP
+MPFR
+MPC
+Attr
+Acl
+Libcap
+Libxcrypt
+Shadow
+GCC
+Ncurses
+# Sed
+# Psmisc
+Gettext
+Bison
+# Grep
+# Bash
+Libtool
+GDBM
+# Gperf
+Expat
+# Inetutils
+# Less
+Perl
+# XML::Parser
+# Intltool
+# Autoconf
+# Automake
+OpenSSL
+Kmod
+Libelf
+Libffi
+Python3
+# Filt-Core
+# Wheel
+# Setuptools
+# Ninja
+# Meson
+	Coreutils
+Check
+# Diffutils
+Gawk
+# Findutils
+# Groff
+# GRUB
+# Gzip
+# IPRoute2
+# Kbd
+Libpipeline
+# Make
+# Patch
+# Tar
+Texinfo
+# Vim
+Udev
+Man-DB
+Procps-ng
+Util-linux
+E2fsprogs
+# Sysklogd
+# SysVinit
+
+# ---------------------------------------------------------------------------- #
+
+# MPC		GCC
+# GMP		MPFR and GCC
+	# MPFR		Gawk and GCC
+# Lz4		Zstd
+	# Zstd		Binutils, GCC, Libelf, and Udev
+		# GCC
+
+# Flex		Binutils, IProute2, Kbd, Kmod, and Man-DB
+# Pkgconf	Binutils, E2fsprogs, IProute2, Kmod, Man-DB, Procps-ng, Python, Udev, and Util-linux
+	# Binutils
+
+# Glibc
+
+# Make
+
+# Libxcrypt	Perl, Python, Shadow, and Udev
+	# Attr		Acl, Libcap, and Patch
+		# Acl 		Coreutils, Sed, Tar, and Vim
+			# Libcap	IProute2 and Shadow
+			# Sed		E2fsprogs, File, Libtool, and Shadow
+				# Shadow	Coreutils
+	# Zlib		File, Kmod, Libelf, Perl, and Util-linux
+		# Iana-Etc	Perl
+			# M4		Autoconf and Bison
+			# Perl		Autoconf
+				# Autoconf	Automake and Coreutils
+				# Gettext	Automake and Bison
+					# Automake	Coreutils
+# OpenSSL	Coreutils, Kmod, Linux, and Udev
+						# Coreutils	Bash, Diffutils, Findutils, Man-DB, and Udev
+							# Ncurses	Bash, GRUB, Inetutils, Less, Procps-ng, Psmisc, Readline, Texinfo, Util-linux, and Vim
+								# Readline	Bash, Bc, and Gawk
+									# Bash
+
+# ---------------------------------------------------------------------------- #
+
+# Diffutils
+# Findutils
+# Gawk
+# Grep		Man-DB
+# Patch
+# Bison		Kbd and Tar
+# Inetutils	Tar
+	# Tar
+# Texinfo
+# DejaGNU
+# Expect
+# Expat		Python and XML::Parser
+# Libffi	Python
+	# Python	Ninja
+
+# Bzip2		File and Libelf
+# Xz		File, GRUB, Kmod, Libelf, Man-DB, and Udev
+	# File
+
+# Less		Gzip
+	# Gzip		Man-DB
+# Linux API Headers
+
+# Procps-ng
+
+# E2fsprogs
+# Kmod		Udev
+# Flit-Core	Wheel
+	# Wheel		Jinja2, MarkupSafe, Meson, and Setuptools
+		# Setuptools	Jinja2, MarkupSafe, and Meson
+			# Ninja		Meson
+				# Meson		Udev
+			# MarkupSafe	Jinja2
+				# Jinja2	Udev
+					# Udev		Util-linux
+		# Util-linux
+
+# Bc		Linux
+# Libelf	IProute2 and Linux
+	# IProute2
+	# Linux
+# XML::Parser	Intltool
+	# Intltool
+# Groff		Man-DB
+# Libpipeline	Man-DB
+	# Man-DB
+# Man-Pages
+
+# Check
+# GDBM
+# Gperf
+# GRUB
+# Kbd
+# Libtool
+# Psmisc
+# Sysklogd
+# SysVinit
+# Tcl
+# Vim
+
+# ---------------------------------------------------------------------------- #
+
+# Acl 		Coreutils, Sed, Tar, and Vim
+# Attr		Acl, Libcap, and Patch
+# Autoconf	Automake and Coreutils
+# Automake	Coreutils
+# Bc		Linux
+# Bison		Kbd and Tar
+# Bzip2		File and Libelf
+# Coreutils	Bash, Diffutils, Findutils, Man-DB, and Udev
+# Expat		Python and XML::Parser
+# Flex		Binutils, IProute2, Kbd, Kmod, and Man-DB
+# Flit-Core	Wheel
+# Gettext	Automake and Bison
+# GMP		MPFR and GCC
+# Grep		Man-DB
+# Groff		Man-DB
+# Gzip		Man-DB
+# Iana-Etc	Perl
+# Inetutils	Tar
+# Jinja2	Udev
+# Kmod		Udev
+# Less		Gzip
+# Libcap	IProute2 and Shadow
+# Libelf	IProute2 and Linux
+# Libffi	Python
+# Libpipeline	Man-DB
+# Libxcrypt	Perl, Python, Shadow, and Udev
+# Lz4		Zstd
+# M4		Autoconf and Bison
+# MarkupSafe	Jinja2
+# Meson		Udev
+# MPC		GCC
+# MPFR		Gawk and GCC
+# Ncurses	Bash, GRUB, Inetutils, Less, Procps-ng, Psmisc, Readline, Texinfo, Util-linux, and Vim
+# Ninja		Meson
+# OpenSSL	Coreutils, Kmod, Linux, and Udev
+# Perl		Autoconf
+# Pkgconf	Binutils, E2fsprogs, IProute2, Kmod, Man-DB, Procps-ng, Python, Udev, and Util-linux
+# Python	Ninja
+# Readline	Bash, Bc, and Gawk
+# Sed		E2fsprogs, File, Libtool, and Shadow
+# Setuptools	Jinja2, MarkupSafe, and Meson
+# Shadow	Coreutils
+# Udev		Util-linux
+# Wheel		Jinja2, MarkupSafe, Meson, and Setuptools
+# XML::Parser	Intltool
+# Xz		File, GRUB, Kmod, Libelf, Man-DB, and Udev
+# Zlib		File, Kmod, Libelf, Perl, and Util-linux
+# Zstd		Binutils, GCC, Libelf, and Udev
+
+# Bash
+# Binutils
+# Coreutils	Bash, Diffutils, Findutils, Man-DB, and Udev
+# GCC
+# Glibc
+# Make
+
+
+# Check
+# DejaGNU
+# Diffutils
+# E2fsprogs
+# Expect
+# File
+# Findutils
+# Gawk
+# GDBM
+# Gperf
+# GRUB
+# Intltool
+# IProute2
+# Kbd
+# Libtool
+# Linux
+# Linux API Headers
+# Man-DB
+# Man-Pages
+# Patch
+# Procps-ng
+# Psmisc
+# Sysklogd
+# SysVinit
+# Tar
+# Tcl
+# Texinfo
+# Util-linux
+# Vim
