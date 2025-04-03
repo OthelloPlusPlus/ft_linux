@@ -95,50 +95,50 @@ GetKeyPress()
 #																			   #
 # ===============ft_linux==============||==============©Othello=============== #
 
-# =====================================||===================================== #
-#									Temp									   #
-# ===============ft_linux==============||==============©Othello=============== #
+# # =====================================||===================================== #
+# #									Temp									   #
+# # ===============ft_linux==============||==============©Othello=============== #
 
-declare -A Packagetemp;
-Packagetemp[Name]="Temp";
-Packagetemp[Version]="";
-Packagetemp[Extension]=".tar.xz";
-Packagetemp[Package]="${Packagetemp[Name]}-${Packagetemp[Version]}${Packagetemp[Extension]}";
+# declare -A Packagetemp;
+# Packagetemp[Name]="Temp";
+# Packagetemp[Version]="";
+# Packagetemp[Extension]=".tar.xz";
+# Packagetemp[Package]="${Packagetemp[Name]}-${Packagetemp[Version]}${Packagetemp[Extension]}";
 
-InstallTemp()
-{
-	EchoInfo	"Package ${Packagetemp[Name]}"
+# InstallTemp()
+# {
+# 	EchoInfo	"Package ${Packagetemp[Name]}"
 
-	ReExtractPackage	"${PDIR}"	"${Packagetemp[Name]}-${Packagetemp[Version]}"	"${Packagetemp[Extension]}";
+# 	ReExtractPackage	"${PDIR}"	"${Packagetemp[Name]}-${Packagetemp[Version]}"	"${Packagetemp[Extension]}";
 
-	if ! cd "${PDIR}${Packagetemp[Name]}-${Packagetemp[Version]}"; then
-		EchoError	"cd ${PDIR}${Packagetemp[Name]}-${Packagetemp[Version]}";
-		return;
-	fi
+# 	if ! cd "${PDIR}${Packagetemp[Name]}-${Packagetemp[Version]}"; then
+# 		EchoError	"cd ${PDIR}${Packagetemp[Name]}-${Packagetemp[Version]}";
+# 		return;
+# 	fi
 
-	EchoInfo	"${Packagetemp[Name]}> Configure"
-	./configure --prefix=/usr 1> /dev/null || { EchoTest KO ${Packagetemp[Name]} && PressAnyKeyToContinue; return; };
+# 	EchoInfo	"${Packagetemp[Name]}> Configure"
+# 	./configure --prefix=/usr 1> /dev/null || { EchoTest KO ${Packagetemp[Name]} && PressAnyKeyToContinue; return; };
 
-	EchoInfo	"${Packagetemp[Name]}> make"
-	make  1> /dev/null || { Packagetemp[Status]=$?; EchoTest KO ${Packagetemp[Name]} && PressAnyKeyToContinue; return; };
+# 	EchoInfo	"${Packagetemp[Name]}> make"
+# 	make  1> /dev/null || { Packagetemp[Status]=$?; EchoTest KO ${Packagetemp[Name]} && PressAnyKeyToContinue; return; };
 
-	EchoInfo	"${Packagetemp[Name]}> make check"
-	make check 1> /dev/null || { Packagetemp[Status]=$?; EchoTest KO ${Packagetemp[Name]} && PressAnyKeyToContinue; return; };
+# 	EchoInfo	"${Packagetemp[Name]}> make check"
+# 	make check 1> /dev/null || { Packagetemp[Status]=$?; EchoTest KO ${Packagetemp[Name]} && PressAnyKeyToContinue; return; };
 	
-	EchoInfo	"${Packagetemp[Name]}> make install"
-	make install 1> /dev/null && Packagetemp[Status]=$? || { Packagetemp[Status]=$?; EchoTest KO ${Packagetemp[Name]} && PressAnyKeyToContinue; return; };
+# 	EchoInfo	"${Packagetemp[Name]}> make install"
+# 	make install 1> /dev/null && Packagetemp[Status]=$? || { Packagetemp[Status]=$?; EchoTest KO ${Packagetemp[Name]} && PressAnyKeyToContinue; return; };
 
-	if ! mkdir -p build; then
-		Packagetemp[Status]=1; 
-		EchoError	"Failed to make ${PDIR}${Packagetemp[Name]}/build";
-		cd -;
-		return ;
-	fi
-	cd -;
-	cd "${PDIR}${Packagetemp[Name]}-${Packagetemp[Version]}/build";
+# 	if ! mkdir -p build; then
+# 		Packagetemp[Status]=1; 
+# 		EchoError	"Failed to make ${PDIR}${Packagetemp[Name]}/build";
+# 		cd -;
+# 		return ;
+# 	fi
+# 	cd -;
+# 	cd "${PDIR}${Packagetemp[Name]}-${Packagetemp[Version]}/build";
 
-	cd -;
-}
+# 	cd -;
+# }
 
 # =====================================||===================================== #
 #									  Man									   #
@@ -211,11 +211,6 @@ PackageGlibc[Package]="${PackageGlibc[Name]}-${PackageGlibc[Version]}${PackageGl
 
 InstallGlibc()
 {
-	# local NAME="glibc";
-	# local VERSION="2.40";
-	# local EXTENSION=".tar.xz";
-	# local PACKAGE="${NAME}-${VERSION}${EXTENSION}";
-
 	EchoInfo	"Package ${PackageGlibc[Name]}"
 
 	ReExtractPackage	"${PDIR}"	"${PackageGlibc[Name]}-${PackageGlibc[Version]}"	"${PackageGlibc[Extension]}";
@@ -3701,6 +3696,314 @@ InstallUdev()
 }
 
 # =====================================||===================================== #
+#									 ManDB									   #
+# ===============ft_linux==============||==============©Othello=============== #
+
+declare -A PackageManDB;
+PackageManDB[Name]="man-db";
+PackageManDB[Version]="2.12.1";
+PackageManDB[Extension]=".tar.xz";
+PackageManDB[Package]="${PackageManDB[Name]}-${PackageManDB[Version]}${PackageManDB[Extension]}";
+
+InstallManDB()
+{
+	EchoInfo	"Package ${PackageManDB[Name]}"
+
+	ReExtractPackage	"${PDIR}"	"${PackageManDB[Name]}-${PackageManDB[Version]}"	"${PackageManDB[Extension]}";
+
+	if ! cd "${PDIR}${PackageManDB[Name]}-${PackageManDB[Version]}"; then
+		EchoError	"cd ${PDIR}${PackageManDB[Name]}-${PackageManDB[Version]}";
+		return;
+	fi
+
+	EchoInfo	"${PackageManDB[Name]}> Configure"
+	./configure --prefix=/usr \
+				--docdir=/usr/share/doc/mandb-2.12.1 \
+				--sysconfdir=/etc \
+				--disable-setuid \
+				--enable-cache-owner=bin \
+				--with-browser=/usr/bin/lynx \
+				--with-vgrind=/usr/bin/vgrind \
+				--with-grap=/usr/bin/grap \
+				--with-systemdtmpfilesdir= \
+				--with-systemdsystemunitdir= \
+				1> /dev/null || { EchoTest KO ${PackageManDB[Name]} && PressAnyKeyToContinue; return; };
+
+	EchoInfo	"${PackageManDB[Name]}> make"
+	make  1> /dev/null || { PackageManDB[Status]=$?; EchoTest KO ${PackageManDB[Name]} && PressAnyKeyToContinue; return; };
+
+	EchoInfo	"${PackageManDB[Name]}> make check"
+	make check 1> /dev/null || { PackageManDB[Status]=$?; EchoTest KO ${PackageManDB[Name]} && PressAnyKeyToContinue; return; };
+	
+	EchoInfo	"${PackageManDB[Name]}> make install"
+	make install 1> /dev/null && PackageManDB[Status]=$? || { PackageManDB[Status]=$?; EchoTest KO ${PackageManDB[Name]} && PressAnyKeyToContinue; return; };
+
+	cd -;
+}
+
+# =====================================||===================================== #
+#									ProcpsNg								   #
+# ===============ft_linux==============||==============©Othello=============== #
+
+declare -A PackageProcpsNg;
+PackageProcpsNg[Name]="procps-ng";
+PackageProcpsNg[Version]="4.0.4";
+PackageProcpsNg[Extension]=".tar.xz";
+PackageProcpsNg[Package]="${PackageProcpsNg[Name]}-${PackageProcpsNg[Version]}${PackageProcpsNg[Extension]}";
+
+InstallProcpsNg()
+{
+	EchoInfo	"Package ${PackageProcpsNg[Name]}"
+
+	ReExtractPackage	"${PDIR}"	"${PackageProcpsNg[Name]}-${PackageProcpsNg[Version]}"	"${PackageProcpsNg[Extension]}";
+
+	if ! cd "${PDIR}${PackageProcpsNg[Name]}-${PackageProcpsNg[Version]}"; then
+		EchoError	"cd ${PDIR}${PackageProcpsNg[Name]}-${PackageProcpsNg[Version]}";
+		return;
+	fi
+
+	EchoInfo	"${PackageProcpsNg[Name]}> Configure"
+	./configure --prefix=/usr \
+				--docdir=/usr/share/doc/procpsNg-4.0.4 \
+				--disable-static \
+				--disable-kill \
+				1> /dev/null || { EchoTest KO ${PackageProcpsNg[Name]} && PressAnyKeyToContinue; return; };
+
+	EchoInfo	"${PackageProcpsNg[Name]}> make"
+	make  1> /dev/null || { PackageProcpsNg[Status]=$?; EchoTest KO ${PackageProcpsNg[Name]} && PressAnyKeyToContinue; return; };
+
+	EchoInfo	"${PackageProcpsNg[Name]}> su tester -c \"PATH=\$PATH make check\""
+	chown -R tester .
+	su tester -c "PATH=$PATH make check" 1> /dev/null || { PackageProcpsNg[Status]=$?; EchoTest KO ${PackageProcpsNg[Name]} && PressAnyKeyToContinue; return; };
+
+	EchoInfo	"${PackageProcpsNg[Name]}> make install"
+	make install 1> /dev/null && PackageProcpsNg[Status]=$? || { PackageProcpsNg[Status]=$?; EchoTest KO ${PackageProcpsNg[Name]} && PressAnyKeyToContinue; return; };
+
+	cd -;
+}
+
+# =====================================||===================================== #
+#								   UtilLinux								   #
+# ===============ft_linux==============||==============©Othello=============== #
+
+declare -A PackageUtilLinux;
+PackageUtilLinux[Name]="util-linux";
+PackageUtilLinux[Version]="2.40.2";
+PackageUtilLinux[Extension]=".tar.xz";
+PackageUtilLinux[Package]="${PackageUtilLinux[Name]}-${PackageUtilLinux[Version]}${PackageUtilLinux[Extension]}";
+
+InstallUtilLinux()
+{
+	EchoInfo	"Package ${PackageUtilLinux[Name]}"
+
+	ReExtractPackage	"${PDIR}"	"${PackageUtilLinux[Name]}-${PackageUtilLinux[Version]}"	"${PackageUtilLinux[Extension]}";
+
+	if ! cd "${PDIR}${PackageUtilLinux[Name]}-${PackageUtilLinux[Version]}"; then
+		EchoError	"cd ${PDIR}${PackageUtilLinux[Name]}-${PackageUtilLinux[Version]}";
+		return;
+	fi
+
+	EchoInfo	"${PackageUtilLinux[Name]}> Configure"
+	./configure --bindir=/usr/bin \
+				--libdir=/usr/lib \
+				--runstatedir=/run \
+				--sbindir=/usr/sbin \
+				--disable-chfn-chsh \
+				--disable-login \
+				--disable-nologin \
+				--disable-su \
+				--disable-setpriv \
+				--disable-runuser \
+				--disable-pylibmount \
+				--disable-liblastlog2 \
+				--disable-static \
+				--without-python \
+				--without-systemd \
+				--without-systemdsystemunitdir \
+				ADJTIME_PATH=/var/lib/hwclock/adjtime \
+				--docdir=/usr/share/doc/util-linux-2.40.2 \
+				1> /dev/null || { EchoTest KO ${PackageUtilLinux[Name]} && PressAnyKeyToContinue; return; };
+
+	EchoInfo	"${PackageUtilLinux[Name]}> make"
+	make  1> /dev/null || { PackageUtilLinux[Status]=$?; EchoTest KO ${PackageUtilLinux[Name]} && PressAnyKeyToContinue; return; };
+
+	EchoInfo	"${PackageUtilLinux[Name]}> make check"
+	touch /etc/fstab
+	chown -R tester .
+	su tester -c "make -k check" 1> /dev/null || { PackageUtilLinux[Status]=$?; EchoTest KO ${PackageUtilLinux[Name]} && PressAnyKeyToContinue; return; };
+
+	EchoInfo	"${PackageUtilLinux[Name]}> make install"
+	make install 1> /dev/null && PackageUtilLinux[Status]=$? || { PackageUtilLinux[Status]=$?; EchoTest KO ${PackageUtilLinux[Name]} && PressAnyKeyToContinue; return; };
+
+	cd -;
+}
+
+# =====================================||===================================== #
+#								   E2fsprogs								   #
+# ===============ft_linux==============||==============©Othello=============== #
+
+declare -A PackageE2fsprogs;
+PackageE2fsprogs[Name]="e2fsprogs";
+PackageE2fsprogs[Version]="1.47.1";
+PackageE2fsprogs[Extension]=".tar.gz";
+PackageE2fsprogs[Package]="${PackageE2fsprogs[Name]}-${PackageE2fsprogs[Version]}${PackageE2fsprogs[Extension]}";
+
+InstallE2fsprogs()
+{
+	EchoInfo	"Package ${PackageE2fsprogs[Name]}"
+
+	ReExtractPackage	"${PDIR}"	"${PackageE2fsprogs[Name]}-${PackageE2fsprogs[Version]}"	"${PackageE2fsprogs[Extension]}";
+
+	if ! cd "${PDIR}${PackageE2fsprogs[Name]}-${PackageE2fsprogs[Version]}"; then
+		EchoError	"cd ${PDIR}${PackageE2fsprogs[Name]}-${PackageE2fsprogs[Version]}";
+		return;
+	fi
+
+	if ! mkdir -p build; then
+		PackageE2fsprogs[Status]=1; 
+		EchoError	"Failed to make ${PDIR}${PackageE2fsprogs[Name]}/build";
+		cd -;
+		return ;
+	fi
+	cd -;
+	cd "${PDIR}${PackageE2fsprogs[Name]}-${PackageE2fsprogs[Version]}/build";
+
+	EchoInfo	"${PackageE2fsprogs[Name]}> Configure"
+	../configure 	--prefix=/usr \
+					--sysconfdir=/etc \
+					--enable-elf-shlibs \
+					--disable-libblkid \
+					--disable-libuuid \
+					--disable-uuidd \
+					--disable-fsck \
+					1> /dev/null || { EchoTest KO ${PackageE2fsprogs[Name]} && PressAnyKeyToContinue; return; };
+
+	EchoInfo	"${PackageE2fsprogs[Name]}> make"
+	make  1> /dev/null || { PackageE2fsprogs[Status]=$?; EchoTest KO ${PackageE2fsprogs[Name]} && PressAnyKeyToContinue; return; };
+
+	EchoInfo	"${PackageE2fsprogs[Name]}> make check"
+	make check &> TempMakeCheck.log ||
+	if [ $(grep ": failed" TempMakeCheck.log | grep -v "m_assume_storage_prezeroed" -c) -gt 0 ]; then
+		PackageE2fsprogs[Status]=$(grep ": failed" TempMakeCheck.log -c)
+		EchoTest KO ${PackageE2fsprogs[Name]}
+		grep " test failed" TempMakeCheck.log
+		grep ": failed" TempMakeCheck.log
+		PressAnyKeyToContinue;
+		return;
+	else
+		EchoTest OK ${PackageE2fsprogs[Name]}
+		grep " test failed" TempMakeCheck.log
+		grep ": failed" TempMakeCheck.log
+	fi
+	rm TempMakeCheck.log
+
+	EchoInfo	"${PackageE2fsprogs[Name]}> make install"
+	make install 1> /dev/null && PackageE2fsprogs[Status]=$? || { PackageE2fsprogs[Status]=$?; EchoTest KO ${PackageE2fsprogs[Name]} && PressAnyKeyToContinue; return; };
+
+	EchoInfo	"${PackageE2fsprogs[Name]}> Remove useless static libraries"
+	rm -fv /usr/lib/{libcom_err,libe2p,libext2fs,libss}.a
+
+	EchoInfo	"${PackageE2fsprogs[Name]}> Unpack and update system dir file"
+	gunzip -v /usr/share/info/libext2fs.info.gz
+	install-info --dir-file=/usr/share/info/dir /usr/share/info/libext2fs.info
+
+	EchoInfo	"${PackageE2fsprogs[Name]}> Install documentation"
+	makeinfo -o 		doc/com_err.info 	../lib/et/com_err.texinfo
+	install -v -m644 	doc/com_err.info 	/usr/share/info
+	install-info --dir-file=/usr/share/info/dir /usr/share/info/com_err.info
+
+	# EchoInfo	"${PackageE2fsprogs[Name]}> Adjust default values"
+	# sed 's/metadata_csum_seed,//' -i /etc/mke2fs.conf
+
+	cd -;
+}
+
+# =====================================||===================================== #
+#									Sysklogd								   #
+# ===============ft_linux==============||==============©Othello=============== #
+
+declare -A PackageSysklogd;
+PackageSysklogd[Name]="sysklogd";
+PackageSysklogd[Version]="2.6.1";
+PackageSysklogd[Extension]=".tar.gz";
+PackageSysklogd[Package]="${PackageSysklogd[Name]}-${PackageSysklogd[Version]}${PackageSysklogd[Extension]}";
+
+InstallSysklogd()
+{
+	EchoInfo	"Package ${PackageSysklogd[Name]}"
+
+	ReExtractPackage	"${PDIR}"	"${PackageSysklogd[Name]}-${PackageSysklogd[Version]}"	"${PackageSysklogd[Extension]}";
+
+	if ! cd "${PDIR}${PackageSysklogd[Name]}-${PackageSysklogd[Version]}"; then
+		EchoError	"cd ${PDIR}${PackageSysklogd[Name]}-${PackageSysklogd[Version]}";
+		return;
+	fi
+
+	EchoInfo	"${PackageSysklogd[Name]}> Configure"
+	./configure --prefix=/usr \
+				--sysconfdir=/etc \
+				--runstatedir=/run \
+				--without-logger \
+				1> /dev/null || { EchoTest KO ${PackageSysklogd[Name]} && PressAnyKeyToContinue; return; };
+
+	EchoInfo	"${PackageSysklogd[Name]}> make"
+	make  1> /dev/null || { PackageSysklogd[Status]=$?; EchoTest KO ${PackageSysklogd[Name]} && PressAnyKeyToContinue; return; };
+
+	EchoInfo	"${PackageSysklogd[Name]}> make install"
+	make install 1> /dev/null && PackageSysklogd[Status]=$? || { PackageSysklogd[Status]=$?; EchoTest KO ${PackageSysklogd[Name]} && PressAnyKeyToContinue; return; };
+
+	EchoInfo	"${PackageSysklogd[Name]}> Configuring /etc/syslog.conf"
+	cat > /etc/syslog.conf << "EOF"
+# Begin /etc/syslog.conf
+auth,authpriv.* -/var/log/auth.log
+*.*;auth,authpriv.none -/var/log/sys.log
+daemon.* -/var/log/daemon.log
+kern.* -/var/log/kern.log
+mail.* -/var/log/mail.log
+user.* -/var/log/user.log
+*.emerg *
+# Do not open any internet ports.
+secure_mode 2
+# End /etc/syslog.conf
+EOF
+
+	cd -;
+}
+
+# =====================================||===================================== #
+#									SysVinit								   #
+# ===============ft_linux==============||==============©Othello=============== #
+
+declare -A PackageSysVinit;
+PackageSysVinit[Name]="sysvinit";
+PackageSysVinit[Version]="3.10";
+PackageSysVinit[Extension]=".tar.xz";
+PackageSysVinit[Package]="${PackageSysVinit[Name]}-${PackageSysVinit[Version]}${PackageSysVinit[Extension]}";
+
+InstallSysVinit()
+{
+	EchoInfo	"Package ${PackageSysVinit[Name]}"
+
+	ReExtractPackage	"${PDIR}"	"${PackageSysVinit[Name]}-${PackageSysVinit[Version]}"	"${PackageSysVinit[Extension]}";
+
+	if ! cd "${PDIR}${PackageSysVinit[Name]}-${PackageSysVinit[Version]}"; then
+		EchoError	"cd ${PDIR}${PackageSysVinit[Name]}-${PackageSysVinit[Version]}";
+		return;
+	fi
+
+	EchoInfo	"${PackageSysVinit[Name]}> Patch"
+	patch -Np1 -i ../sysvinit-3.10-consolidated-1.patch
+
+	EchoInfo	"${PackageSysVinit[Name]}> make"
+	make  1> /dev/null || { PackageSysVinit[Status]=$?; EchoTest KO ${PackageSysVinit[Name]} && PressAnyKeyToContinue; return; };
+
+	EchoInfo	"${PackageSysVinit[Name]}> make install"
+	make install 1> /dev/null && PackageSysVinit[Status]=$? || { PackageSysVinit[Status]=$?; EchoTest KO ${PackageSysVinit[Name]} && PressAnyKeyToContinue; return; };
+
+	cd -;
+}
+
+# =====================================||===================================== #
 #																			   #
 #									  Menu									   #
 #																			   #
@@ -3742,6 +4045,69 @@ InstallAll()
 	InstallBison;
 	InstallGrep;
 	InstallBash;
+	InstallLibtool;
+	InstallGDBM;
+	InstallGperf;
+	InstallExpat;
+	InstallInetutils;
+	InstallLess;
+	InstallPerl;
+	InstallXMLParser;
+	InstallIntltool;
+	InstallAutoconf;
+	InstallAutomake;
+	InstallOpenSSL;
+	InstallKmod;
+	InstallElfutils;
+	InstallLibffi;
+	InstallPython;
+	InstallFlitCore;
+	InstallWheel;
+	InstallSetuptools;
+	InstallNinja;
+	InstallMeson;
+	InstallCoreutils;
+	InstallCheck;
+	InstallDiffutils;
+	InstallGawk;
+	InstallFindutils;
+	InstallGroff;
+	InstallGRUB;
+	InstallGzip;
+	InstallIPRoute2;
+	InstallKbd;
+	InstallLibpipeline;
+	InstallMake;
+	InstallPatch;
+	InstallTar;
+	InstallTexinfo;
+	InstallVim;
+	InstallMarkupSafe;
+	InstallJinja2;
+	InstallUdev;
+	InstallManDB;
+	InstallProcpsNg;
+	InstallUtilLinux;
+	InstallE2fsprogs;
+	InstallSysklogd;
+	InstallSysVinit;
+}
+
+CleanUp()
+{
+	find "${PDIR}" -mindepth 1 -maxdepth 1 -type d -exec rm -rf {} +
+	rm -rf /tmp/{*,.*}
+	find /usr/lib /usr/libexec -name \*.la -delete
+
+	while true; do
+		echo	"Remove Cross-Compiler and user tester? (y/n)"
+		GetKeyPress
+		case "$input" in
+			Y|y)	find /usr -depth -name $(uname -m)-lfs-linux-gnu\* | xargs rm -rf;
+					userdel -r tester;;
+			N|n)	break ;;
+		esac
+	done
 }
 
 PrintMenu()
@@ -3749,7 +4115,7 @@ PrintMenu()
 	width=$(tput cols);
 	height=$(tput lines);
 
-	MenuOptions=76;
+	MenuOptions=82;
 	MenuTop=$((MenuOptions+5));
 	MenuStart=$((MenuIndex-(height/2)));
 	if [ $MenuStart -gt $((MenuTop-height)) ] || [ $MenuIndex -lt 3 ]; then
@@ -3826,7 +4192,7 @@ PrintMenu()
 			63)	PrintMenuLine	"63 ${PackageGroff[Name]}-${PackageGroff[Version]}"			$MenuIndex	63	"${PackageGroff[Status]}";;
 			64)	PrintMenuLine	"64 ${PackageGRUB[Name]}-${PackageGRUB[Version]}"			$MenuIndex	64	"${PackageGRUB[Status]}";;
 			65)	PrintMenuLine	"65 ${PackageGzip[Name]}-${PackageGzip[Version]}"			$MenuIndex	65	"${PackageGzip[Status]}";;
-			66)	PrintMenuLine	"66 ${PackageIPRoute2[Name]}-${PackageIPRoute2[Version]}"		$MenuIndex	66	"${PackageIPRoute2[Status]}";;
+			66)	PrintMenuLine	"66 ${PackageIPRoute2[Name]}-${PackageIPRoute2[Version]}"	$MenuIndex	66	"${PackageIPRoute2[Status]}";;
 			67)	PrintMenuLine	"67 ${PackageKbd[Name]}-${PackageKbd[Version]}"				$MenuIndex	67	"${PackageKbd[Status]}";;
 			68)	PrintMenuLine	"68 ${PackageLibpipeline[Name]}-${PackageLibpipeline[Version]}"	$MenuIndex	68	"${PackageLibpipeline[Status]}";;
 			69)	PrintMenuLine	"69 ${PackageMake[Name]}-${PackageMake[Version]}"			$MenuIndex	69	"${PackageMake[Status]}";;
@@ -3834,14 +4200,20 @@ PrintMenu()
 			71)	PrintMenuLine	"71 ${PackageTar[Name]}-${PackageTar[Version]}"				$MenuIndex	71	"${PackageTar[Status]}";;
 			72)	PrintMenuLine	"72 ${PackageTexinfo[Name]}-${PackageTexinfo[Version]}"		$MenuIndex	72	"${PackageTexinfo[Status]}";;
 			73)	PrintMenuLine	"73 ${PackageVim[Name]}-${PackageVim[Version]}"				$MenuIndex	73	"${PackageVim[Status]}";;
-			74)	PrintMenuLine	"74 ${PackageMarkupSafe[Name]}-${PackageMarkupSafe[Version]}"				$MenuIndex	74	"${PackageMarkupSafe[Status]}";;
-			75)	PrintMenuLine	"75 ${PackageJinja2[Name]}-${PackageJinja2[Version]}"				$MenuIndex	75	"${PackageJinja2[Status]}";;
-			76)	PrintMenuLine	"76 ${PackageUdev[Name]}-${PackageUdev[Version]}"				$MenuIndex	76	"${PackageUdev[Status]}";;
-			77)	printf '%*s\n' "$width" '' | tr ' ' '-';;
-			78)	PrintMenuLine	"Install All"	$MenuIndex	0;;
-			79)	PrintMenuLine	"Validate"	$MenuIndex	1;;
-			80)	PrintMenuLine	"Quit"	$MenuIndex	2;;
-			81)	printf '%*s\n' "$width" '' | tr ' ' '-';;
+			74)	PrintMenuLine	"74 ${PackageMarkupSafe[Name]}-${PackageMarkupSafe[Version]}"	$MenuIndex	74	"${PackageMarkupSafe[Status]}";;
+			75)	PrintMenuLine	"75 ${PackageJinja2[Name]}-${PackageJinja2[Version]}"		$MenuIndex	75	"${PackageJinja2[Status]}";;
+			76)	PrintMenuLine	"76 ${PackageUdev[Name]}-${PackageUdev[Version]}"			$MenuIndex	76	"${PackageUdev[Status]}";;
+			77)	PrintMenuLine	"77 ${PackageManDB[Name]}-${PackageManDB[Version]}"			$MenuIndex	77	"${PackageManDB[Status]}";;
+			78)	PrintMenuLine	"78 ${PackageProcpsNg[Name]}-${PackageProcpsNg[Version]}"	$MenuIndex	78	"${PackageProcpsNg[Status]}";;
+			79)	PrintMenuLine	"79 ${PackageUtilLinux[Name]}-${PackageUtilLinux[Version]}"	$MenuIndex	79	"${PackageUtilLinux[Status]}";;
+			80)	PrintMenuLine	"80 ${PackageE2fsprogs[Name]}-${PackageE2fsprogs[Version]}"	$MenuIndex	80	"${PackageE2fsprogs[Status]}";;
+			81)	PrintMenuLine	"81 ${PackageSysklogd[Name]}-${PackageSysklogd[Version]}"	$MenuIndex	81	"${PackageSysklogd[Status]}";;
+			82)	PrintMenuLine	"82 ${PackageSysVinit[Name]}-${PackageSysVinit[Version]}"	$MenuIndex	82	"${PackageSysVinit[Status]}";;
+			83)	printf '%*s\n' "$width" '' | tr ' ' '-';;
+			84)	PrintMenuLine	"Install All"	$MenuIndex	0;;
+			85)	PrintMenuLine	"Validate"	$MenuIndex	1;;
+			86)	PrintMenuLine	"Quit"	$MenuIndex	2;;
+			87)	printf '%*s\n' "$width" '' | tr ' ' '-';;
 			*)	echo $counter ;;
 		esac
 	done
@@ -3926,10 +4298,16 @@ PrintMenu()
 				74)	InstallMarkupSafe;;
 				75)	InstallJinja2;;
 				76)	InstallUdev;;
+				77) InstallManDB;;
+				78) InstallProcpsNg;;
+				79) InstallUtilLinux;;
+				80) InstallE2fsprogs;;
+				81) InstallSysklogd;;
+				82) InstallSysVinit;;
 				0)	InstallAll;;
 				1)	./CheckBinaries.sh;;
 				2)	MenuIndex=-1;
-					find "${PDIR}" -mindepth 1 -maxdepth 1 -type d -exec rm -rf {} +
+					CleanUp;
 					return ;;
 			esac;
 			PressAnyKeyToContinue;;
@@ -3964,85 +4342,6 @@ while [ "$MenuIndex" -ge 0 ]; do
 done
 
 exit 
-# ---------------------------------------------------------------------------- #
-
-# Man-pages
-# Iana-Etc
-Glibc
-Zlib
-Bzip2
-Xz
-Lz4
-Zstd
-File
-Readline
-# M4
-# Bc
-Flex
-Tcl
-Expect
-Pkgconf
-Binutils
-GMP
-MPFR
-MPC
-Attr
-Acl
-Libcap
-Libxcrypt
-Shadow
-GCC
-Ncurses
-# Sed
-# Psmisc
-Gettext
-Bison
-# Grep
-# Bash
-Libtool
-GDBM
-# Gperf
-Expat
-# Inetutils
-# Less
-Perl
-# XML::Parser
-# Intltool
-# Autoconf
-# Automake
-OpenSSL
-Kmod
-Libelf
-Libffi
-Python3
-# Filt-Core
-# Wheel
-# Setuptools
-# Ninja
-# Meson
-	Coreutils
-Check
-# Diffutils
-Gawk
-# Findutils
-# Groff
-# GRUB
-# Gzip
-# IPRoute2
-# Kbd
-Libpipeline
-# Make
-# Patch
-# Tar
-Texinfo
-# Vim
-Udev
-Man-DB
-Procps-ng
-Util-linux
-E2fsprogs
-# Sysklogd
-# SysVinit
 
 # ---------------------------------------------------------------------------- #
 
@@ -4140,93 +4439,4 @@ E2fsprogs
 # Sysklogd
 # SysVinit
 # Tcl
-# Vim
-
-# ---------------------------------------------------------------------------- #
-
-# Acl 		Coreutils, Sed, Tar, and Vim
-# Attr		Acl, Libcap, and Patch
-# Autoconf	Automake and Coreutils
-# Automake	Coreutils
-# Bc		Linux
-# Bison		Kbd and Tar
-# Bzip2		File and Libelf
-# Coreutils	Bash, Diffutils, Findutils, Man-DB, and Udev
-# Expat		Python and XML::Parser
-# Flex		Binutils, IProute2, Kbd, Kmod, and Man-DB
-# Flit-Core	Wheel
-# Gettext	Automake and Bison
-# GMP		MPFR and GCC
-# Grep		Man-DB
-# Groff		Man-DB
-# Gzip		Man-DB
-# Iana-Etc	Perl
-# Inetutils	Tar
-# Jinja2	Udev
-# Kmod		Udev
-# Less		Gzip
-# Libcap	IProute2 and Shadow
-# Libelf	IProute2 and Linux
-# Libffi	Python
-# Libpipeline	Man-DB
-# Libxcrypt	Perl, Python, Shadow, and Udev
-# Lz4		Zstd
-# M4		Autoconf and Bison
-# MarkupSafe	Jinja2
-# Meson		Udev
-# MPC		GCC
-# MPFR		Gawk and GCC
-# Ncurses	Bash, GRUB, Inetutils, Less, Procps-ng, Psmisc, Readline, Texinfo, Util-linux, and Vim
-# Ninja		Meson
-# OpenSSL	Coreutils, Kmod, Linux, and Udev
-# Perl		Autoconf
-# Pkgconf	Binutils, E2fsprogs, IProute2, Kmod, Man-DB, Procps-ng, Python, Udev, and Util-linux
-# Python	Ninja
-# Readline	Bash, Bc, and Gawk
-# Sed		E2fsprogs, File, Libtool, and Shadow
-# Setuptools	Jinja2, MarkupSafe, and Meson
-# Shadow	Coreutils
-# Udev		Util-linux
-# Wheel		Jinja2, MarkupSafe, Meson, and Setuptools
-# XML::Parser	Intltool
-# Xz		File, GRUB, Kmod, Libelf, Man-DB, and Udev
-# Zlib		File, Kmod, Libelf, Perl, and Util-linux
-# Zstd		Binutils, GCC, Libelf, and Udev
-
-# Bash
-# Binutils
-# Coreutils	Bash, Diffutils, Findutils, Man-DB, and Udev
-# GCC
-# Glibc
-# Make
-
-
-# Check
-# DejaGNU
-# Diffutils
-# E2fsprogs
-# Expect
-# File
-# Findutils
-# Gawk
-# GDBM
-# Gperf
-# GRUB
-# Intltool
-# IProute2
-# Kbd
-# Libtool
-# Linux
-# Linux API Headers
-# Man-DB
-# Man-Pages
-# Patch
-# Procps-ng
-# Psmisc
-# Sysklogd
-# SysVinit
-# Tar
-# Tcl
-# Texinfo
-# Util-linux
 # Vim
