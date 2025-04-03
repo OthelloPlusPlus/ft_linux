@@ -53,7 +53,8 @@ Disk
 
 ### System
 
-Motherboard > Boot Order: `Optical` before `Hard Disk`
+<!-- Motherboard > Boot Order: `Optical` before `Hard Disk` -->
+Motherboard > Boot Order: `HArd Disk` before `Optical`
 
 ### Storage
 
