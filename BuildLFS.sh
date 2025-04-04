@@ -387,11 +387,6 @@ PackageZlib[Package]="${PackageZlib[Name]}-${PackageZlib[Version]}${PackageZlib[
 
 InstallZlib()
 {
-	# local NAME="zlib";
-	# local VERSION="1.3.1";
-	# local EXTENSION=".tar.gz";
-	# local PACKAGE="${NAME}-${VERSION}${EXTENSION}";
-
 	EchoInfo	"Package ${PackageZlib[Name]}"
 
 	ReExtractPackage	"${PDIR}"	"${PackageZlib[Name]}-${PackageZlib[Version]}"	"${PackageZlib[Extension]}";
@@ -431,11 +426,6 @@ PackageBzip2[Package]="${PackageBzip2[Name]}-${PackageBzip2[Version]}${PackageBz
 
 InstallBzip2()
 {
-	# local NAME="Bzip2";
-	# local VERSION="";
-	# local EXTENSION=".tar.xz";
-	# local PACKAGE="${NAME}-${VERSION}${EXTENSION}";
-
 	EchoInfo	"Package ${PackageBzip2[Name]}"
 
 	ReExtractPackage	"${PDIR}"	"${PackageBzip2[Name]}-${PackageBzip2[Version]}"	"${PackageBzip2[Extension]}";
@@ -459,8 +449,8 @@ InstallBzip2()
 	EchoInfo	"${PackageBzip2[Name]}> make"
 	make  1> /dev/null || { PackageBzip2[Status]=$?; EchoTest KO ${PackageBzip2[Name]} && PressAnyKeyToContinue; return; };
 
-	# EchoInfo	"${PackageBzip2[Name]}> make check"
-	# make check 1> /dev/null || { PackageBzip2[Status]=$?; EchoTest KO ${PackageBzip2[Name]} && PressAnyKeyToContinue; return; };
+	EchoInfo	"${PackageBzip2[Name]}> make check"
+	make check 1> /dev/null || { PackageBzip2[Status]=$?; EchoTest KO ${PackageBzip2[Name]} && PressAnyKeyToContinue; return; };
 	
 	EchoInfo	"${PackageBzip2[Name]}> make PREFIX=/usr install"
 	make PREFIX=/usr install 1> /dev/null && PackageBzip2[Status]=$? || { PackageBzip2[Status]=$?; EchoTest KO ${PackageBzip2[Name]} && PressAnyKeyToContinue; return; };
@@ -3123,7 +3113,7 @@ InstallGRUB()
 	make  1> /dev/null || { PackageGRUB[Status]=$?; EchoTest KO ${PackageGRUB[Name]} && PressAnyKeyToContinue; return; };
 
 	# EchoInfo	"${PackageGRUB[Name]}> make check"
-	# make check 1> /dev/null || { PackageGRUB[Status]=$?; EchoTest KO ${PackageGRUB[Name]} && PressAnyKeyToContinue; return; };
+	# make check 1> /dev/null || { PackageGRUB[Status]=$?; EchoTest KO ${PackageGRUB[Name]} && EchoInfo "Most of the tests depend on packages that are not available in the limited LFS environment." && PressAnyKeyToContinue; return; };
 	
 	EchoInfo	"${PackageGRUB[Name]}> make install"
 	make install 1> /dev/null && PackageGRUB[Status]=$? || { PackageGRUB[Status]=$?; EchoTest KO ${PackageGRUB[Name]} && PressAnyKeyToContinue; return; };
@@ -4104,7 +4094,8 @@ CleanUp()
 		GetKeyPress
 		case "$input" in
 			Y|y)	find /usr -depth -name $(uname -m)-lfs-linux-gnu\* | xargs rm -rf;
-					userdel -r tester;;
+					userdel -r tester;
+					break ;;
 			N|n)	break ;;
 		esac
 	done
