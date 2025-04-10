@@ -93,6 +93,42 @@ fdisk /dev/sda
 ## Setting password
 ```passwd```
 
+## Virtual Drive Image
+setting .vdi steps
+
+```
+# Mount the new partition
+mount /dev/sda1 /mnt
+
+# Install base system
+pacman -Sy archlinux-keyring
+pacstrap /mnt base linux linux-firmware
+
+# Generate fstab
+genfstab -U /mnt >> /mnt/etc/fstab
+
+# Chroot into your new system
+arch-chroot /mnt
+
+# Set up your system
+ln -sf /usr/share/zoneinfo/Region/City /etc/localtime
+hwclock --systohc
+
+sed -i 's/^#\(en_US\.UTF-8 UTF-8\)/\1/' /etc/locale.gen
+locale-gen
+echo "LANG=en_US.UTF-8" > /etc/locale.conf
+
+echo "myarch" > /etc/hostname
+
+# Install GRUB
+pacman -S grub
+grub-install --target=i386-pc /dev/sda
+grub-mkconfig -o /boot/grub/grub.cfg
+
+passwd
+
+```
+
 # Linux Kernel
 https://www.kernel.org/
 longterm:	6.6.63	2024-11-22
