@@ -1,4 +1,4 @@
-#! /bin/zsh
+#! /bin/bash
 
 source colors.sh
 
@@ -68,6 +68,7 @@ RunMakeCheckTest()
 #				 					Terminal								   #
 #																			   #
 # ===============ft_linux==============||==============©Othello=============== #
+# export TERM=xterm;
 
 GetInput()
 {
@@ -76,6 +77,13 @@ GetInput()
 	unset MSG;
 	read	input;
 	printf '%*s\n' "$width" '' | tr ' ' '-';
+}
+
+GetKeyPress()
+{
+	stty -echo -icanon
+	input=$(dd bs=1 count=1 2>/dev/null)
+	stty sane
 }
 
 PressAnyKeyToContinue()
