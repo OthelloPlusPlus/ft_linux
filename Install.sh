@@ -91,10 +91,18 @@ while true; do
 	printf	"1)\t Install ArchLinux\n"
 	printf	"2)\t Copy LFS\n"
 	printf	"3)\t Install LFS\n"
+	printf '%*s\n' "$Width" '' | tr ' ' '-';
 	printf	"4)\t Enter as Root\n"
+	printf	"5)\t Enter as arch-chroot (ArchLinux Install)\n"
+	printf	"6)\t Enter as ArchUser\n"
+	printf	"7)\t Enter as Chroot\n"
 	printf '%*s\n' "$Width" '' | tr ' ' '-';
 	printf	"q)\t exit\n"
 	printf '%*s\n' "$Width" '' | tr ' ' '-';
+	if [ ! -z "$ErrorMsg" ]; then
+		printf	"$ErrorMsg\n"
+		printf '%*s\n' "$Width" '' | tr ' ' '-';
+	fi
 	printf	"Input: ";
 
 	GetKeyPress;
@@ -105,7 +113,17 @@ while true; do
 		2)	CopyForLFS;;
 		3)	CopyForLFS;
 			RunCmd	"chmod +x Install*.sh; ./Install.sh";;
-		4)	ssh -p $PORT $USER@$ADDRESS;;
+		4)	ssh -p $PORT $USER@$ADDRESS || ErrorMsg="Failed to enter as Root";;
+		5)	ssh -p $PORT $USER@$ADDRESS -t "arch-chroot - ArchUser" || ErrorMsg="Failed to arch-chroot";;
+		6)	ssh -p $PORT $USER@$ADDRESS -t "su - ArchUser" || ErrorMsg="Failed to enter as ArchUser";;
+		7)	ssh -p $PORT $USER@$ADDRESS -t "chroot	\"/lfs\" /usr/bin/env -i	\
+															HOME=/root	\
+															TERM=\"$TERM\"	\
+															PS1='(lfs chroot) \u:\w\$ '	\
+															PATH=/usr/bin:/usr/sbin	\
+															MAKEFLAGS=\"-j$(nproc)\"	\
+															TESTSUITEFLAGS=\"-j$(nproc)\"	\
+															/bin/bash --login" 	|| ErrorMsg="Failed to enter as Chroot";;
 		q)	exit;;
 	esac
 done
