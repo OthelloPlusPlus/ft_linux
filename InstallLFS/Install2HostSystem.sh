@@ -237,7 +237,7 @@ while true; do
 	echo	"d)\t Display Directory Layout";
 	echo	"e)\t Display Environment";
 	echo	"b)\t Display Bash Config Files";
-	printf	"r)\t Remove Directories (%s)\n" "$(find $DEST -mindepth 1 -type d | wc -l)";
+	[ -d $DEST ] 1> /dev/null && printf	"r)\t Remove Directories (%s)\n" "$(find $DEST -mindepth 1 -maxdepth 1 -type d | wc -l)";
 	echo	"q)\t Return to main menu";
 	printf '%*s\n' "$Width" '' | tr ' ' '-';
 	$LocalCommand;

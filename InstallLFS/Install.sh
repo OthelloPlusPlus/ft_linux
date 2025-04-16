@@ -15,10 +15,10 @@ InstallCrossToolchainAsUser()
 	echo
 	printf '%*s\n' "$Width" '' | tr ' ' '-';
 	cp Utils.sh colors.sh UtilInstallPackages.sh /home/${UserName};
-	mv Install5CrossToolchain.sh Install6CrossTemporaryTools.sh Install3CrossToolchain.sh /home/${UserName}
+	mv Install3CrossToolchain.sh /home/${UserName}
 
 	echo	"To continue enter the following command:";
-	printf	"${CB_BLACK}%-42s${C_RESET}\n"	" > zsh ./Install5CrossToolchain.sh";
+	printf	"${CB_BLACK}%-42s${C_RESET}\n"	" > zsh ./Install3CrossToolchain.sh";
 
 	su - ${UserName}
 }
@@ -66,6 +66,7 @@ while true; do
 	# echo	"B)\t Making the LFS System Bootable";
 	printf '%*s\n' "$Width" '' | tr ' ' '-';
 	echo	"v)\t Validate LFS";
+	echo -e	"q)\t Quit";
 	printf '%*s\n' "$Width" '' | tr ' ' '-';
 	$ExecuteCommand;
 	printf '%*s\n' "$Width" '' | tr ' ' '-';

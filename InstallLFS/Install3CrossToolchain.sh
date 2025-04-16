@@ -133,8 +133,8 @@ ValidateTemporaryTools()
 if [ $# -gt 0 ]; then
 	case "$1" in
 		RunAll)	Install5CrossToolchain;
-				Install6CrossTemporaryTools;
-				PrepareChrootForTemporaryTools;;
+				Install6CrossTemporaryTools;;
+				# PrepareChrootForTemporaryTools;;
 		*)		echo "Bad flag: '$1'";;
 	esac
 	exit;

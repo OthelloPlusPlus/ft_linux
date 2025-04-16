@@ -149,7 +149,117 @@ Install7Cleanup()
 
 Install8AllBinaries()
 {
-	
+	if ! CheckMountpoints; then
+		return ;
+	fi
+
+	for (( i=29; i<=82; i++ )); do
+		case $i in 
+			3) InstallMan;; 		# 8.3
+			4) InstallIanaEtc;; 	# 8.4
+			5) InstallGlibc;; 		# 8.5
+			6) InstallZlib;; 		# 8.6
+			7) InstallBzip2;; 		# 8.7
+			8) InstallXz;; 			# 8.8
+			9) InstallLz4;; 		# 8.9
+			10) InstallZstd;; 	# 8.10
+			11) InstallFile;; 		# 8.11
+			12) InstallReadline;; 	# 8.12
+			13) InstallM4;; 			# 8.13
+			14) InstallBc;; 			# 8.14
+			15) InstallFlex;; 		# 8.15
+			16) InstallTcl;; 		# 8.16
+			17) InstallExpect;; 		# 8.17
+			18) InstallDejaGNU;; 	# 8.18
+			19) InstallPkgconf;; 	# 8.19
+			20) InstallBinutils;; # 8.20
+			21) InstallGMP;; 		# 8.21
+			22) InstallMPFR;; 		# 8.22
+			23) InstallMPC;; 		# 8.23
+			24) InstallAttr;; 		# 8.24
+			25) InstallAcl;; 		# 8.25
+			26) InstallLibcap;; 		# 8.26
+			27) InstallLibxcrypt;; 	# 8.27
+			28) InstallShadow;; 		# 8.28
+			29) InstallGcc;; 		# 8.29
+			30) InstallNcurses;; # 8.30
+			31) InstallSed;; 		# 8.31
+			32) InstallPsmisc;; 		# 8.32
+			33) InstallGettext;; 	# 8.33
+			34) InstallBison;; 		# 8.34
+			35) InstallGrep;; 		# 8.35
+			36) InstallBash;; 		# 8.36
+			37) InstallLibtool;; 	# 8.37
+			38) InstallGDBM;; 		# 8.38
+			39) InstallGperf;; 		# 8.39
+			40) InstallExpat;; 	# 8.40
+			41) InstallInetutils;; 	# 8.41
+			42) InstallLess;; 		# 8.42
+			43) InstallPerl;; 		# 8.43
+			44) InstallXMLParser;; 	# 8.44
+			45) InstallIntltool;; 	# 8.45
+			46) InstallAutoconf;; 	# 8.46
+			47) InstallAutomake;; 	# 8.47
+			48) InstallOpenSSL;; 	# 8.48
+			49) InstallKmod;; 		# 8.49
+			50) InstallElfutils;; # 8.50
+			51) InstallLibffi;; 		# 8.51
+			52) InstallPython;; 		# 8.52
+			53) InstallFlitCore;; 	# 8.53
+			54) InstallWheel;; 		# 8.54
+			55) InstallSetuptools;; 	# 8.55
+			56) InstallNinja;; 		# 8.56
+			57) InstallMeson;; 		# 8.57
+			58) InstallCoreutils;; 	# 8.58
+			59) InstallCheck;; 		# 8.59
+			60) InstallDiffutils;; # 8.60
+			61) InstallGawk;; 		# 8.61
+			62) InstallFindutils;; 	# 8.62
+			63) InstallGroff;; 		# 8.63
+			64) InstallGRUB;; 		# 8.64
+			65) InstallGzip;; 		# 8.65
+			66) InstallIPRoute2;; 	# 8.66
+			67) InstallKbd;; 		# 8.67
+			68) InstallLibpipeline;; # 8.68
+			69) InstallMake;; 		# 8.69
+			70) InstallPatch;; 	# 8.70
+			71) InstallTar;; 		# 8.71
+			72) InstallTexinfo;; 	# 8.72
+			73) InstallVim;; 		# 8.73
+			74) InstallMarkupSafe;; 	# 8.74
+			75) InstallJinja2;; 		# 8.75
+			76) InstallUdev;; 		# 8.76
+			77) InstallManDB;; 		# 8.77
+			78) InstallProcpsNg;; 	# 8.78
+			79) InstallUtilLinux;; 	# 8.79
+			80) InstallE2fsprogs;; # 8.80
+			81) InstallSysklogd;; 	# 8.81
+			82) InstallSysVinit;; 	# 8.82
+		esac
+		if [ $? -gt 0 ]; then
+			LocalCommand="echo \"Failed to create for Chapter 8.$i. Stopped\"";
+			return 1;
+		fi
+	done
+}
+
+CheckMountpoints()
+{
+	for CheckMount in "/dev" "/dev/pts" "/proc" "/sys" "/run" "/dev/shm"; do
+		mountpoint -q "$CheckMount" || { LocalCommand="echo \"CRUCIAL: ($? $CheckMount): Mountpoints are not set! Did you reboot?\""; return $?; };
+	done
+}
+
+# =====================================||===================================== #
+#																			   #
+#								   Chapter 9								   #
+#							  System Configuration							   #
+#																			   #
+# ===============ft_linux==============||==============©Othello=============== #
+
+Configure9System()
+{
+
 }
 
 # =====================================||===================================== #
@@ -175,12 +285,12 @@ while true; do
 	echo -e	"Option:\t${-}";
 	printf '%*s\n' "$Width" '' | tr ' ' '-';
 	echo -e	"0)\t ";
-	echo -e	"7)\t Configure environment and build last Tmeporary Tools";
+	echo -e	"7)\t Configure environment and build last Temporary Tools";
 	echo -e	"8)\t Install Basic System Software";
 	echo -e	"9)\t System Configuration";
 	echo -e	"B)\t Making the LFS System Bootable";
 	printf '%*s\n' "$Width" '' | tr ' ' '-';
-	echo -e	"r)\t Remove Package directories";
+	printf	"r)\t Remove Directories (%s)\n" "$(find $PDIR -mindepth 1 -maxdepth 1 -type d | wc -l)";
 	echo -e	"q)\t Return to main menu";
 	printf '%*s\n' "$Width" '' | tr ' ' '-';
 	$LocalCommand;
@@ -192,7 +302,8 @@ while true; do
 		0)	;;
 		7)	Install7;;
 		8)	Install8AllBinaries;;
-		r)	RemovePackageDirectories;;
+		9)	Configure9System;;
+		r)	RemovePackageDirectories || PressAnyKeyToContinue;;
 		q)	exit;;
 	esac
 done
