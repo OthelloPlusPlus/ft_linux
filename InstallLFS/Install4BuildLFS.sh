@@ -259,7 +259,16 @@ CheckMountpoints()
 
 Configure9System()
 {
+	InstallLFSBootscript;
+	ManageDevices;
+}
 
+ManageDevices()
+{
+	bash /usr/lib/udev/init-net-rules.sh
+
+	EchoInfo "--- Custom Udev Rules ---"
+	EchoInfo '/etc/udev/rules.d/70-persistent-net.rules'
 }
 
 # =====================================||===================================== #
