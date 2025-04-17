@@ -50,42 +50,42 @@ RemovePackageDirectories()
 #									Temp									   #
 # ===============ft_linux==============||==============©Othello=============== #
 
-declare -A Packagetemp;
-Packagetemp[Name]="Temp";
-Packagetemp[Version]="";
-Packagetemp[Package]="${Packagetemp[Name]}-${Packagetemp[Version]}";
-Packagetemp[Extension]=".tar.xz";
+# declare -A Packagetemp;
+# Packagetemp[Name]="Temp";
+# Packagetemp[Version]="";
+# Packagetemp[Package]="${Packagetemp[Name]}-${Packagetemp[Version]}";
+# Packagetemp[Extension]=".tar.xz";
 
-InstallTemp()
-{
-	EchoInfo	"Package ${Packagetemp[Name]}"
+# InstallTemp()
+# {
+# 	EchoInfo	"Package ${Packagetemp[Name]}"
 
-	ReExtractPackage	"${PDIR}"	"${Packagetemp[Package]}"	"${Packagetemp[Extension]}";
+# 	ReExtractPackage	"${PDIR}"	"${Packagetemp[Package]}"	"${Packagetemp[Extension]}";
 
-	if ! cd "${PDIR}${Packagetemp[Package]}"; then
-		EchoError	"cd ${PDIR}${Packagetemp[Package]}";
-		return 1;
-	fi
+# 	if ! cd "${PDIR}${Packagetemp[Package]}"; then
+# 		EchoError	"cd ${PDIR}${Packagetemp[Package]}";
+# 		return 1;
+# 	fi
 
-	EchoInfo	"${Packagetemp[Name]}> Configure"
-	./configure --prefix=/usr 1> /dev/null || { Packagetemp[Status]=$?; EchoTest KO ${Packagetemp[Name]} && PressAnyKeyToContinue; return 1; };
+# 	EchoInfo	"${Packagetemp[Name]}> Configure"
+# 	./configure --prefix=/usr 1> /dev/null || { Packagetemp[Status]=$?; EchoTest KO ${Packagetemp[Name]} && PressAnyKeyToContinue; return 1; };
 
-	EchoInfo	"${Packagetemp[Name]}> make"
-	make  1> /dev/null || { Packagetemp[Status]=$?; EchoTest KO ${Packagetemp[Name]} && PressAnyKeyToContinue; return 1; };
+# 	EchoInfo	"${Packagetemp[Name]}> make"
+# 	make  1> /dev/null || { Packagetemp[Status]=$?; EchoTest KO ${Packagetemp[Name]} && PressAnyKeyToContinue; return 1; };
 
-	EchoInfo	"${Packagetemp[Name]}> make check"
-	make check 1> /dev/null || { Packagetemp[Status]=$?; EchoTest KO ${Packagetemp[Name]} && PressAnyKeyToContinue; return 1; };
+# 	EchoInfo	"${Packagetemp[Name]}> make check"
+# 	make check 1> /dev/null || { Packagetemp[Status]=$?; EchoTest KO ${Packagetemp[Name]} && PressAnyKeyToContinue; return 1; };
 	
-	EchoInfo	"${Packagetemp[Name]}> make install"
-	make install 1> /dev/null && Packagetemp[Status]=$? || { Packagetemp[Status]=$?; EchoTest KO ${Packagetemp[Name]} && PressAnyKeyToContinue; return 1; };
+# 	EchoInfo	"${Packagetemp[Name]}> make install"
+# 	make install 1> /dev/null && Packagetemp[Status]=$? || { Packagetemp[Status]=$?; EchoTest KO ${Packagetemp[Name]} && PressAnyKeyToContinue; return 1; };
 
-	# if ! mkdir -p build; then
-	# 	Packagetemp[Status]=1; 
-	# 	EchoError	"Failed to make ${PDIR}${Packagetemp[Name]}/build";
-	# 	return ;
-	# fi
-	# cd "${PDIR}${Packagetemp[Package]}/build";
-}
+# 	# if ! mkdir -p build; then
+# 	# 	Packagetemp[Status]=1; 
+# 	# 	EchoError	"Failed to make ${PDIR}${Packagetemp[Name]}/build";
+# 	# 	return ;
+# 	# fi
+# 	# cd "${PDIR}${Packagetemp[Package]}/build";
+# }
 
 # =====================================||===================================== #
 #																			   #
@@ -556,8 +556,8 @@ GCCExtract()
 declare -A PackageLinuxAPI;
 PackageLinuxAPI[Name]="linux";
 PackageLinuxAPI[Version]="6.10.5";
-PackageLinuxAPI[Package]="${PackageGCC[Name]}-${PackageGCC[Version]}";
 PackageLinuxAPI[Extension]=".tar.xz";
+PackageLinuxAPI[Package]="${PackageLinux[Name]}-${PackageLinux[Version]}";
 
 InstallLinuxAPI_CT()
 {
@@ -1067,8 +1067,8 @@ InstallNcurses()
 	cp -av lib/lib*.so.5* /usr/lib
 
 	EchoInfo	"${PackageNcurses[Name]}> Ncurses Testing is done manually:"
-	if [ "$width" -lt 42 ]; then
-		local LineWidth=$((width-2));
+	if [ "$Width" -lt 42 ]; then
+		local LineWidth=$((Width-2));
 	else
 		local LineWidth=42;
 	fi
@@ -3560,7 +3560,7 @@ declare -A PackageInetutils;
 PackageInetutils[Name]="inetutils";
 PackageInetutils[Version]="2.5";
 PackageInetutils[Extension]=".tar.xz";
-PackageInetutils[Package]="${PackageInetutils[Name]}-${PackageInetutils[Version]}${PackageInetutils[Extension]}";
+PackageInetutils[Package]="${PackageInetutils[Name]}-${PackageInetutils[Version]}";
 
 # 8.41
 InstallInetutils()
@@ -4870,4 +4870,117 @@ InstallSysVinit()
 
 	EchoInfo	"${PackageSysVinit[Name]}> make install"
 	make install 1> /dev/null && PackageSysVinit[Status]=$? || { PackageSysVinit[Status]=$?; EchoTest KO ${PackageSysVinit[Name]} && PressAnyKeyToContinue; return 1; };
+}
+
+# =====================================||===================================== #
+#						9.2. LFS-Bootscripts-20240825						   #
+# ===============ft_linux==============||==============©Othello=============== #
+
+declare -A PackageLFSBootscript;
+PackageLFSBootscript[Name]="lfs-bootscripts";
+PackageLFSBootscript[Version]="20240825";
+PackageLFSBootscript[Extension]=".tar.xz";
+PackageLFSBootscript[Package]="${PackageLFSBootscript[Name]}-${PackageLFSBootscript[Version]}";
+
+InstallLFSBootscript()
+{
+	EchoInfo	"Package ${PackageLFSBootscript[Name]}"
+
+	ReExtractPackage	"${PDIR}"	"${PackageLFSBootscript[Package]}"	"${PackageLFSBootscript[Extension]}";
+
+	if ! cd "${PDIR}${PackageLFSBootscript[Package]}"; then
+		EchoError	"cd ${PDIR}${PackageLFSBootscript[Package]}";
+		return;
+	fi
+
+	EchoInfo	"${PackageLFSBootscript[Name]}> make install"
+	make install 1> /dev/null && PackageLFSBootscript[Status]=$? || { PackageLFSBootscript[Status]=$?; EchoTest KO ${PackageLFSBootscript[Name]} && PressAnyKeyToContinue; return; };
+}
+
+# =====================================||===================================== #
+#								10.3. Linux-6.10.5							   #
+# ===============ft_linux==============||==============©Othello=============== #
+
+declare -A PackageLinux;
+PackageLinux[Name]="linux";
+PackageLinux[Version]="6.10.5";
+PackageLinux[Extension]=".tar.xz";
+PackageLinux[Package]="${PackageLinux[Name]}-${PackageLinux[Version]}";
+
+InstallLinux()
+{
+	EchoInfo	"Package ${PackageLinux[Name]}"
+
+	ReExtractPackage	"${PDIR}"	"${PackageLinux[Package]}"	"${PackageLinux[Extension]}";
+
+	if ! cd "${PDIR}${PackageLinux[Package]}"; then
+		EchoError	"cd ${PDIR}${PackageLinux[Package]}";
+		return 1;
+	fi
+
+	EchoInfo	"${PackageLinux[Name]}> make mrproper"
+	make mrproper 1> /dev/null || { PackageLinux[Status]=$?; EchoTest KO ${PackageLinux[Name]} && PressAnyKeyToContinue; return 1; };
+
+	EchoInfo	"${PackageLinux[Name]}> make defconfig (Sets menuconfig to good starting values)";
+	make defconfig 1> /dev/null || { PackageLinux[Status]=$?; EchoTest KO ${PackageLinux[Name]} && PressAnyKeyToContinue; return 1; };
+	EchoInfo	"${PackageLinux[Name]}> Adjusting config values";
+	# General setup --->
+		scripts/config --disable CONFIG_WERROR
+		# CPU/Task time and stats accounting --->
+			scripts/config --enable CONFIG_PSI
+			scripts/config --disable CONFIG_PSI_DEFAULT_DISABLED
+		scripts/config --disable CONFIG_IKHEADERS
+		scripts/config --enable CONFIG_CGROUPS
+			scripts/config --enable CONFIG_MEMCG
+		scripts/config --disable CONFIG_EXPERT
+	# Processor type and features --->
+		scripts/config --enable CONFIG_RELOCATABLE
+		scripts/config --enable CONFIG_RANDOMIZE_BASE
+		scripts/config --enable CONFIG_X86_X2APIC #64
+	# General architecture-dependent options --->
+		scripts/config --enable CONFIG_STACKPROTECTOR
+		scripts/config --enable CONFIG_STACKPROTECTOR_STRONG
+	# Device Drivers --->
+		# Generic Driver Options --->
+			scripts/config --disable CONFIG_UEVENT_HELPER
+			scripts/config --enable CONFIG_DEVTMPFS
+			scripts/config --enable CONFIG_DEVTMPFS_MOUNT
+		# Graphics support --->
+			scripts/config --module CONFIG_DRM # Required to add GUI later
+			scripts/config --enable CONFIG_DRM_FBDEV_EMULATION
+			# Console display driver support --->
+				scripts/config --enable CONFIG_FRAMEBUFFER_CONSOLE
+		scripts/config --enable CONFIG_PCI #64
+			scripts/config --enable CONFIG_PCI_MSI #64
+		scripts/config --enable CONFIG_IOMMU_SUPPORT #64
+			scripts/config --enable CONFIG_IRQ_REMAP #64
+	EchoInfo	"${PackageLinux[Name]}> make olddefconfig (replacing make menuconfig)";
+	make olddefconfig 1> /dev/null || { PackageLinux[Status]=$?; EchoTest KO ${PackageLinux[Name]} && PressAnyKeyToContinue; return 1; };
+
+	EchoInfo	"${PackageLinux[Name]}> make"
+	make  1> /dev/null || { PackageLinux[Status]=$?; EchoTest KO ${PackageLinux[Name]} && PressAnyKeyToContinue; return 1; };
+
+	EchoInfo	"${PackageLinux[Name]}> make modules_install"
+	make modules_install 1> /dev/null && PackageLinux[Status]=$? || { PackageLinux[Status]=$?; EchoTest KO ${PackageLinux[Name]} && PressAnyKeyToContinue; return 1; };
+	
+EchoInfo "This is where things go wrong"
+EchoInfo	"Boot complained about not finding /boot/vmlinuz-6.10.5-lfs-12.2"
+PressAnyKeyToContinue;
+	cp -iv arch/x86/boot/bzImage /boot/vmlinuz-6.10.5-lfs-12.2
+	cp -iv System.map /boot/System.map-6.10.5
+	cp -iv .config /boot/config-6.10.5
+	cp -r Documentation -T /usr/share/doc/linux-6.10.5
+
+	# 10.3.2. Configuring Linux Module Load Order
+	EchoInfo	"Configuring Linux Module Load Order"
+	install -v -m755 -d /etc/modprobe.d
+	EchoInfo	"/etc/modprobe.d/usb.conf"
+	cat > /etc/modprobe.d/usb.conf << "EOF"
+# Begin /etc/modprobe.d/usb.conf
+
+install ohci_hcd /sbin/modprobe ehci_hcd ; /sbin/modprobe -i ohci_hcd ; true
+install uhci_hcd /sbin/modprobe ehci_hcd ; /sbin/modprobe -i uhci_hcd ; true
+
+# End /etc/modprobe.d/usb.conf
+EOF
 }

@@ -149,11 +149,9 @@ Install7Cleanup()
 
 Install8AllBinaries()
 {
-	if ! CheckMountpoints; then
-		return ;
-	fi
+	CheckMountpoints || return $?;
 
-	for (( i=29; i<=82; i++ )); do
+	for (( i=3; i<=82; i++ )); do
 		case $i in 
 			3) InstallMan;; 		# 8.3
 			4) InstallIanaEtc;; 	# 8.4
@@ -237,16 +235,48 @@ Install8AllBinaries()
 			82) InstallSysVinit;; 	# 8.82
 		esac
 		if [ $? -gt 0 ]; then
+			PressAnyKeyToContinue;
 			LocalCommand="echo \"Failed to create for Chapter 8.$i. Stopped\"";
 			return 1;
 		fi
 	done
+
+	CleanupAfter8;
 }
 
 CheckMountpoints()
 {
 	for CheckMount in "/dev" "/dev/pts" "/proc" "/sys" "/run" "/dev/shm"; do
-		mountpoint -q "$CheckMount" || { LocalCommand="echo \"CRUCIAL: ($? $CheckMount): Mountpoints are not set! Did you reboot?\""; return $?; };
+		mountpoint -q "$CheckMount" || { 
+			local ReturnValue=$?
+			LocalCommand="echo \"CRUCIAL: ($ReturnValue $CheckMount): Mountpoints are not set! Did you reboot?\""; 
+			return $ReturnValue; 
+		};
+	done
+	return 0;
+}
+
+CleanUpAfter8()
+{
+	RemovePackageDirectories;
+
+	local TempAttempt=0;
+	while true; do
+		clear;
+		echo -n	"Cleanup [y/n]? ";
+		GetKeyPress;
+		case $input in
+			y)	rm -rf /tmp/{*,.*};
+				find /usr/lib /usr/libexec -name \*.la -delete;
+				find /usr -depth -name $(uname -m)-lfs-linux-gnu\* | xargs rm -rf;
+				userdel -r tester;;
+			n)	return ;;
+			*)	(( TempAttempt = TempAttempt +1 ));
+				if [ $TempAttempt -gt 3 ]; then
+					EchoError	"Too many incorrect Keypresses. Not cleaning";
+					return ;
+				fi ;;
+		esac
 	done
 }
 
@@ -259,16 +289,354 @@ CheckMountpoints()
 
 Configure9System()
 {
-	InstallLFSBootscript;
-	ManageDevices;
+	CheckMountpoints || return $?;
+
+	for (( i=0; i<=6; i++ )); do
+		case $i in 
+			0)	InstallLFSBootscript;;
+			1)	ManageDevices;;
+			2)	GeneralNetworkConfiguration;;
+			3)	SystemVBootscript;;
+			4)	ConfigureSystemLocale;;
+			5)	ReadlineLibraryConfigurationFile;;
+			6)	ShellValidationFile;;
+		esac
+		if [ $? -gt 0 ]; then
+			EchoError "Chapter 9 failed ($?) on step $i";
+			PressAnyKeyToContinue;
+			return ;
+		fi
+	done
 }
 
+# 9.4
 ManageDevices()
 {
 	bash /usr/lib/udev/init-net-rules.sh
 
 	EchoInfo "--- Custom Udev Rules ---"
 	EchoInfo '/etc/udev/rules.d/70-persistent-net.rules'
+	if [ -z "$NameLength" ]; then
+		NameLength=13;
+	fi
+
+	for pair in $(grep "^SUBSYSTEM" "/etc/udev/rules.d/70-persistent-net.rules"); do
+		local LocalKey="$(echo \"$pair\" | cut -d= -f1 | tr -d '"')";
+		local LocalValue="$(echo \"$pair\" | cut -d= -f2- | tr -d '"=,')";
+		case $LocalKey in
+			SUBSYSTEM) 		if [ "$LocalValue" == "net" ]; 	then printf "$C_LGREEN"; else printf "$C_LRED"; fi ;;
+			ACTION) 		if [ "$LocalValue" == "add" ]; 	then printf "$C_LGREEN"; else printf "$C_LRED"; fi ;;
+			DRIVERS) 		if [ "$LocalValue == ""?*" ]; 	then printf "$C_LGREEN"; else printf "$C_LRED"; fi ;;
+			ATTR{type}) 	if [ "$LocalValue" == "1" ]; 	then printf "$C_LGREEN"; else printf "$C_LRED"; fi ;;
+			NAME)			printf "$C_UNDL";;
+		esac
+		printf	"${C_BOLD}%-${NameLength}s${C_RESET} %-s\n" "$LocalKey" "$LocalValue";
+	done
+	PressAnyKeyToContinue;
+}
+
+# 9.5
+GeneralNetworkConfiguration()
+{
+	EchoInfo	"/etc/sysconfig/ifconfig.eth0"
+	cd /etc/sysconfig/
+cat > ifconfig.eth0 << "EOF"
+ONBOOT=yes
+IFACE=eth0
+SERVICE=ipv4-static
+IP=192.168.1.2
+GATEWAY=192.168.1.1
+PREFIX=24
+BROADCAST=192.168.1.255
+EOF
+
+	EchoInfo	"/etc/resolv.conf"
+	cat > /etc/resolv.conf << "EOF"
+# Begin /etc/resolv.conf
+domain <Your Domain Name>
+nameserver <IP address of your primary nameserver>
+nameserver <IP address of your secondary nameserver>
+# End /etc/resolv.conf
+EOF
+
+	EchoInfo	"/etc/hostname"
+	# StoredHostName="ohengelm";
+	EchoInfo	"hostname: $StoredHostName";
+	echo "$StoredHostName" > /etc/hostname;
+
+	EchoInfo	"/etc/hosts"
+	StoredFQDN="$StoredHostName.local";
+	cat > /etc/hosts << EOF
+# Begin /etc/hosts
+# IP_address    myhost.example.org        aliases
+127.0.0.1       localhost.localdomain     localhost
+127.0.1.1       $StoredFQDN            $StoredHostName
+# 192.168.1.1   $StoredFQDN            $StoredHostName
+::1             localhost                 ip6-localhost ip6-loopback
+ff02::1         ip6-allnodes
+ff02::2         ip6-allrouters
+# End /etc/hosts
+EOF
+}
+
+# 9.6
+SystemVBootscript()
+{
+	# 9.6.2. Configuring SysVinit
+	EchoInfo	"/etc/inittab";
+	cat > /etc/inittab << "EOF"
+# Begin /etc/inittab
+
+id:3:initdefault:
+
+si::sysinit:/etc/rc.d/init.d/rc S
+
+l0:0:wait:/etc/rc.d/init.d/rc 0
+l1:S1:wait:/etc/rc.d/init.d/rc 1
+l2:2:wait:/etc/rc.d/init.d/rc 2
+l3:3:wait:/etc/rc.d/init.d/rc 3
+l4:4:wait:/etc/rc.d/init.d/rc 4
+l5:5:wait:/etc/rc.d/init.d/rc 5
+l6:6:wait:/etc/rc.d/init.d/rc 6
+
+ca:12345:ctrlaltdel:/sbin/shutdown -t1 -a -r now
+
+su:S06:once:/sbin/sulogin
+s1:1:respawn:/sbin/sulogin
+
+1:2345:respawn:/sbin/agetty --noclear tty1 9600
+2:2345:respawn:/sbin/agetty tty2 9600
+3:2345:respawn:/sbin/agetty tty3 9600
+4:2345:respawn:/sbin/agetty tty4 9600
+5:2345:respawn:/sbin/agetty tty5 9600
+6:2345:respawn:/sbin/agetty tty6 9600
+
+# End /etc/inittab
+EOF
+
+	# 9.6.4. Configuring the System Clock
+	EchoInfo	"/etc/sysconfig/clock";
+	cat > /etc/sysconfig/clock << "EOF"
+# Begin /etc/sysconfig/clock
+
+UTC=1
+
+# Set this to any options you might need to give to hwclock,
+# such as machine hardware clock type for Alphas.
+CLOCKPARAMS=
+
+# End /etc/sysconfig/clock
+EOF
+
+	# 9.6.5. Configuring the Linux Console
+	EchoInfo	"/etc/sysconfig/console";
+	cat > /etc/sysconfig/console << "EOF"
+# Begin /etc/sysconfig/console
+
+UNICODE="1"
+FONT="Lat2-Terminus16"
+
+# End /etc/sysconfig/console
+EOF
+}
+
+ConfigureSystemLocale()
+{
+	EchoInfo	"System Locale";
+	LocaleName=$(locale -a | grep "^en_US" | grep "utf");
+	printf	"%-17s %s\n" "Name:" "$LocaleName";
+	printf	"%-17s " "Language:";	LC_ALL="$LocaleName" locale language || PressAnyKeyToContinue;
+	printf	"%-17s " "Character Map:";	LC_ALL="$LocaleName" locale charmap || PressAnyKeyToContinue;
+	printf	"%-17s " "Currency:";	LC_ALL="$LocaleName" locale int_curr_symbol || PressAnyKeyToContinue;
+	printf	"%-17s " "Telephone Prefix:";	LC_ALL="$LocaleName" locale int_prefix || PressAnyKeyToContinue;
+	
+	EchoInfo	"/etc/profile";
+	local LocaleLanguage="en";
+	local LocaleCountry="US";
+	local LocaleCharmap=$(LC_ALL="$LocaleName" locale charmap);
+	# local LocaleModifers="@euro"
+	cat > /etc/profile << EOF
+# Begin /etc/profile
+
+for i in \$(locale); do
+    unset \${i%=*}
+done
+
+if [[ "\$TERM" = linux ]]; then
+    export LANG=C.UTF-8
+else
+    export LANG=${LocaleLanguage}_${LocaleCountry}.${LocaleCharmap}${LocaleModifers}
+fi
+
+# End /etc/profile
+EOF
+}
+
+# 9.8
+ReadlineLibraryConfigurationFile()
+{
+	EchoInfo	"/etc/inputrc";
+	cat > /etc/inputrc << "EOF"
+# Begin /etc/inputrc
+# Modified by Chris Lynn <roryo@roryo.dynup.net>
+
+# Allow the command prompt to wrap to the next line
+set horizontal-scroll-mode Off
+
+# Enable 8-bit input
+set meta-flag On
+set input-meta On
+
+# Turns off 8th bit stripping
+set convert-meta Off
+
+# Keep the 8th bit for display
+set output-meta On
+
+# none, visible or audible
+set bell-style none
+
+# All of the following map the escape sequence of the value
+# contained in the 1st argument to the readline specific functions
+"\eOd": backward-word
+"\eOc": forward-word
+
+# for linux console
+"\e[1~": beginning-of-line
+"\e[4~": end-of-line
+"\e[5~": beginning-of-history
+"\e[6~": end-of-history
+"\e[3~": delete-char
+"\e[2~": quoted-insert
+
+# for xterm
+"\eOH": beginning-of-line
+"\eOF": end-of-line
+
+# for Konsole
+"\e[H": beginning-of-line
+"\e[F": end-of-line
+
+# End /etc/inputrc
+EOF
+}
+
+# 9.9
+ShellValidationFile()
+{
+	EchoInfo	"/etc/shells";
+	cat > /etc/shells << "EOF"
+# Begin /etc/shells
+
+/bin/sh
+/bin/bash
+/bin/zsh
+
+# End /etc/shells
+EOF
+}
+
+# =====================================||===================================== #
+#																			   #
+#								   Chapter 10								   #
+#						 Making the LFS System Bootable						   #
+#																			   #
+# ===============ft_linux==============||==============©Othello=============== #
+
+Make10LFSBootable()
+{
+	CreateMountpointReferenceFile;
+	InstallLinux;
+	SetupBootWithGRUB;
+}
+
+CreateMountpointReferenceFile()
+{
+	local RootPoint=$(lsblk -lno NAME,MOUNTPOINTS | awk '$2 == "/" { print $1 }');
+	local RootType=$(lsblk -lno NAME,MOUNTPOINTS,FSTYPE | awk '$2 == "/" { print $3 }');
+	local SwapPoint=$(lsblk -lno NAME,MOUNTPOINTS | awk '$2 == "[SWAP]" { print $1 }');
+
+	EchoInfo	"/etc/fstab";
+	cat > /etc/fstab << EOF
+# Begin /etc/fstab
+
+# file system   mount-point     type        options             dump    fsck order
+/dev/${RootPoint:-sda5}       /               ${RootType:-ext4}        defaults            1       1
+/dev/${SwapPoint:-sda2}       swap            swap        pri=1               0       0
+proc            /proc           proc        nosuid,noexec,nodev 0       0
+sysfs           /sys            sysfs       nosuid,noexec,nodev 0       0
+devpts          /dev/pts        devpts      gid=5,mode=620      0       0
+tmpfs           /run            tmpfs       defaults            0       0
+devtmpfs        /dev            devtmpfs    mode=0755,nosuid    0       0
+tmpfs           /dev/shm        tmpfs       nosuid,nodev        0       0
+cgroup2         /sys/fs/cgroup  cgroup2     nosuid,noexec,nodev 0       0
+
+# End /etc/fstab
+EOF
+}
+
+SetupBootWithGRUB()
+{
+	EchoInfo	"Installing GRUB!!!"
+	grub-install /dev/sda
+
+	local BootType=$(lsblk -lno NAME,LABEL,MOUNTPOINTS,FSTYPE | awk '$2 == "/boot" { print $3 }');
+	local BootDrive=$(lsblk -nd | nl -v 0 | awk '$2 == "sda" { print $1 }');
+	local BootPart=$(lsblk -lno NAME,LABEL | awk '$2 == "/boot" { print $1 }' | sed 's/sda//')
+	
+	local RootPoint=$(lsblk -lno NAME,MOUNTPOINTS | awk '$2 == "/" { print $1 }');
+
+	EchoInfo	"/boot/grub/grub.cfg";
+	cat > /boot/grub/grub.cfg << EOF
+# Begin /boot/grub/grub.cfg
+set default=0
+set timeout=5
+
+insmod part_gpt
+insmod ${BootType:-ext2}
+set root=(hd${BootDrive:-0},${BootPart:-1})
+
+menuentry "GNU/Linux, Linux 6.10.5-lfs-12.2" {
+        linux   /boot/vmlinuz-6.10.5-lfs-12.2   root=/dev/${RootPoint:-sda5}  ro
+}
+EOF
+
+}
+
+# =====================================||===================================== #
+#																			   #
+#								   Chapter 11								   #
+#									The End									   #
+#																			   #
+# ===============ft_linux==============||==============©Othello=============== #
+
+FinalTouches()
+{
+	DocumentRelease;
+}
+
+DocumentRelease()
+{
+	EchoInfo	"/etc/lfs-release"
+	echo 12.2 > /etc/lfs-release
+
+	EchoInfo	"/etc/lsb-release"
+	cat > /etc/lsb-release << "EOF"
+DISTRIB_ID="Linux From Scratch"
+DISTRIB_RELEASE="12.2"
+DISTRIB_CODENAME="ohengelm"
+DISTRIB_DESCRIPTION="Linux From Scratch"
+EOF
+
+	EchoInfo	"/etc/os-release"
+	cat > /etc/os-release << "EOF"
+NAME="Linux From Scratch"
+VERSION="12.2"
+ID=lfs
+PRETTY_NAME="Linux From Scratch 12.2"
+VERSION_CODENAME="ohengelm"
+HOME_URL="https://www.linuxfromscratch.org/lfs/"
+EOF
 }
 
 # =====================================||===================================== #
@@ -298,6 +666,7 @@ while true; do
 	echo -e	"8)\t Install Basic System Software";
 	echo -e	"9)\t System Configuration";
 	echo -e	"B)\t Making the LFS System Bootable";
+	echo -e "F)\t Final Touches";
 	printf '%*s\n' "$Width" '' | tr ' ' '-';
 	printf	"r)\t Remove Directories (%s)\n" "$(find $PDIR -mindepth 1 -maxdepth 1 -type d | wc -l)";
 	echo -e	"q)\t Return to main menu";
@@ -312,7 +681,10 @@ while true; do
 		7)	Install7;;
 		8)	Install8AllBinaries;;
 		9)	Configure9System;;
-		r)	RemovePackageDirectories || PressAnyKeyToContinue;;
+		B)	Make10LFSBootable;;
+		F)	FinalTouches;;
+		r)	RemovePackageDirectories;;
 		q)	exit;;
 	esac
+	PressAnyKeyToContinue;
 done

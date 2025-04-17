@@ -69,7 +69,7 @@ CopyForArchLinux()
 
 CopyForLFS()
 {
-	CopyFile 	"Utils/*.sh InstallLFS/*.sh" \
+	CopyFile 	"Utils/*.sh InstallLFS/*.sh eval/*.sh" \
 				"/root";
 }
 

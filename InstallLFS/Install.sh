@@ -27,7 +27,7 @@ BuildLFSSystemAsUser()
 {
 	echo
 	printf '%*s\n' "$Width" '' | tr ' ' '-';
-	cp Utils.sh colors.sh UtilInstallPackages.sh $LFS/;
+	cp Utils.sh colors.sh UtilInstallPackages.sh CheckBinaries.sh $LFS/;
 	mv Install4BuildLFS.sh $LFS/
 
 	echo	"To continue enter the following command:";
@@ -43,6 +43,35 @@ BuildLFSSystemAsUser()
 			/bin/bash --login
 }
 
+RebootTheSystem()
+{
+	EchoInfo	"Reboot> Unmounting"
+	umount -v $LFS/dev/pts
+	mountpoint -q $LFS/dev/shm && umount -v $LFS/dev/shm
+	umount -v $LFS/dev
+	umount -v $LFS/run
+	umount -v $LFS/proc
+	umount -v $LFS/sys
+
+	umount -v "$LFS/tmp";
+	umount -v "$LFS/opt";
+	umount -v "$LFS/usr/src";
+	umount -v "$LFS/usr";
+	umount -v "$LFS/home";
+	umount -v "$LFS/boot/efi";
+	# umount -v "$LFS/boot";
+	umount -v "$LFS";
+
+	EchoInfo	"Shutdown";
+	shutdown now;
+}
+
+# =====================================||===================================== #
+#																			   #
+#									Execution								   #
+#																			   #
+# ===============ft_linux==============||==============©Othello=============== #
+
 while true; do
 	Width=$(tput cols);
 
@@ -56,14 +85,7 @@ while true; do
 	echo	"3)\t Building Cross-Toolchain and Temporary Tools";
 	echo	" p)\t  3.2 Prepare chroot and build more Temporary Tools";
 	echo	"4)\t Building LFS";
-	# echo	"3)\t Download Packages and Patches";
-	# echo	"4)\t Final Preparations";
-	# echo	"5)\t Compiling a Cross-Toolchain";
-	# echo	"6)\t Cross Compiling Temporary Tools";
-	# echo	"7)\t Entering Chroot and Building Additional Temporary Tools";
-	# echo	"8)\t Installing Basic System Software";
-	# echo	"9)\t System Configuration";
-	# echo	"B)\t Making the LFS System Bootable";
+	echo	"R)\t Reboot for installation";
 	printf '%*s\n' "$Width" '' | tr ' ' '-';
 	echo	"v)\t Validate LFS";
 	echo -e	"q)\t Quit";
@@ -80,9 +102,7 @@ while true; do
 		3)	InstallCrossToolchainAsUser || PressAnyKeyToContinue;;
 		p)	./Install3_2PrepareChroot.sh || PressAnyKeyToContinue;;
 		4)	BuildLFSSystemAsUser || PressAnyKeyToContinue;;
-		# 3)	./Install3Packages.sh || PressAnyKeyToContinue;;
-		# 4)	./Install4Preparations.sh || PressAnyKeyToContinue;;
-		# 5)	InstallCrossToolchainAsUser;;
+		R)	RebootTheSystem;;
 		v)	local ExecuteCommand="Validate";;
 		q)	exit;;
 		*)	local ExecuteCommand=$input;;
