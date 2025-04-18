@@ -4954,6 +4954,10 @@ InstallLinux()
 			scripts/config --enable CONFIG_PCI_MSI #64
 		scripts/config --enable CONFIG_IOMMU_SUPPORT #64
 			scripts/config --enable CONFIG_IRQ_REMAP #64
+
+	# Added for size
+	scripts/config --enable CONFIG_FB_SIMPLE
+
 	EchoInfo	"${PackageLinux[Name]}> make olddefconfig (replacing make menuconfig)";
 	make olddefconfig 1> /dev/null || { PackageLinux[Status]=$?; EchoTest KO ${PackageLinux[Name]} && PressAnyKeyToContinue; return 1; };
 
@@ -4963,9 +4967,10 @@ InstallLinux()
 	EchoInfo	"${PackageLinux[Name]}> make modules_install"
 	make modules_install 1> /dev/null && PackageLinux[Status]=$? || { PackageLinux[Status]=$?; EchoTest KO ${PackageLinux[Name]} && PressAnyKeyToContinue; return 1; };
 	
-EchoInfo "This is where things go wrong"
-EchoInfo	"Boot complained about not finding /boot/vmlinuz-6.10.5-lfs-12.2"
-PressAnyKeyToContinue;
+	EchoInfo	"${PackageLinux[Name]}> Ensuring /boot in mounted";
+	mountpoint /boot || mount /dev/sda1 /boot;
+
+	EchoInfo	"${PackageLinux[Name]}> Copying crucial files for GRUB boot";
 	cp -iv arch/x86/boot/bzImage /boot/vmlinuz-6.10.5-lfs-12.2
 	cp -iv System.map /boot/System.map-6.10.5
 	cp -iv .config /boot/config-6.10.5

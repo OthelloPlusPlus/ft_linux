@@ -328,7 +328,7 @@ ManageDevices()
 			ACTION) 		if [ "$LocalValue" == "add" ]; 	then printf "$C_LGREEN"; else printf "$C_LRED"; fi ;;
 			DRIVERS) 		if [ "$LocalValue == ""?*" ]; 	then printf "$C_LGREEN"; else printf "$C_LRED"; fi ;;
 			ATTR{type}) 	if [ "$LocalValue" == "1" ]; 	then printf "$C_LGREEN"; else printf "$C_LRED"; fi ;;
-			NAME)			printf "$C_UNDL";;
+			NAME)			IFaceName=$LocalValue; printf "$C_UNDL";;
 		esac
 		printf	"${C_BOLD}%-${NameLength}s${C_RESET} %-s\n" "$LocalKey" "$LocalValue";
 	done
@@ -338,11 +338,12 @@ ManageDevices()
 # 9.5
 GeneralNetworkConfiguration()
 {
-	EchoInfo	"/etc/sysconfig/ifconfig.eth0"
+	IFaceName=enp0s3;
+	EchoInfo	"/etc/sysconfig/ifconfig.enp0s3"
 	cd /etc/sysconfig/
-cat > ifconfig.eth0 << "EOF"
+cat > ifconfig.${IFaceName:-enp0s3} << EOF
 ONBOOT=yes
-IFACE=eth0
+IFACE=${IFaceName:-enp0s3}
 SERVICE=ipv4-static
 IP=192.168.1.2
 GATEWAY=192.168.1.1
@@ -353,14 +354,13 @@ EOF
 	EchoInfo	"/etc/resolv.conf"
 	cat > /etc/resolv.conf << "EOF"
 # Begin /etc/resolv.conf
-domain <Your Domain Name>
-nameserver <IP address of your primary nameserver>
-nameserver <IP address of your secondary nameserver>
+domain codam.nl
+nameserver 10.0.2.3
 # End /etc/resolv.conf
 EOF
 
 	EchoInfo	"/etc/hostname"
-	# StoredHostName="ohengelm";
+	StoredHostName="ohengelm";
 	EchoInfo	"hostname: $StoredHostName";
 	echo "$StoredHostName" > /etc/hostname;
 
@@ -550,11 +550,38 @@ Make10LFSBootable()
 	SetupBootWithGRUB;
 }
 
+ReadMountPoints()
+{
+	EchoInfo	"Storing Mountpoint variables";
+	RootPoint=$(lsblk -lno NAME,MOUNTPOINTS | awk '$2 == "/" { print $1 }');
+	RootType=$(blkid -s TYPE -o value "/dev/${RootPoint}");
+	# echo $RootPoint $RootType
+
+	mountpoint /boot || mount /dev/sda1 /boot;
+	BootPoint=$(lsblk -lno NAME,MOUNTPOINTS | awk '$2 == "/boot" { print $1 }');
+	BootType=$(blkid -s TYPE -o value "/dev/${BootPoint}");
+	# echo $BootPoint $BootType
+
+	SwapPoint=$(lsblk -lno NAME,MOUNTPOINTS | awk '$2 == "[SWAP]" { print $1 }');
+	SwapType=$(blkid -s TYPE -o value "/dev/${SwapPoint}");
+	# echo $SwapPoint $SwapType
+
+	HomePoint=$(lsblk -lno NAME,MOUNTPOINTS | awk '$2 == "/home" { print $1 }');
+	HomeType=$(blkid -s TYPE -o value "/dev/${HomePoint}");
+	# echo $HomePoint $HomeType
+
+	USrcPoint=$(lsblk -lno NAME,MOUNTPOINTS | awk '$2 == "/usr/src" { print $1 }');
+	USrcType=$(blkid -s TYPE -o value "/dev/${USrcPoint}");
+	# echo $USrcPoint $USrcType
+
+	OptPoint=$(lsblk -lno NAME,MOUNTPOINTS | awk '$2 == "/opt" { print $1 }');
+	OptType=$(blkid -s TYPE -o value "/dev/${OptPoint}");
+	# echo $OptPoint $OptType
+}
+
 CreateMountpointReferenceFile()
 {
-	local RootPoint=$(lsblk -lno NAME,MOUNTPOINTS | awk '$2 == "/" { print $1 }');
-	local RootType=$(lsblk -lno NAME,MOUNTPOINTS,FSTYPE | awk '$2 == "/" { print $3 }');
-	local SwapPoint=$(lsblk -lno NAME,MOUNTPOINTS | awk '$2 == "[SWAP]" { print $1 }');
+	ReadMountPoints;
 
 	EchoInfo	"/etc/fstab";
 	cat > /etc/fstab << EOF
@@ -562,7 +589,11 @@ CreateMountpointReferenceFile()
 
 # file system   mount-point     type        options             dump    fsck order
 /dev/${RootPoint:-sda5}       /               ${RootType:-ext4}        defaults            1       1
+/dev/${BootPoint:-sda1}       /boot           ${BootType:-ext2}        defaults            1       2
 /dev/${SwapPoint:-sda2}       swap            swap        pri=1               0       0
+/dev/${HomePoint:-sda6}       /home           ${HomeType:-ext4}        defaults            0       0
+/dev/${USrcPoint:-sda7}       /usr/src        ${USrcType:-ext4}        defaults            0       0
+/dev/${OptPoint:-sda8}       /opt            ${OptType:-ext4}        defaults            0       0
 proc            /proc           proc        nosuid,noexec,nodev 0       0
 sysfs           /sys            sysfs       nosuid,noexec,nodev 0       0
 devpts          /dev/pts        devpts      gid=5,mode=620      0       0
@@ -577,14 +608,10 @@ EOF
 
 SetupBootWithGRUB()
 {
+	ReadMountPoints;
+
 	EchoInfo	"Installing GRUB!!!"
 	grub-install /dev/sda
-
-	local BootType=$(lsblk -lno NAME,LABEL,MOUNTPOINTS,FSTYPE | awk '$2 == "/boot" { print $3 }');
-	local BootDrive=$(lsblk -nd | nl -v 0 | awk '$2 == "sda" { print $1 }');
-	local BootPart=$(lsblk -lno NAME,LABEL | awk '$2 == "/boot" { print $1 }' | sed 's/sda//')
-	
-	local RootPoint=$(lsblk -lno NAME,MOUNTPOINTS | awk '$2 == "/" { print $1 }');
 
 	EchoInfo	"/boot/grub/grub.cfg";
 	cat > /boot/grub/grub.cfg << EOF
@@ -593,14 +620,21 @@ set default=0
 set timeout=5
 
 insmod part_gpt
-insmod ${BootType:-ext2}
+insmod ext2
+
+insmod gfxterm
+insmod all_video
+
 set root=(hd${BootDrive:-0},${BootPart:-1})
 
+set gfxmode=1024x768,800x600,640x480
+set gfxpayload=text
+terminal_output gfxterm
+
 menuentry "GNU/Linux, Linux 6.10.5-lfs-12.2" {
-        linux   /boot/vmlinuz-6.10.5-lfs-12.2   root=/dev/${RootPoint:-sda5}  ro
+        linux   /vmlinuz-6.10.5-lfs-12.2   root=/dev/${RootPoint:-sda5}  ro
 }
 EOF
-
 }
 
 # =====================================||===================================== #
@@ -641,6 +675,151 @@ EOF
 
 # =====================================||===================================== #
 #																			   #
+#									 Bonus									   #
+#																			   #
+# ===============ft_linux==============||==============©Othello=============== #
+
+BonusBinaries()
+{
+	ExtractPackage	"blfs-bootscripts-20250225.tar.xz"
+	InstallWget;
+	InstallCaCert;
+	InstallOpenSSH;
+}
+
+ExtractPackage()
+{
+	tar -xf "/usr/src/${1}" -C "/usr/src/" || EchoError "($?)Failed to extract ${1}";
+}
+
+declare -A PackageWget;
+PackageWget[Name]="wget";
+PackageWget[Version]="1.25.0";
+PackageWget[Extension]=".tar.gz";
+PackageWget[Package]="${PackageWget[Name]}-${PackageWget[Version]}";
+
+InstallWget()
+{
+	EchoInfo	"${PackageWget[Name]}";
+	ExtractPackage	"${PackageWget[Package]}${PackageWget[Extension]}";
+
+	cd "/usr/src/${PackageWget[Package]}" || { EchoError "${PackageWget[Name]}> ($?)cd"; return; };
+
+	EchoInfo	"${PackageWget[Name]}> configure"
+	./configure --prefix=/usr \
+				--sysconfdir=/etc \
+				--with-ssl=openssl \
+				1> /dev/null || { EchoError "${PackageWget[Name]}> ($?)configure"; return; }
+
+	EchoInfo	"${PackageWget[Name]}> make"
+	make 1> /dev/null || { EchoError "${PackageWget[Name]}> ($?)make"; return; }
+
+	EchoInfo	"${PackageWget[Name]}> make install"
+	make install 1> /dev/null || { EchoError "${PackageWget[Name]}> ($?)make install"; return; }
+}
+
+declare -A PackageCaCert;
+PackageCaCert[Name]="make-ca.sh";
+PackageCaCert[Version]="20170514";
+PackageCaCert[Extension]="";
+PackageCaCert[Package]="${PackageCaCert[Name]}-${PackageCaCert[Version]}";
+
+InstallCaCert()
+{
+	EchoInfo	"${PackageCaCert[Name]}";
+
+	cd "/usr/src/make-ca" || { EchoError "${PackageCaCert[Name]}> ($?)cd"; return; };
+
+	EchoInfo	"${PackageCaCert[Name]}> configure"
+	install -vdm755 /etc/ssl/local
+	wget http://www.cacert.org/certs/root.crt
+	openssl x509 \
+			-in root.crt \
+			-text \
+			-fingerprint \
+			-setalias "CAcert Class 1 root" \
+			-addtrust serverAuth \
+			-addtrust emailProtection \
+			-addtrust codeSigning \
+			> /etc/ssl/local/CAcert_Class_1_root.pem
+
+	EchoInfo	"${PackageCaCert[Name]}> install"
+	install -vm755 make-ca.sh-20170514 /usr/sbin/make-ca.sh 1> /dev/null || { EchoError "${PackageCaCert[Name]}> ($?)make"; return; }
+
+	EchoInfo	"${PackageCaCert[Name]}> /usr/sbin/make-ca.sh"
+	/usr/sbin/make-ca.sh 1> /dev/null || { EchoError "${PackageCaCert[Name]}> ($?)make install"; return; }
+}
+
+declare -A PackageOpenSSH;
+PackageOpenSSH[Name]="openssh";
+PackageOpenSSH[Version]="9.9p2";
+PackageOpenSSH[Extension]=".tar.gz";
+PackageOpenSSH[Package]="${PackageOpenSSH[Name]}-${PackageOpenSSH[Version]}";
+
+InstallOpenSSH()
+{
+	EchoInfo	"${PackageOpenSSH[Name]}";
+	ExtractPackage	"${PackageOpenSSH[Package]}${PackageOpenSSH[Extension]}";
+
+	cd "/usr/src/${PackageOpenSSH[Package]}" || { EchoError "${PackageOpenSSH[Name]}> ($?)cd"; return; };
+
+	EchoInfo	"${PackageOpenSSH[Name]}> Setup Environment"
+	install -v -g sys -m700 -d /var/lib/sshd 1> /dev/null || { EchoError "${PackageOpenSSH[Name]}> ($?)make"; return; }
+
+	EchoInfo	"${PackageOpenSSH[Name]}> Add usergroup sshd"
+	groupadd -g 50 sshd
+	useradd  -c 'sshd PrivSep' \
+			-d /var/lib/sshd  \
+			-g sshd           \
+			-s /bin/false     \
+			-u 50 sshd
+
+	EchoInfo	"${PackageOpenSSH[Name]}> configure"
+	./configure --prefix=/usr \
+				--sysconfdir=/etc/ssh \
+				--with-privsep-path=/var/lib/sshd \
+				--with-default-path=/usr/bin \
+				--with-superuser-path=/usr/sbin:/usr/bin \
+				--with-pid-dir=/run \
+				1> /dev/null || { EchoError "${PackageOpenSSH[Name]}> ($?)make"; return; }
+
+	EchoInfo	"${PackageOpenSSH[Name]}> make"
+	make 1> /dev/null || { EchoError "${PackageOpenSSH[Name]}> ($?)make"; return; }
+
+	EchoInfo	"${PackageOpenSSH[Name]}> make -j1 tests"
+	make -j1 tests 1> /dev/null || { EchoError "${PackageOpenSSH[Name]}> ($?)make"; return; }
+
+	EchoInfo	"${PackageOpenSSH[Name]}> make install"
+	make install 1> /dev/null || { EchoError "${PackageOpenSSH[Name]}> ($?)make"; return; }
+
+	EchoInfo	"${PackageOpenSSH[Name]}> install -mXXX"
+	install -v -m755    contrib/ssh-copy-id /usr/bin \
+						 1> /dev/null || { EchoError "${PackageOpenSSH[Name]}> ($?)make"; return; }
+	install -v -m644    contrib/ssh-copy-id.1 \
+						/usr/share/man/man1 \
+						 1> /dev/null || { EchoError "${PackageOpenSSH[Name]}> ($?)make"; return; }
+	install -v -m755 -d /usr/share/doc/openssh-9.9p2 \
+						 1> /dev/null || { EchoError "${PackageOpenSSH[Name]}> ($?)make"; return; }
+	install -v -m644    INSTALL LICENCE OVERVIEW README* \
+						/usr/share/doc/openssh-9.9p2 \
+						 1> /dev/null || { EchoError "${PackageOpenSSH[Name]}> ($?)make"; return; }
+
+	# echo "PermitRootLogin no" >> /etc/ssh/sshd_config
+	# ssh-keygen
+	# ssh-copy-id -i ~/.ssh/id_ed25519.pub REMOTE_USERNAME@REMOTE_HOSTNAME
+	# echo "PasswordAuthentication no" >> /etc/ssh/sshd_config
+	# echo "KbdInteractiveAuthentication no" >> /etc/ssh/sshd_config
+	# sed 's@d/login@d/sshd@g' /etc/pam.d/login > /etc/pam.d/sshd
+	# chmod 644 /etc/pam.d/sshd
+	# echo "UsePAM yes" >> /etc/ssh/sshd_config
+
+	EchoInfo	"${PackageOpenSSH[Name]}> make install-sshd (@blfs-bootscripts-20250225)";
+	cd /usr/src/blfs-bootscripts-20250225;
+	make install-sshd 1> /dev/null || { EchoError "${PackageOpenSSH[Name]}> ($?)make"; return; }
+}
+
+# =====================================||===================================== #
+#																			   #
 #									Execution								   #
 #																			   #
 # ===============ft_linux==============||==============©Othello=============== #
@@ -665,7 +844,8 @@ while true; do
 	echo -e	"7)\t Configure environment and build last Temporary Tools";
 	echo -e	"8)\t Install Basic System Software";
 	echo -e	"9)\t System Configuration";
-	echo -e	"B)\t Making the LFS System Bootable";
+	echo -e "B)\t Bonus Binaries";
+	echo -e	"G)\t Making the LFS System Bootable (GRUB)";
 	echo -e "F)\t Final Touches";
 	printf '%*s\n' "$Width" '' | tr ' ' '-';
 	printf	"r)\t Remove Directories (%s)\n" "$(find $PDIR -mindepth 1 -maxdepth 1 -type d | wc -l)";
@@ -681,7 +861,8 @@ while true; do
 		7)	Install7;;
 		8)	Install8AllBinaries;;
 		9)	Configure9System;;
-		B)	Make10LFSBootable;;
+		B)	BonusBinaries;;
+		G)	Make10LFSBootable;;
 		F)	FinalTouches;;
 		r)	RemovePackageDirectories;;
 		q)	exit;;

@@ -24,6 +24,26 @@ DownloadPackages()
 		-A "md5sums,*.tar.xz,*.tar.gz,*.tar.bz2,*.patch" -nv;
 }
 
+DownloadBonusPackages()
+{
+	# wget
+	wget -P "$LFS/usr/src" "https://ftp.gnu.org/gnu/wget/wget-1.25.0.tar.gz"
+	# certificates
+	mkdir "$LFS/usr/src/make-ca"
+	wget -P "$LFS/usr/src/make-ca" "http://anduin.linuxfromscratch.org/BLFS/other/make-ca.sh-20170514"
+	wget -P "$LFS/usr/src/make-ca" "http://anduin.linuxfromscratch.org/BLFS/other/certdata.txt"
+	# BLFS bootscrpit
+	wget -P "$LFS/usr/src" "https://anduin.linuxfromscratch.org/BLFS/blfs-bootscripts/blfs-bootscripts-20250225.tar.xz"
+	# openssh
+	wget -P "$LFS/usr/src" "https://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-9.9p2.tar.gz"
+	# lynx
+	wget -P "$LFS/usr/src" "https://invisible-mirror.net/archives/lynx/tarballs/lynx2.9.2.tar.bz2"
+	# zsh
+	wget -P "$LFS/usr/src" "https://www.zsh.org/pub/zsh-5.9.tar.xz"
+	# curl
+	wget -P "$LFS/usr/src" "https://curl.se/download/curl-8.13.0.tar.xz"
+}
+
 RemoveSubDirectories()
 {
 	while read -r checksum filename; do
@@ -250,7 +270,8 @@ while true; do
 			CreateDirectoryLayout;
 			AddUserToLFS;
 			CreateLFSEnvironment;;
-		3)	DownloadPackages;;
+		3)	DownloadPackages;
+			DownloadBonusPackages;;
 		4)	CreateDirectoryLayout;;
 		5)	AddUserToLFS;;
 		6)	CreateLFSEnvironment;;

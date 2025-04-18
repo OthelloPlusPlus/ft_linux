@@ -43,6 +43,52 @@ BuildLFSSystemAsUser()
 			/bin/bash --login
 }
 
+EnsureMounts()
+{
+	# EnsureMount	"/dev/sda1"	"/boot"
+	# EnsureMount	"-v --bind /dev"	"$LFS/dev"
+	# EnsureMount	"-vt devpts devpts -o gid=5,mode=0620"	"$LFS/dev/pts"
+	# EnsureMount	"vt proc proc"	"$LFS/proc"
+	# EnsureMount	"-vt sysfs sysfs"	"$LFS/sys"
+	# EnsureMount	"-vt tmpfs tmpfs"	"$LFS/run"
+	# if [ -h $LFS/dev/shm ]; then
+	# 	install -v -d -m 1777 $LFS$(realpath /dev/shm)
+	# else
+	# 	EnsureMount	"-vt tmpfs -o nosuid,nodev tmpfs"	"$LFS/dev/shm"
+	# fi
+	# EnsureMount "/dev/sda1"	"/boot"
+	# Preparing Virtual Kernel File Systems
+	EchoInfo	"Creating $LFS directories"
+	mkdir -pv $LFS/{dev,proc,sys,run}
+
+	EchoInfo	"Mounting $LFS directories"
+	! mountpoint -q $LFS/dev 		&& mount -v --bind /dev $LFS/dev
+
+	! mountpoint -q $LFS/dev/pts 	&& mount -vt devpts devpts -o gid=5,mode=0620 $LFS/dev/pts
+	! mountpoint -q $LFS/proc 		&& mount -vt proc proc $LFS/proc
+	! mountpoint -q $LFS/sys 		&& mount -vt sysfs sysfs $LFS/sys
+	! mountpoint -q $LFS/run 		&& mount -vt tmpfs tmpfs $LFS/run
+
+	EchoInfo	"Populating $LFS/dev"
+	if [ -h $LFS/dev/shm ]; then
+		install -v -d -m 1777 $LFS$(realpath /dev/shm)
+	else
+		mountpoint -q $LFS/dev/shm || mount -vt tmpfs -o nosuid,nodev tmpfs $LFS/dev/shm;
+	fi
+	! mountpoint -q /boot		&& mount -vt /dev/sda1 /boot
+}
+
+EnsureMount()
+{
+	mountpoint "$2";
+	local RetVal=$?;
+	case $RetVal in
+		0) return 0;;
+		32)	mount $3 $1 "$2";;
+		*)	EchoError	"Bad errorcode $RetVal";;
+	esac
+}
+
 RebootTheSystem()
 {
 	EchoInfo	"Reboot> Unmounting"
@@ -87,6 +133,7 @@ while true; do
 	echo	"4)\t Building LFS";
 	echo	"R)\t Reboot for installation";
 	printf '%*s\n' "$Width" '' | tr ' ' '-';
+	echo	"m)\t Ensure Mounts";
 	echo	"v)\t Validate LFS";
 	echo -e	"q)\t Quit";
 	printf '%*s\n' "$Width" '' | tr ' ' '-';
@@ -103,6 +150,7 @@ while true; do
 		p)	./Install3_2PrepareChroot.sh || PressAnyKeyToContinue;;
 		4)	BuildLFSSystemAsUser || PressAnyKeyToContinue;;
 		R)	RebootTheSystem;;
+		m)	EnsureMounts || PressAnyKeyToContinue;;
 		v)	local ExecuteCommand="Validate";;
 		q)	exit;;
 		*)	local ExecuteCommand=$input;;
