@@ -363,3 +363,18 @@ Arch Linux install medium (x86_64, BIOS)
 
 Run install
 
+GRUB insmod: https://www.linux.org/threads/understanding-the-various-grub-modules.11142/ 
+
+# Bonus
+
+https://www.linuxfromscratch.org/blfs/view/stable/
+
+wget
+ca-certificates
+openssh
+lynx
+zsh
+curl
+
+pacman
+gnome

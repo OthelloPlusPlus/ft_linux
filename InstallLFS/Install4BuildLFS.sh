@@ -339,16 +339,20 @@ ManageDevices()
 GeneralNetworkConfiguration()
 {
 	IFaceName=enp0s3;
+	# ifConfigIP="$(ip addr show enp0s3 | grep 'inet ' | awk '{print $2}' | cut -d/ -f1)"
+	# ifConfigPREFIX="$(ip addr show enp0s3 | grep 'inet ' | awk '{print $2}' | cut -d/ -f2)"
+	# ifConfigBORADCAST="$(ip addr show enp0s3 | grep 'inet ' | awk '{print $4}')"
+	# IfConfigGATEWAY="$(ip route | grep default | awk '{ print $3}')"
 	EchoInfo	"/etc/sysconfig/ifconfig.enp0s3"
 	cd /etc/sysconfig/
 cat > ifconfig.${IFaceName:-enp0s3} << EOF
 ONBOOT=yes
 IFACE=${IFaceName:-enp0s3}
 SERVICE=ipv4-static
-IP=192.168.1.2
-GATEWAY=192.168.1.1
+IP=10.0.2.15
+GATEWAY=10.0.2.2
 PREFIX=24
-BROADCAST=192.168.1.255
+BROADCAST=10.0.2.255
 EOF
 
 	EchoInfo	"/etc/resolv.conf"
@@ -356,6 +360,8 @@ EOF
 # Begin /etc/resolv.conf
 domain codam.nl
 nameserver 10.0.2.3
+nameserver 8.8.8.8
+nameserver 1.1.1.1
 # End /etc/resolv.conf
 EOF
 
@@ -621,17 +627,16 @@ set timeout=5
 
 insmod part_gpt
 insmod ext2
-
-insmod gfxterm
-insmod all_video
+# insmod gfxterm
+# insmod all_video
 
 set root=(hd${BootDrive:-0},${BootPart:-1})
 
-set gfxmode=1024x768,800x600,640x480
-set gfxpayload=text
-terminal_output gfxterm
+# set gfxmode=auto
+# terminal_output gfxterm
 
 menuentry "GNU/Linux, Linux 6.10.5-lfs-12.2" {
+        # set gfxpayload=keep
         linux   /vmlinuz-6.10.5-lfs-12.2   root=/dev/${RootPoint:-sda5}  ro
 }
 EOF
@@ -804,6 +809,7 @@ InstallOpenSSH()
 						/usr/share/doc/openssh-9.9p2 \
 						 1> /dev/null || { EchoError "${PackageOpenSSH[Name]}> ($?)make"; return; }
 
+	AddSSHConfFile;
 	# echo "PermitRootLogin no" >> /etc/ssh/sshd_config
 	# ssh-keygen
 	# ssh-copy-id -i ~/.ssh/id_ed25519.pub REMOTE_USERNAME@REMOTE_HOSTNAME
@@ -816,6 +822,29 @@ InstallOpenSSH()
 	EchoInfo	"${PackageOpenSSH[Name]}> make install-sshd (@blfs-bootscripts-20250225)";
 	cd /usr/src/blfs-bootscripts-20250225;
 	make install-sshd 1> /dev/null || { EchoError "${PackageOpenSSH[Name]}> ($?)make"; return; }
+}
+
+AddSSHConfFile()
+{
+	# Create file
+	mkdir -p /etc/ssh/sshd_config.d;
+	cat > /etc/ssh/sshd_config.d/10-custom-lfs.conf << EOF
+# 10-archiso.conf
+PasswordAuthentication yes
+PermitRootLogin yes
+
+# 20-systemd-userdb.conf
+AuthorizedKeysCommand /usr/bin/userdbctl ssh-authorized-keys %u
+AuthorizedKeysCommandUser root
+
+# 99-archlinux.conf
+KbdInteractiveAuthentication no
+UsePAM yes
+PrintMotd no	
+EOF
+
+	# Ensure include
+	grep -q '^Include /etc/ssh/sshd_config.d/\*\.conf$' /etc/ssh/sshd_config || sed -i '1iInclude /etc/ssh/sshd_config.d/*.conf' /etc/ssh/sshd_config
 }
 
 # =====================================||===================================== #

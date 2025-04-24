@@ -4955,8 +4955,8 @@ InstallLinux()
 		scripts/config --enable CONFIG_IOMMU_SUPPORT #64
 			scripts/config --enable CONFIG_IRQ_REMAP #64
 
-	# Added for size
-	scripts/config --enable CONFIG_FB_SIMPLE
+	# # Added for size
+	# scripts/config --enable CONFIG_FB_SIMPLE
 
 	EchoInfo	"${PackageLinux[Name]}> make olddefconfig (replacing make menuconfig)";
 	make olddefconfig 1> /dev/null || { PackageLinux[Status]=$?; EchoTest KO ${PackageLinux[Name]} && PressAnyKeyToContinue; return 1; };
