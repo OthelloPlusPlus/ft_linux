@@ -11,10 +11,20 @@ source ${SHMAN_DIR}Utils.sh
 declare -A PackageElogind;
 PackageElogind[Source]="https://github.com/elogind/elogind/archive/v255.17/elogind-255.17.tar.gz";
 PackageElogind[MD5]="3cd76e1a71e13c4810f6e80e176a8fa7";
-PackageElogind[Name]="elogind";
-PackageElogind[Version]="255.17";
+# Automated unless edgecase
+PackageElogind[Name]="";
+PackageElogind[Version]="";
+PackageElogind[Extension]="";
+if [[ -n "${PackageElogind[Source]}" ]]; then
+	filename="${PackageElogind[Source]##*/}"
+	if [[ $filename =~ ^([a-zA-Z0-9._+-]+)-([0-9]+\.[0-9]+(\.[0-9]+)?)(\..+)$ ]]; then
+		[[ -z "${PackageElogind[Name]}" ]] && PackageElogind[Name]="${BASH_REMATCH[1]}"
+		[[ -z "${PackageElogind[Version]}" ]] && PackageElogind[Version]="${BASH_REMATCH[2]}"
+		[[ -z "${PackageElogind[Extension]}" ]] && PackageElogind[Extension]="${BASH_REMATCH[4]}"
+	fi
+fi
 PackageElogind[Package]="${PackageElogind[Name]}-${PackageElogind[Version]}";
-PackageElogind[Extension]=".tar.xz";
+
 
 PackageElogind[Programs]="busctl elogind-inhibit loginctl";
 PackageElogind[Libraries]="libelogind.so";
@@ -27,12 +37,12 @@ InstallElogind()
 
 	# Check Dependencies
 	EchoInfo	"${PackageElogind[Name]}> Checking dependencies..."
-	Required=()
+	Required=(Linux)
 	for Dependency in "${Required[@]}"; do
 		(source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}") || { PressAnyKeyToContinue; return $?; }
 	done
 
-	Recommended=(Dbus LinuxPAM Polkit DocbookXml DocbookXslNons LibXslt)
+	Recommended=(Dbus LinuxPAM DocbookXml DocbookXslNons LibXslt)
 	for Dependency in "${Recommended[@]}"; do
 		(source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}") || PressAnyKeyToContinue;
 	done
@@ -96,7 +106,6 @@ _BuildElogind()
 	fi
 
 	EchoInfo	"${PackageElogind[Name]}> Requires kernel settings"
-	PressAnyKeyToContinue;
 
 	mkdir -p build 	&& cd ${SHMAN_PDIR}${PackageElogind[Package]}/build \
 					|| { EchoError "${PackageElogind[Name]}> Failed to enter ${SHMAN_PDIR}${PackageElogind[Package]}/build"; return 1; }

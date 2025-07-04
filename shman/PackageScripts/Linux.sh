@@ -104,6 +104,20 @@ PackageLinuxConfigPolkit=(
 		"--enable CONFIG_USER_NS"
 )
 
+PackageLinuxConfigElogind=(
+	# File systems --->
+	"--enable CONFIG_INOTIFY_USER"    
+		# Pseudo filesystems --->
+		"--enable CONFIG_TMPFS"
+		"--enable CONFIG_TMPFS_POSIX_ACL"
+	# Cryptographic API --->
+	"--enable CONFIG_CRYPTO"
+		# 	Crypto core or helper --->
+		"--module CONFIG_CRYPTO_USER"
+		# Userspace interface --->
+		"--module CONFIG_CRYPTO_USER_API_HASH"
+)
+
 PackageLinuxConfig=(
 	"${PackageLinuxConfigLFS[@]}"
 	# "${PackageLinuxConfigBLFS[@]}"
@@ -112,6 +126,7 @@ PackageLinuxConfig=(
 	"${PackageLinuxConfigLibAlsaLib[@]}"
 	"${PackageLinuxConfigLibEvdev[@]}"
 	"${PackageLinuxConfigPolkit[@]}"
+	"${PackageLinuxConfigElogind[@]}"
 )
 
 InstallLinux()
