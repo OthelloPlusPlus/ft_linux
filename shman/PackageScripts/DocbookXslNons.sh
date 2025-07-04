@@ -113,7 +113,7 @@ _BuildDocbookXslNons()
 			xhtml xhtml-1_1 xhtml5                                          \
 		/usr/share/xml/docbook/xsl-stylesheets-nons-1.79.2 &&
 
-	ln -s VERSION /usr/share/xml/docbook/xsl-stylesheets-nons-1.79.2/VERSION.xsl &&
+	ln -sf VERSION /usr/share/xml/docbook/xsl-stylesheets-nons-1.79.2/VERSION.xsl &&
 
 	install -v -m644 -D README \
 						/usr/share/doc/docbook-xsl-nons-1.79.2/README.txt &&
