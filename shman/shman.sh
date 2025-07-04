@@ -306,6 +306,7 @@ while true; do
 
 	printf '%*s\n' "$Width" '' | tr ' ' '-';
 	echo -e	"${C_ORANGE}${C_BOLD}Shman - Shell Package Manager${C_RESET}";
+	echo -n "Scripts: "; ls ${SHMAN_SDIR}/*.sh -l | wc -l;
 	printf '%*s\n' "$Width" '' | tr ' ' '-';
 	echo -e "p)\t Python Packages"
 	echo -e "l)\t gcc Libraries"
