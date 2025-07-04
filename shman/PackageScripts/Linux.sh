@@ -221,6 +221,7 @@ _BuildLinux()
 	make olddefconfig 1> /dev/null || { EchoTest KO ${PackageLinux[Name]} && PressAnyKeyToContinue; return 1; };
 
 	EchoInfo	"${PackageLinux[Name]}> make"
+	date 2> /dev/null;
 	make 1> /dev/null || { EchoTest KO ${PackageLinux[Name]} && PressAnyKeyToContinue; return 1; };
 
 	EchoInfo	"${PackageLinux[Name]}> make modules_install"
