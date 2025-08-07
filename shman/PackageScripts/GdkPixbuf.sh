@@ -2,7 +2,7 @@
 
 if [ ! -z "${PackageGdkPixbuf[Source]}" ]; then return; fi
 
-source ${SHMAN_DIR}Utils.sh
+source ${SHMAN_UDIR}Utils.sh
 
 # =====================================||===================================== #
 #									GdkPixbuf								   #
@@ -31,7 +31,7 @@ InstallGdkPixbuf()
 		source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}" || { PressAnyKeyToContinue; return $?; }
 	done
 
-	Recommended=(LibRsvg LibTiff)
+	Recommended=(Docutils LibTiff)
 	for Dependency in "${Recommended[@]}"; do
 		source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}" || PressAnyKeyToContinue;
 	done

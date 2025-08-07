@@ -25,21 +25,25 @@ InstallCairo()
 	# Check Installation
 	CheckCairo && return $?;
 
-	EchoInfo	"${PackageCairo[Name]}> Checking dependencies..."
-
 	# Check Dependencies
+	EchoInfo	"${PackageCairo[Name]}> Checking dependencies..."
 	Required=(LibPng Pixman)
 	for Dependency in "${Required[@]}"; do
+		# EchoInfo	"${PackageCairo[Name]}> Checking ${Dependency}..."
 		source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}" || { PressAnyKeyToContinue; return $?; }
 	done
 
-	Recommended=(Fontconfig GLib XorgLibraries)
+	# removed Fontconfig and XorgLibraries because circular dependencies
+	Recommended=(GLib FreeTypeChain)
 	for Dependency in "${Recommended[@]}"; do
+		# EchoInfo	"${PackageCairo[Name]}> Checking ${Dependency}..."
 		source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}" || PressAnyKeyToContinue;
 	done
 
-	Optional=(Ghostscript GTKDoc LibDrm LibRsvg LibXml2 LZO Popplet Valgrind GTK+ LibSpectre)
+ 	# removed LibRsvg because circular
+	Optional=(Ghostscript GTKDoc LibDrm LibXml2 LZO Popplet Valgrind GTK+ LibSpectre)
 	for Dependency in "${Optional[@]}"; do
+		# EchoInfo	"${PackageCairo[Name]}> Checking ${Dependency}..."
 		if [ -f ${SHMAN_SDIR}/${Dependency}.sh ]; then
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 		fi
@@ -89,7 +93,7 @@ _BuildCairo()
 	fi
 
 	EchoInfo	"${PackageCairo[Name]}> Patching"
-	patch -Np1 -i ../cairo-1.18.2-upstream_fixes-1.patch
+	patch -Np1 -i ../cairo-1.18.2-upstream_fixes-1.patch || return $?;
 
 	if ! mkdir -p build; then
 		EchoError	"Failed to make ${SHMAN_PDIR}${PackageCairo[Name]}/build";

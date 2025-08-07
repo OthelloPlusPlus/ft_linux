@@ -2,7 +2,7 @@
 
 if [ ! -z "${PackageZsh[Source]}" ]; then return; fi
 
-source ${SHMAN_DIR}Utils.sh
+source ${SHMAN_UDIR}Utils.sh
 
 # =====================================||===================================== #
 #									  Zsh									   #
@@ -129,6 +129,9 @@ _ConfigureZsh()
 	EchoInfo	"${PackageZsh[Name]}> Add /etc/zsh/zshrc file for default users"
 	mkdir -p /etc/zsh
 	cat	> /etc/zsh/zshrc << EOF
+# Colors
+export TERM=xterm-256color
+
 # Default prompt
 case "\$(tput colors)" in
 	8)

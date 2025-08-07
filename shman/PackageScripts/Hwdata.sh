@@ -2,7 +2,7 @@
 
 if [ ! -z "${PackageHwdata[Source]}" ]; then return; fi
 
-source ${SHMAN_DIR}Utils.sh
+source ${SHMAN_UDIR}Utils.sh
 
 # =====================================||===================================== #
 #									 Hwdata									   #
@@ -61,7 +61,7 @@ CheckHwdata()
 
 CheckHwdataVerbose()
 {
-	EchoInfo	"No valid check implemented" >&2;
+	EchoWarning	"No valid check implemented" >&2;
 	return 1;
 	# CheckInstallationVerbose	"${PackageHwdata[Programs]}"\
 	# 							"${PackageHwdata[Libraries]}"\

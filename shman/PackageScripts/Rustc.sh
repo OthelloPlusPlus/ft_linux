@@ -2,7 +2,7 @@
 
 if [ ! -z "${PackageRustc[Source]}" ]; then return; fi
 
-source ${SHMAN_DIR}Utils.sh
+source ${SHMAN_UDIR}Utils.sh
 
 # =====================================||===================================== #
 #									 Rustc									   #
@@ -17,7 +17,8 @@ PackageRustc[Package]="${PackageRustc[Name]}-${PackageRustc[Version]}-src";
 PackageRustc[Extension]=".tar.xz";
 
 PackageRustc[Programs]="cargo-clippy cargo-fmt cargo clippy-driver rust-gdb rust-gdbgui rust-lldb rustc rustdoc rustfmt";
-PackageRustc[Libraries]="librustc-driver-<16-byte-hash>.so libstd-<16-byte-hash>.so libtest-<16-byte-hash>.so";
+# removed non-gcc libraries librustc-driver-<16-byte-hash>.so libstd-<16-byte-hash>.so libtest-<16-byte-hash>.so
+PackageRustc[Libraries]="";
 PackageRustc[Python]="";
 
 InstallRustc()
@@ -55,7 +56,14 @@ CheckRustc()
 {
 	CheckInstallation 	"${PackageRustc[Programs]}"\
 						"${PackageRustc[Libraries]}"\
-						"${PackageRustc[Python]}" 1> /dev/null;
+						"${PackageRustc[Python]}" \
+						1> /dev/null || return $?;
+	rustc - --emit=metadata 1> /dev/null <<EOF
+fn main() {
+    let _ = std::fs::File::open("/dev/null");
+}
+EOF
+
 	return $?;
 }
 
@@ -63,7 +71,17 @@ CheckRustcVerbose()
 {
 	CheckInstallationVerbose	"${PackageRustc[Programs]}"\
 								"${PackageRustc[Libraries]}"\
-								"${PackageRustc[Python]}";
+								"${PackageRustc[Python]}" \
+								|| return $?;
+	rustc - --emit=metadata 1> /dev/null <<EOF
+fn main() {
+    let _ = std::fs::File::open("/dev/null");
+}
+EOF
+	if [ $? -ne 0 ]; then
+		echo -en "${C_RED}libstd-*.so${C_RESET}" >&2;
+		return 1;
+	fi
 	return $?;
 }
 

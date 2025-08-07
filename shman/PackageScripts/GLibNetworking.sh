@@ -2,7 +2,7 @@
 
 if [ ! -z "${PackageGLibNetworking[Source]}" ]; then return; fi
 
-source ${SHMAN_DIR}Utils.sh
+source ${SHMAN_UDIR}Utils.sh
 
 # =====================================||===================================== #
 #								GLibNetworking								   #
@@ -33,8 +33,8 @@ InstallGLibNetworking()
 
 	Recommended=(GSettingsDesktopSchemas MakeCa)
 	for Dependency in "${Recommended[@]}"; do
+		EchoInfo	"${PackageGLibNetworking[Name]}> Checking Recommended ${Dependency}..."
 		(source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}") || PressAnyKeyToContinue;
-		echo "Checking $Dependency $?"
 	done
 
 	Optional=(LibProxy)

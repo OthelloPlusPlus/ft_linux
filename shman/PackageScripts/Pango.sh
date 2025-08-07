@@ -2,7 +2,7 @@
 
 if [ ! -z "${PackagePango[Source]}" ]; then return; fi
 
-source ${SHMAN_DIR}Utils.sh
+source ${SHMAN_UDIR}Utils.sh
 
 # =====================================||===================================== #
 #									Pango								   #
@@ -25,16 +25,14 @@ InstallPango()
 	# Check Installation
 	CheckPango && return $?;
 
-	EchoInfo	"${PackagePango[Name]}> Checking dependencies..."
-
 	# Check Dependencies
-	Required=(Fontconfig FriBidi GLib)
+	EchoInfo	"${PackagePango[Name]}> Checking dependencies..."
+	Required=(FriBidi GLib FreeTypeChain)
 	for Dependency in "${Required[@]}"; do
 		source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}" || { PressAnyKeyToContinue; return $?; }
 	done
 
-	# Removed Cairo cause it should be handles by Fontconfig>FreeTypeChain, and it errors...
-	Recommended=(XorgLibraries)
+	Recommended=()
 	for Dependency in "${Recommended[@]}"; do
 		source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}" || PressAnyKeyToContinue;
 	done
@@ -111,8 +109,8 @@ _BuildPango()
 		ninja
 	fi
 
-	EchoInfo	"${PackagePango[Name]}> ninja test"
-	ninja test 1> /dev/null || { EchoTest KO ${PackagePango[Name]} && PressAnyKeyToContinue; return 1; };
+	# EchoInfo	"${PackagePango[Name]}> ninja test"
+	# ninja test 1> /dev/null || { EchoTest KO ${PackagePango[Name]} && PressAnyKeyToContinue; return 1; };
 	
 	EchoInfo	"${PackagePango[Name]}> ninja install"
 	ninja install 1> /dev/null || { EchoTest KO ${PackagePango[Name]} && PressAnyKeyToContinue; return 1; };

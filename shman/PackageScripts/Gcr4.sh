@@ -2,7 +2,7 @@
 
 if [ ! -z "${PackageGcr4[Source]}" ]; then return; fi
 
-source ${SHMAN_DIR}Utils.sh
+source ${SHMAN_UDIR}Utils.sh
 
 # =====================================||===================================== #
 #									Gcr4								   #
@@ -26,6 +26,7 @@ InstallGcr4()
 	CheckGcr4 && return $?;
 
 	# Check Dependencies
+	EchoInfo	"${PackageGcr4[Name]}4> Checking dependencies..."
 	Required=(GLib LibGcrypt P11Kit)
 	for Dependency in "${Required[@]}"; do
 		source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}" || { PressAnyKeyToContinue; return $?; }
@@ -33,6 +34,7 @@ InstallGcr4()
 
 	Recommended=(GnuPG GTK4 LibSecret LibXslt OpenSSH Vala)
 	for Dependency in "${Recommended[@]}"; do
+		# EchoInfo	"${PackageGcr4[Name]}4> Checking recommended ${Dependency}..."
 		source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}" || PressAnyKeyToContinue;
 	done
 
@@ -111,7 +113,7 @@ _BuildGcr4()
 	EchoInfo	"${PackageGcr4[Name]}4> ninja test"
 	if [ -z "$DISPLAY" ]; then
 		echo "No X graphical environment detected. Tests requiring X will fail."
-		ninja test || { EchoTest KO "${PackageGcr4[Name]}4 Failures expected due to no X graphical environment." && PressAnyKeyToContinue; };
+		ninja test || { EchoWarning "${PackageGcr4[Name]}4> Failures expected due to no X graphical environment." && PressAnyKeyToContinue; };
 	else
 		ninja test 1> /dev/null || { EchoTest KO ${PackageGcr4[Name]}4 && PressAnyKeyToContinue; return 1; };
 	fi

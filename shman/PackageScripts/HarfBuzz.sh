@@ -2,7 +2,7 @@
 
 if [ ! -z "${PackageHarfBuzz[Source]}" ]; then return; fi
 
-source ${SHMAN_DIR}Utils.sh
+source ${SHMAN_UDIR}Utils.sh
 
 # =====================================||===================================== #
 #									HarfBuzz								   #
@@ -34,7 +34,7 @@ InstallHarfBuzz()
 	done
 
 	# removed FreeType because of circular dependency, because why create clean stuff people...
-	Recommended=(GLib ICU)
+	Recommended=(GLib Graphite2 Texlive LibreOffice ICU FreeTypeChain)
 	for Dependency in "${Recommended[@]}"; do
 		source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}" || PressAnyKeyToContinue;
 	done

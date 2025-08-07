@@ -2,7 +2,7 @@
 
 if [ ! -z "${PackagePipewire[Source]}" ]; then return; fi
 
-source ${SHMAN_DIR}Utils.sh
+source ${SHMAN_UDIR}Utils.sh
 
 # =====================================||===================================== #
 #									Pipewire								   #
@@ -16,7 +16,7 @@ PackagePipewire[Version]="1.2.7";
 PackagePipewire[Package]="${PackagePipewire[Name]}-${PackagePipewire[Version]}";
 PackagePipewire[Extension]=".tar.bz2";
 
-PackagePipewire[Programs]="pipewire pw-cat pw-cli pw-config pw-dot pw-dump pw-jack pw-link pw-loopback pw-metadata pw-mididump pw-mon pw-profiler pw-reserve pw-top pw-v4l2 spa-acp-tool spa-inspect spa-json-dump spa-monitor spa-resample and pipewire-aes67 pipewire-avb pipewire-pulse pw-dsdplay pw-encplay pw-midiplay pw-midirecord pw-play pw-record";
+PackagePipewire[Programs]="pipewire pw-cat pw-cli pw-config pw-dot pw-dump pw-jack pw-link pw-loopback pw-metadata pw-mididump pw-mon pw-profiler pw-reserve pw-top pw-v4l2 spa-acp-tool spa-inspect spa-json-dump spa-monitor spa-resample pipewire-aes67 pipewire-avb pipewire-pulse pw-dsdplay pw-encplay pw-midiplay pw-midirecord pw-play pw-record";
 # too many...
 PackagePipewire[Libraries]="libpipewire-0.3.so";
 PackagePipewire[Python]="";

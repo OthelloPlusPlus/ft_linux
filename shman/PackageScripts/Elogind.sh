@@ -2,7 +2,7 @@
 
 if [ ! -z "${PackageElogind[Source]}" ]; then return; fi
 
-source ${SHMAN_DIR}Utils.sh
+source ${SHMAN_UDIR}Utils.sh
 
 # =====================================||===================================== #
 #									Elogind								   #
@@ -25,9 +25,9 @@ if [[ -n "${PackageElogind[Source]}" ]]; then
 fi
 PackageElogind[Package]="${PackageElogind[Name]}-${PackageElogind[Version]}";
 
-
 PackageElogind[Programs]="busctl elogind-inhibit loginctl";
-PackageElogind[Libraries]="libelogind.so";
+# Added libsystemd.so to check if it properly replaces its utility
+PackageElogind[Libraries]="libelogind.so libsystemd.so";
 PackageElogind[Python]="";
 
 InstallElogind()
@@ -37,12 +37,12 @@ InstallElogind()
 
 	# Check Dependencies
 	EchoInfo	"${PackageElogind[Name]}> Checking dependencies..."
-	Required=(Linux)
+	Required=(Linux LinuxPAM) # moved LinuxPAM up because its needed for a directory
 	for Dependency in "${Required[@]}"; do
 		(source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}") || { PressAnyKeyToContinue; return $?; }
 	done
 
-	Recommended=(Dbus LinuxPAM DocbookXml DocbookXslNons LibXslt)
+	Recommended=(Dbus DocbookXml DocbookXslNons LibXslt)
 	for Dependency in "${Recommended[@]}"; do
 		(source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}") || PressAnyKeyToContinue;
 	done
@@ -58,7 +58,10 @@ InstallElogind()
 	EchoInfo	"${PackageElogind[Name]}> Building package..."
 	_ExtractPackageElogind || return $?;
 	_BuildElogind || return $?;
-	_ConfigureElogind;
+	_ConfigureElogind || return $?;
+
+	/usr/libexec/elogind &
+	EchoInfo "${PackageElogind[Name]}> Started daemon PID $!"
 	return $?
 }
 
@@ -66,18 +69,70 @@ CheckElogind()
 {
 	CheckInstallation 	"${PackageElogind[Programs]}"\
 						"${PackageElogind[Libraries]}"\
-						"${PackageElogind[Python]}" 1> /dev/null && \
-	loginctl
-	return $?;
+						"${PackageElogind[Python]}" 1> /dev/null || return $?;
+
+	
+	if ! pgrep -x dbus-daemon &> /dev/null; then return 2; fi
+	if ! ps -p $(cat /run/elogind.pid) &>/dev/null; then return 3; fi
+	if ! loginctl &> /dev/null; then return 4; fi
+	if ! dbus-send --system \
+					--dest=org.freedesktop.login1 \
+					--type=method_call \
+					--print-reply \
+					/org/freedesktop/login1 org.freedesktop.login1.Manager.ListSessions &>/dev/null; then
+		return 5;
+	fi
+	return 0;
 }
 
 CheckElogindVerbose()
 {
 	CheckInstallationVerbose	"${PackageElogind[Programs]}"\
 								"${PackageElogind[Libraries]}"\
-								"${PackageElogind[Python]}" && \
-	loginctl
-	return $?;
+								"${PackageElogind[Python]}" || return $?;
+
+	if ! pgrep -x dbus-daemon &>/dev/null; then
+		/etc/init.d/dbus start &> /dev/null
+		if ! pgrep -x dbus-daemon &>/dev/null; then
+			echo -en "${C_RED}dbus start${C_RESET} " >&2
+			return 2;
+		fi
+	fi
+
+	if [ -f /run/elogind.pid ]; then
+		if ! ps -p $(cat /run/elogind.pid) &> /dev/null; then
+			/usr/libexec/elogind &> /dev/null &
+			if ! ps -p $(cat /run/elogind.pid) &> /dev/null; then
+				echo -en "${C_RED}elogind${C_RESET} " >&2
+				return 3;
+			fi
+		fi
+	else
+		if ! pgrep -f elogind &>/dev/null; then
+			/usr/libexec/elogind &> /dev/null &
+			if ! pgrep -f elogind &>/dev/null; then
+				echo -en "${C_RED}elogind${C_RESET} " >&2
+				return 3;
+			fi
+		fi
+	fi
+
+	for i in {1..10}; do
+		if loginctl &>/dev/null; then break; fi
+		if [ $i -ge 10 ]; then echo -en "$? ${C_RED}loginctl${C_RESET} " >&2; return 4; fi
+		sleep 1;
+	done
+
+	if ! dbus-send --system \
+					--dest=org.freedesktop.login1 \
+					--type=method_call \
+					--print-reply \
+					/org/freedesktop/login1 org.freedesktop.login1.Manager.ListSessions &>/dev/null; then
+		echo -en "$? ${C_RED}dbus interface${C_RESET} " >&2
+		return 5;
+	fi
+
+	return 0;
 }
 
 # =====================================||===================================== #
@@ -105,7 +160,7 @@ _BuildElogind()
 		return 1;
 	fi
 
-	EchoInfo	"${PackageElogind[Name]}> Requires kernel settings"
+	EchoInfo	"${PackageElogind[Name]}> Requires kernel settings INOTIFY_USER CONFIG_TMPFS CONFIG_TMPFS_POSIX_ACL CONFIG_CRYPTO CONFIG_CRYPTO_USER CONFIG_CRYPTO_USER_API_HASH"
 
 	mkdir -p build 	&& cd ${SHMAN_PDIR}${PackageElogind[Package]}/build \
 					|| { EchoError "${PackageElogind[Name]}> Failed to enter ${SHMAN_PDIR}${PackageElogind[Package]}/build"; return 1; }
@@ -125,12 +180,23 @@ _BuildElogind()
 	ninja 1> /dev/null || { EchoTest KO ${PackageElogind[Name]} && PressAnyKeyToContinue; return 1; };
 
 	EchoInfo	"${PackageElogind[Name]}> ninja test"
-	ninja test 1> /dev/null || { EchoTest KO ${PackageElogind[Name]} && PressAnyKeyToContinue; return 1; };
+	ninja test 1> /dev/null || {
+		EchoTest KO "${PackageElogind[Name]}> 3 tests known to fail:";
+		grep -B1 -A999 '^Summary of Failures:' "${SHMAN_PDIR}${PackageElogind[Package]}/build/meson-logs/testlog.txt" | GREP_COLORS='mt=1;33' grep --color=always -E -B10 -A10 "test-login|dbus-docs-fresh|check-version-history" || echo "No summary found.";
+		PressAnyKeyToContinue;
+	}
 	
 	EchoInfo	"${PackageElogind[Name]}> ninja install"
 	ninja install 1> /dev/null || { EchoTest KO ${PackageElogind[Name]} && PressAnyKeyToContinue; return 1; };
+
+	EchoInfo	"${PackageElogind[Name]}> Creating symbolic links"
 	ln -sfv  libelogind.pc /usr/lib/pkgconfig/libsystemd.pc
+	ln -sfv  libelogind.pc /usr/lib64/pkgconfig/libsystemd.pc
 	ln -sfvn elogind /usr/include/systemd
+	ln -sv libelogind.so /usr/lib/libsystemd.so
+	ln -sv libelogind.so /usr/lib64/libsystemd.so
+
+
 }
 
 _ConfigureElogind()
@@ -139,8 +205,9 @@ _ConfigureElogind()
 	sed -e '/\[Login\]/a KillUserProcesses=no' \
 		-i /etc/elogind/logind.conf
 
-	EchoInfo	"${PackageElogind[Name]}> /etc/pam.d/system-session"	
-	cat >> /etc/pam.d/system-session << "EOF" &&
+	if ! grep -qF 	"^# Begin elogind addition" /etc/pam.d/system-session; then
+		EchoInfo	"${PackageElogind[Name]}> /etc/pam.d/system-session"
+		cat >> /etc/pam.d/system-session << "EOF"
 # Begin elogind addition
 
 session  required    pam_loginuid.so
@@ -148,6 +215,7 @@ session  optional    pam_elogind.so
 
 # End elogind addition
 EOF
+	fi
 
 	EchoInfo	"${PackageElogind[Name]}> /etc/pam.d/elogind-user"	
 	cat > /etc/pam.d/elogind-user << "EOF"

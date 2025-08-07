@@ -1,8 +1,8 @@
 #!/bin/bash
 
-if [ ! -z "${PackageICU[Source]}" ]; then return; fi
+# if [ ! -z "${PackageICU[Source]}" ]; then return; fi
 
-source ${SHMAN_DIR}Utils.sh
+source ${SHMAN_UDIR}Utils.sh
 
 # =====================================||===================================== #
 #									  cURL									   #

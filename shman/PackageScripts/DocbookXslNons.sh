@@ -2,7 +2,7 @@
 
 if [ ! -z "${PackageDocbookXslNons[Source]}" ]; then return; fi
 
-source ${SHMAN_DIR}Utils.sh
+source ${SHMAN_UDIR}Utils.sh
 
 # =====================================||===================================== #
 #									DocbookXslNons								   #
@@ -53,20 +53,24 @@ InstallDocbookXslNons()
 
 CheckDocbookXslNons()
 {
-	EchoInfo	"No valid check implemented" >&2;
-	return 1;
-	CheckInstallation 	"${PackageDocbookXslNons[Programs]}"\
-						"${PackageDocbookXslNons[Libraries]}"\
-						"${PackageDocbookXslNons[Python]}" 1> /dev/null;
-	return $?;
+	if [ ! -f /usr/share/doc/docbook-xsl-nons-1.79.2/README ] || \
+		[ $(ls /usr/share/xml/docbook/xsl-stylesheets-nons-1.79.2/*/*.xsl 2> /dev/null | wc -l) -lt 334 ]; then
+		return 1;
+	fi
+	return 0;
 }
 
 CheckDocbookXslNonsVerbose()
 {
-	CheckInstallationVerbose	"${PackageDocbookXslNons[Programs]}"\
-								"${PackageDocbookXslNons[Libraries]}"\
-								"${PackageDocbookXslNons[Python]}";
-	return $?;
+	if [ ! -f /usr/share/doc/docbook-xsl-nons-1.79.2/README ]; then
+		echo "${C_RED}doc/docbook-xsl-nons-1.79.2${C_RESET} " >&2;
+		return 1;
+	fi
+	if [ $(ls /usr/share/xml/docbook/xsl-stylesheets-nons-1.79.2/*/*.xsl 2> /dev/null | wc -l) -lt 334 ]; then
+		echo "${C_RED}*.xsl${C_RESET} " >&2;
+		return 2;
+	fi
+	return 0;
 }
 
 # =====================================||===================================== #

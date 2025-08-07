@@ -2,7 +2,7 @@
 
 if [ ! -z "${PackageMutter[Source]}" ]; then return; fi
 
-source ${SHMAN_DIR}Utils.sh
+source ${SHMAN_UDIR}Utils.sh
 
 # =====================================||===================================== #
 #									Mutter								   #
@@ -17,7 +17,7 @@ PackageMutter[Package]="${PackageMutter[Name]}-${PackageMutter[Version]}";
 PackageMutter[Extension]=".tar.xz";
 
 PackageMutter[Programs]="mutter";
-PackageMutter[Libraries]="libmutter-15.so";
+PackageMutter[Libraries]="libmutter-15.so libmutter-test-15.so";
 PackageMutter[Python]="";
 
 InstallMutter()
@@ -27,12 +27,14 @@ InstallMutter()
 
 	# Check Dependencies
 	EchoInfo	"${PackageMutter[Name]}> Checking dependencies..."
-	Required=(GnomeSettingsDaemon Graphene LibEi LibXcvt LibXkbcommon Pipewire)
+	# Added Elogind cause it needs libsystemd.so which elogind emulates
+	Required=(GnomeSettingsDaemon Graphene LibEi LibXcvt LibXkbcommon Pipewire Elogind)
 	for Dependency in "${Required[@]}"; do
 		source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}" || { PressAnyKeyToContinue; return $?; }
 	done
 
-	Recommended=(DesktopFileUtils GLib LibDisplayInfo StartupNotification LibInput Wayland WaylandProtocols Xwayland)
+	# Added Colord because it seems to need it
+	Recommended=(DesktopFileUtils GLib LibDisplayInfo StartupNotification LibInput Wayland WaylandProtocols Xwayland Colord)
 	for Dependency in "${Recommended[@]}"; do
 		source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}" || PressAnyKeyToContinue;
 	done
@@ -87,16 +89,23 @@ _BuildMutter()
 		return 1;
 	fi
 
+	# EchoInfo	"${PackageMutter[Name]}> AI Patching"
+	# if [ "$(grep -c "^option('colord'" meson_options.txt)" -eq 0 ]; then
+	# 	echo "option('colord', type: 'boolean', value: false, description: 'Enable colord support')" >> meson_options.txt;
+	# fi
+	# sed -i "s|^colord_dep = dependency('colord', version: colord_req)|colord_dep = dependency('colord', version: colord_req, required: get_option('colord'))|" meson.build
+
 	mkdir -p build 	&& cd ${SHMAN_PDIR}${PackageMutter[Package]}/build \
 					|| { EchoError "${PackageMutter[Name]}> Failed to enter ${SHMAN_PDIR}${PackageMutter[Package]}/build"; return 1; }
 
 	EchoInfo	"${PackageMutter[Name]}> Configure"
 	meson setup --prefix=/usr \
 				--buildtype=release \
-				-D tests=disabled \
+				-D clutter_tests=false \
 				-D profiler=false \
-				.. \
-				1> /dev/null || { EchoTest KO ${PackageMutter[Name]} && PressAnyKeyToContinue; return 1; };
+				-D libdisplay_info=disabled \
+				-D xwayland=false \
+				.. 1> /dev/null || { EchoTest KO ${PackageMutter[Name]} && PressAnyKeyToContinue; return 1; };
 
 	EchoInfo	"${PackageMutter[Name]}> ninja"
 	ninja 1> /dev/null || { EchoTest KO ${PackageMutter[Name]} && PressAnyKeyToContinue; return 1; };

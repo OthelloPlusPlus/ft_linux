@@ -2,7 +2,7 @@
 
 if [ ! -z "${PackageIbus[Source]}" ]; then return; fi
 
-source ${SHMAN_DIR}Utils.sh
+source ${SHMAN_UDIR}Utils.sh
 
 # =====================================||===================================== #
 #									Ibus								   #
@@ -34,6 +34,7 @@ InstallIbus()
 
 	Recommended=(DConf GLib GTK3 GTK4 LibNotify)
 	for Dependency in "${Recommended[@]}"; do
+		# EchoInfo	"${PackageIbus[Name]}> Checking recommended ${Dependency}..."
 		source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}" || PressAnyKeyToContinue;
 	done
 
@@ -53,22 +54,31 @@ InstallIbus()
 
 CheckIbus()
 {
-	gtk-query-immodules-3.0 --update-cache
+	gtk-query-immodules-3.0 --update-cache &> /dev/null || return $?;
 	gtk-query-immodules-3.0 | grep -q im-ibus.so || return $?;
 	CheckInstallation 	"${PackageIbus[Programs]}"\
 						"${PackageIbus[Libraries]}"\
-						"${PackageIbus[Python]}" 1> /dev/null;
+						"${PackageIbus[Python]}" 1> /dev/null || return $?;
+	if which gjs &> /dev/null; then
+		gjs -c 'print(imports.gi.IBus);' &> /dev/null || return $?;
+	fi
 	return $?;
 }
 
 CheckIbusVerbose()
 {
-	gtk-query-immodules-3.0 --update-cache
-	gtk-query-immodules-3.0 | grep -q im-ibus.so || echo "${C_RED}im-ibus.so${C_RESET} " >&2;
+	gtk-query-immodules-3.0 --update-cache &> /dev/null || { echo -en "${C_RED}gtk-query-immodules${C_RESET} " >&2; return 1; }
+	gtk-query-immodules-3.0 | grep -q im-ibus.so || echo -en "${C_RED}im-ibus.so${C_RESET} " >&2;
 	CheckInstallationVerbose	"${PackageIbus[Programs]}"\
 								"${PackageIbus[Libraries]}"\
 								"${PackageIbus[Python]}";
-	return $?;
+	if which gjs &> /dev/null; then
+		gjs -c 'print(imports.gi.IBus);' &> /dev/null || {
+			echo -en "${C_RED}gjs${C_RESET} " >&2;
+			return 1;
+		}
+	fi
+	return 0;
 }
 
 # =====================================||===================================== #
@@ -109,26 +119,37 @@ _BuildIbus()
 		sed '/docs/d;/GTK_DOC/d' -i Makefile.am configure.ac
 	fi
 
-	# mkdir -p build 	&& cd ${SHMAN_PDIR}${PackageIbus[Package]}/build \
-	# 				|| { EchoError "${PackageIbus[Name]}> Failed to enter ${SHMAN_PDIR}${PackageIbus[Package]}/build"; return 1; }
-
+	EchoInfo	"${PackageIbus[Name]}> Configure autogen.sh"
+	SAVE_DIST_FILES=1 NOCONFIGURE=1 ./autogen.sh 1> /dev/null || { EchoTest KO ${PackageIbus[Name]} && PressAnyKeyToContinue; return 1; };
 	EchoInfo	"${PackageIbus[Name]}> Configure"
-	SAVE_DIST_FILES=1 NOCONFIGURE=1 ./autogen.sh
 	PYTHON=python3 \
 	./configure --prefix=/usr \
+				--libdir=/usr/lib64 \
 				--sysconfdir=/etc \
 				--disable-python2 \
 				--disable-appindicator \
 				--disable-emoji-dict \
 				--disable-gtk2 \
 				--disable-systemd-services \
+				--enable-introspection \
 				1> /dev/null || { EchoTest KO ${PackageIbus[Name]} && PressAnyKeyToContinue; return 1; };
 
 	EchoInfo	"${PackageIbus[Name]}> make"
 	make 1> /dev/null || { EchoTest KO ${PackageIbus[Name]} && PressAnyKeyToContinue; return 1; };
 
-	# EchoInfo	"${PackageIbus[Name]}> make -k check"
-	# make check 1> /dev/null || { EchoTest KO ${PackageIbus[Name]} && PressAnyKeyToContinue; return 1; };
+	EchoInfo	"${PackageIbus[Name]}> make -k check"
+	make -k check 1> /dev/null || { 
+			EchoTest KO "${PackageIbus[Name]}> Expected Errors:";
+			EchoWarning "${PackageIbus[Name]}> ibus-keypress if running Wayland";
+			EchoWarning "${PackageIbus[Name]}> xkb-latin-layouts on some systems";
+			find . -type f -name test-suite.log | while read -r logfile; do
+				head -n 3 "$logfile"
+				grep '^FAIL:' "$logfile"
+			done
+			EchoWarning "${PackageIbus[Name]}> Evaluate whether errors are critical.";
+			EchoWarning "${PackageIbus[Name]}> Otherwise Ctrl + C";
+			PressAnyKeyToContinue;
+		};
 	
 	EchoInfo	"${PackageIbus[Name]}> make install"
 	make install 1> /dev/null || { EchoTest KO ${PackageIbus[Name]} && PressAnyKeyToContinue; return 1; };

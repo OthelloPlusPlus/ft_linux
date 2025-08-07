@@ -2,7 +2,7 @@
 
 if [ ! -z "${PackageXorgLibraries[Source]}" ]; then return; fi
 
-source ${SHMAN_DIR}Utils.sh
+source ${SHMAN_UDIR}Utils.sh
 
 # =====================================||===================================== #
 #								 XorgLibraries								   #
@@ -26,7 +26,8 @@ InstallXorgLibraries()
 	CheckXorgLibraries && return $?;
 
 	# Check Dependencies
-	Dependencies=(Fontconfig LibXcb)
+	EchoInfo	"${PackageXorgLibraries[Name]}> Checking dependencies..."
+	Dependencies=(LibXcb FreeTypeChain)
 	for Dependency in "${Dependencies[@]}"; do
 		source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}" || return $?
 	done
@@ -36,7 +37,7 @@ InstallXorgLibraries()
 		source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 	done
 
-	Optional=()
+	Optional=(Asciidoc Xmlto Fop Links Lynx)
 	for Dependency in "${Optional[@]}"; do
 		if [ -f ${SHMAN_SDIR}/${Dependency}.sh ]; then
 			source "${SHMAN_SDIR}/${Dependency}.sh";
@@ -70,6 +71,13 @@ CheckXorgLibrariesVerbose()
 #								  Installation								   #
 # ===============ft_linux==============||==============©Othello=============== #
 
+# Wrapper for compatiblity
+_ExtractPackageXorgLibraries()
+{
+	_DownloadPackageList
+
+	return $?;
+}
 _BuildXorgLibraries()
 {
 	EchoInfo	"Package ${PackageXorgLibraries[Name]}"
@@ -126,11 +134,11 @@ _AsRoot()
 {
 	EchoInfo	"${PackageXorgLibraries[Name]}> $* $package"
 	if   [ $EUID = 0 ]; then 
-		$* || { EchoTest KO ${PackageXorgLibraries[Name]} && PressAnyKeyToContinue; return 1; };
+		$* 1> /dev/null || { EchoTest KO ${PackageXorgLibraries[Name]} && PressAnyKeyToContinue; return 1; };
 	elif [ -x /usr/bin/sudo ]; then 
-		sudo $* || { EchoTest KO ${PackageXorgLibraries[Name]} && PressAnyKeyToContinue; return 1; };
+		sudo $* 1> /dev/null || { EchoTest KO ${PackageXorgLibraries[Name]} && PressAnyKeyToContinue; return 1; };
 	else
-		su -c \\"$*\\" || { EchoTest KO ${PackageXorgLibraries[Name]} && PressAnyKeyToContinue; return 1; };
+		su -c \\"$*\\" 1> /dev/null || { EchoTest KO ${PackageXorgLibraries[Name]} && PressAnyKeyToContinue; return 1; };
 	fi
 }
 
@@ -183,7 +191,7 @@ EOF
 
 	grep -v '^#' ../lib-7.md5 | \
 		awk '{print $2}' | \
-		wget -i- -c -B https://www.x.org/pub/individual/lib/
+		wget -i- -c -B https://www.x.org/pub/individual/lib/ > /dev/null
 
 	md5sum -c ../lib-7.md5
 }

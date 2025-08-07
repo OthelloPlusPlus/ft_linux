@@ -9,15 +9,25 @@ source ${SHMAN_DIR}Utils.sh
 # ===============ft_linux==============||==============©Othello=============== #
 
 declare -A PackageLibXdmcp;
-PackageLibXdmcp[Source]="https://xorg.freedesktop.org/archive/individual/lib/libxcb-1.17.0.tar.xz";
-PackageLibXdmcp[MD5]="96565523e9f9b701fcb35d31f1d4086e";
-PackageLibXdmcp[Name]="libxcb";
-PackageLibXdmcp[Version]="1.17.0";
+# Manual
+PackageLibXdmcp[Source]="https://www.x.org/pub/individual/lib/libXdmcp-1.1.5.tar.xz";
+PackageLibXdmcp[MD5]="ce0af51de211e4c99a111e64ae1df290";
+# Automated unless edgecase
+PackageLibXdmcp[Name]="";
+PackageLibXdmcp[Version]="";
+PackageLibXdmcp[Extension]="";
+if [[ -n "${PackageLibXdmcp[Source]}" ]]; then
+	filename="${PackageLibXdmcp[Source]##*/}"
+	if [[ $filename =~ ^([a-zA-Z0-9._+-]+)-([0-9]+\.[0-9]+(\.[0-9]+)?)(\..+)$ ]]; then
+		[[ -z "${PackageLibXdmcp[Name]}" ]] && PackageLibXdmcp[Name]="${BASH_REMATCH[1]}"
+		[[ -z "${PackageLibXdmcp[Version]}" ]] && PackageLibXdmcp[Version]="${BASH_REMATCH[2]}"
+		[[ -z "${PackageLibXdmcp[Extension]}" ]] && PackageLibXdmcp[Extension]="${BASH_REMATCH[4]}"
+	fi
+fi
 PackageLibXdmcp[Package]="${PackageLibXdmcp[Name]}-${PackageLibXdmcp[Version]}";
-PackageLibXdmcp[Extension]=".tar.xz";
 
 PackageLibXdmcp[Programs]="";
-PackageLibXdmcp[Libraries]="libxcb.so libxcb-composite.so libxcb-damage.so libxcb-dbe.so libxcb-dpms.so libxcb-dri2.so libxcb-dri3.so libxcb-glx.so libxcb-present.so libxcb-randr.so libxcb-record.so libxcb-render.so libxcb-res.so libxcb-screensaver.so libxcb-shape.so libxcb-shm.so libxcb-sync.so libxcb-xf86dri.so libxcb-xfixes.so libxcb-xinerama.so libxcb-xinput.so libxcb-xkb.so libxcb-xtest.so libxcb-xvmc.so libxcb-xv.so";
+PackageLibXdmcp[Libraries]="libXdmcp.so";
 PackageLibXdmcp[Python]="";
 
 InstallLibXdmcp()
@@ -26,24 +36,30 @@ InstallLibXdmcp()
 	CheckLibXdmcp && return $?;
 
 	# Check Dependencies
-	Dependencies=(Xorgproto)
-	for Dependency in "${Dependencies[@]}"; do
-		source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}" || return $?
+	EchoInfo	"${PackageLibXdmcp[Name]}> Checking dependencies..."
+	Required=(Xorgproto)
+	for Dependency in "${Required[@]}"; do
+		# EchoInfo	"${PackageLibXdmcp[Name]}> Checking required ${Dependency}..."
+		(source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}") || { PressAnyKeyToContinue; return $?; }
 	done
 
 	Recommended=()
 	for Dependency in "${Recommended[@]}"; do
-		source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
+		# EchoInfo	"${PackageLibXdmcp[Name]}> Checking recommended ${Dependency}..."
+		(source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}") || PressAnyKeyToContinue;
 	done
 
-	Optional=(LibXslt)
+	Optional=(Xmlto Fop LibXslt)
 	for Dependency in "${Optional[@]}"; do
+		# EchoInfo	"${PackageLibXdmcp[Name]}> Checking optional ${Dependency}..."
 		if [ -f ${SHMAN_SDIR}/${Dependency}.sh ]; then
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 		fi
 	done
-	
+
 	# Install Package
+	EchoInfo	"${PackageLibXdmcp[Name]}> Building package..."
+	_ExtractPackageLibXdmcp || return $?;
 	_BuildLibXdmcp;
 	return $?
 }
@@ -68,17 +84,29 @@ CheckLibXdmcpVerbose()
 #								  Installation								   #
 # ===============ft_linux==============||==============©Othello=============== #
 
+_ExtractPackageLibXdmcp()
+{
+	DownloadPackage	"${PackageLibXdmcp[Source]}"	"${SHMAN_PDIR}"	"${PackageLibXdmcp[Package]}${PackageLibXdmcp[Extension]}"	"${PackageLibXdmcp[MD5]}" || return $?;
+	ReExtractPackage	"${SHMAN_PDIR}"	"${PackageLibXdmcp[Package]}"	"${PackageLibXdmcp[Extension]}" || return $?;
+
+	for URL in \
+		# ""
+	do
+		wget -O "${SHMAN_PDIR}/${URL##*/}" "${URL}"
+	done
+
+	return $?;
+}
+
 _BuildLibXdmcp()
 {
-	EchoInfo	"Package ${PackageLibXdmcp[Name]}"
-
-	DownloadPackage	"${PackageLibXdmcp[Source]}"	"${SHMAN_PDIR}"	"${PackageLibXdmcp[Package]}${PackageLibXdmcp[Extension]}"	"${PackageLibXdmcp[MD5]}";
-	ReExtractPackage	"${SHMAN_PDIR}"	"${PackageLibXdmcp[Package]}"	"${PackageLibXdmcp[Extension]}";
-
 	if ! cd "${SHMAN_PDIR}${PackageLibXdmcp[Package]}"; then
 		EchoError	"cd ${SHMAN_PDIR}${PackageLibXdmcp[Package]}";
 		return 1;
 	fi
+
+	# mkdir -p build 	&& cd ${SHMAN_PDIR}${PackageLibXdmcp[Package]}/build \
+	# 				|| { EchoError "${PackageLibXdmcp[Name]}> Failed to enter ${SHMAN_PDIR}${PackageLibXdmcp[Package]}/build"; return 1; }
 
 	EchoInfo	"${PackageLibXdmcp[Name]}> Configure"
 	./configure $XORG_CONFIG \
@@ -90,7 +118,7 @@ _BuildLibXdmcp()
 
 	EchoInfo	"${PackageLibXdmcp[Name]}> make check"
 	make check 1> /dev/null || { EchoTest KO ${PackageLibXdmcp[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageLibXdmcp[Name]}> make install"
 	make install 1> /dev/null || { EchoTest KO ${PackageLibXdmcp[Name]} && PressAnyKeyToContinue; return 1; };
 }

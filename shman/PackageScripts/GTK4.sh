@@ -2,7 +2,7 @@
 
 if [ ! -z "${PackageGTK4[Source]}" ]; then return; fi
 
-source ${SHMAN_DIR}Utils.sh
+source ${SHMAN_UDIR}Utils.sh
 
 # =====================================||===================================== #
 #									GTK4								   #
@@ -28,16 +28,20 @@ InstallGTK4()
 	# Check Dependencies
 	Required=(FriBidi GdkPixbuf Graphene ISOCodes LibEpoxy LibXkbcommon Pango WaylandProtocols GLib)
 	for Dependency in "${Required[@]}"; do
+		EchoInfo	"${PackageGTK4[Name]}4> Checking required ${Dependency}..."
 		source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}" || { PressAnyKeyToContinue; return $?; }
 	done
 
-	Recommended=(AdwaitaIconTheme GstPluginsGood GstPluginsBad GlslcFromShaderc HicolorIconTheme LibRsvg VulkanLoader)
+	# removed AdwaitaIconTheme for circular dependency
+	Recommended=(GstPluginsGood GstPluginsBad GlslcFromShaderc HicolorIconTheme LibRsvg VulkanLoader)
 	for Dependency in "${Recommended[@]}"; do
+		EchoInfo	"${PackageGTK4[Name]}4> Checking recommended ${Dependency}..."
 		source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}" || PressAnyKeyToContinue;
 	done
 
 	Optional=(Avahi Colord Cups GiDocGen Highlight Libcloudproviders Sassc Tinysparql)
 	for Dependency in "${Optional[@]}"; do
+		EchoInfo	"${PackageGTK4[Name]}4> Checking optional ${Dependency}..."
 		if [ -f ${SHMAN_SDIR}/${Dependency}.sh ]; then
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 		fi

@@ -2,7 +2,7 @@
 
 if [ ! -z "${PackageUPower[Source]}" ]; then return; fi
 
-source ${SHMAN_DIR}Utils.sh
+source ${SHMAN_UDIR}Utils.sh
 
 # =====================================||===================================== #
 #									UPower								   #
@@ -108,8 +108,15 @@ _BuildUPower()
 	EchoInfo	"${PackageUPower[Name]}> ninja"
 	ninja 1> /dev/null || { EchoTest KO ${PackageUPower[Name]} && PressAnyKeyToContinue; return 1; };
 
+
+
 	EchoInfo	"${PackageUPower[Name]}> ninja test"
-	LC_ALL=C ninja test 1> /dev/null || { EchoTest KO ${PackageUPower[Name]} && PressAnyKeyToContinue; return 1; };
+	if [ -z "$DISPLAY" ]; then
+		echo "No X graphical environment detected. Tests requiring X will fail."
+		LC_ALL=C ninja test || { EchoWarning "${PackageUPower[Name]}> expected" && PressAnyKeyToContinue; };
+	else
+		LC_ALL=C ninja test 1> /dev/null || { EchoTest KO ${PackageUPower[Name]}4 && PressAnyKeyToContinue; return 1; };
+	fi
 	
 	EchoInfo	"${PackageUPower[Name]}> ninja install"
 	ninja install 1> /dev/null || { EchoTest KO ${PackageUPower[Name]} && PressAnyKeyToContinue; return 1; };

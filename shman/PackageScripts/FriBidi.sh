@@ -2,7 +2,7 @@
 
 if [ ! -z "${PackageFriBidi[Source]}" ]; then return; fi
 
-source ${SHMAN_DIR}Utils.sh
+source ${SHMAN_UDIR}Utils.sh
 
 # =====================================||===================================== #
 #									FriBidi									   #

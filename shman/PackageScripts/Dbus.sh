@@ -2,10 +2,10 @@
 
 if [ ! -z "${PackageDbus[Source]}" ]; then return; fi
 
-source ${SHMAN_DIR}Utils.sh
+source ${SHMAN_UDIR}Utils.sh
 
 # =====================================||===================================== #
-#									Dbus								   #
+#									  Dbus									   #
 # ===============ft_linux==============||==============©Othello=============== #
 
 declare -A PackageDbus;
@@ -32,7 +32,7 @@ InstallDbus()
 		source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}" || { PressAnyKeyToContinue; return $?; }
 	done
 
-	Recommended=(XorgLibraries)
+	Recommended=(FreeTypeChain)
 	for Dependency in "${Recommended[@]}"; do
 		source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}" || PressAnyKeyToContinue;
 	done
@@ -56,16 +56,57 @@ CheckDbus()
 {
 	CheckInstallation 	"${PackageDbus[Programs]}"\
 						"${PackageDbus[Libraries]}"\
-						"${PackageDbus[Python]}" 1> /dev/null;
-	return $?;
+						"${PackageDbus[Python]}" 1> /dev/null || return $?;
+	
+	# Check system bus
+	if [ ! -S /run/dbus/system_bus_socket ]; then
+		return 2;
+	fi
+
+	# Method call on system bus
+	if ! dbus-send --system \
+					--dest=org.freedesktop.DBus \
+					--type=method_call \
+					--print-reply \
+					/org/freedesktop/DBus org.freedesktop.DBus.ListNames &> /dev/null; then
+		return 3;
+	fi
+
+	if ! pgrep -x dbus-daemon &> /dev/null; then
+		return 4;
+	fi
+
+	return 0;
 }
 
 CheckDbusVerbose()
 {
 	CheckInstallationVerbose	"${PackageDbus[Programs]}"\
 								"${PackageDbus[Libraries]}"\
-								"${PackageDbus[Python]}";
-	return $?;
+								"${PackageDbus[Python]}" || return $?;
+	
+	# Check system bus
+	if [ ! -S /run/dbus/system_bus_socket ]; then
+		echo -en "${C_RED}system_bus_socket${C_RESET} ";
+		return 2;
+	fi
+
+	# Method call on system bus
+	if ! dbus-send --system \
+					--dest=org.freedesktop.DBus \
+					--type=method_call \
+					--print-reply \
+					/org/freedesktop/DBus org.freedesktop.DBus.ListNames; then
+		echo -en "${C_RED}dbus-send${C_RESET} ";
+		return 3;
+	fi
+
+	if ! pgrep -x dbus-daemon > /dev/null; then
+		echo -en "${C_RED}dbus-daemon${C_RESET} ";
+		return 4;
+	fi
+
+	return 0;
 }
 
 # =====================================||===================================== #
@@ -116,7 +157,7 @@ _BuildDbus()
 	dbus-uuidgen --ensure
 
 	# If using elogind-255.17
-	# ln -sfv /var/lib/dbus/machine-id /etc
+	ln -sfv /var/lib/dbus/machine-id /etc
 
 	# Rename the documentation directory if exists
 	if [ -e /usr/share/doc/dbus ]; then

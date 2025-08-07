@@ -2,7 +2,7 @@
 
 if [ ! -z "${PackageGnomeDesktop[Source]}" ]; then return; fi
 
-source ${SHMAN_DIR}Utils.sh
+source ${SHMAN_UDIR}Utils.sh
 
 # =====================================||===================================== #
 #								  GnomeDesktop								   #
@@ -29,6 +29,7 @@ InstallGnomeDesktop()
 	EchoInfo	"${PackageGnomeDesktop[Name]}> Checking dependencies..."
 	Required=(GSettingsDesktopSchemas GTK3 GTK4 ISOCodes Itstool LibSeccomp LibXml2 XkeyboardConfig)
 	for Dependency in "${Required[@]}"; do
+		# EchoInfo	"${PackageGnomeDesktop[Name]}> Checking required ${Dependency}..."
 		source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}" || { PressAnyKeyToContinue; return $?; }
 	done
 

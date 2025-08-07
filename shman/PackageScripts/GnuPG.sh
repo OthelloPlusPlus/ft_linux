@@ -2,7 +2,7 @@
 
 if [ ! -z "${PackageGnuPG[Source]}" ]; then return; fi
 
-source ${SHMAN_DIR}Utils.sh
+source ${SHMAN_UDIR}Utils.sh
 
 # =====================================||===================================== #
 #									 GnuPG								   #
@@ -109,6 +109,7 @@ _BuildGnuPG()
 	
 	EchoInfo	"${PackageGnuPG[Name]}> make install"
 	make install 1> /dev/null || { EchoTest KO ${PackageGnuPG[Name]} && PressAnyKeyToContinue; return 1; };
+	EchoInfo	"${PackageGnuPG[Name]}> install -v m..."
 	install -v -m755 -d /usr/share/doc/gnupg-2.4.7/html && \
 	install -v -m644    doc/gnupg_nochunks.html \
 						/usr/share/doc/gnupg-2.4.7/html/gnupg.html && \

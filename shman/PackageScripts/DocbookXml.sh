@@ -2,7 +2,7 @@
 
 if [ ! -z "${PackageDocbookXml[Source]}" ]; then return; fi
 
-source ${SHMAN_DIR}Utils.sh
+source ${SHMAN_UDIR}Utils.sh
 
 # =====================================||===================================== #
 #									DocbookXml								   #
@@ -53,21 +53,29 @@ InstallDocbookXml()
 
 CheckDocbookXml()
 {
-	return 1;
-	# CheckInstallation 	"${PackageDocbookXml[Programs]}"\
-	# 					"${PackageDocbookXml[Libraries]}"\
-	# 					"${PackageDocbookXml[Python]}" 1> /dev/null;
-	# return $?;
+	if [ ! -f /etc/xml/docbook ] || \
+		[ $(ls /usr/share/xml/docbook/xml-dtd-4.5/*.dtd 2>/dev/null | wc -l) -lt 3 ] || \
+		[ $(ls /usr/share/xml/docbook/xml-dtd-4.5/*.mod 2>/dev/null | wc -l) -lt 6 ]; then
+		return 1
+	fi
+	return 0;
 }
 
 CheckDocbookXmlVerbose()
 {
-	EchoInfo	"No valid check implemented" >&2;
-	return 1;
-	# CheckInstallationVerbose	"${PackageDocbookXml[Programs]}"\
-	# 							"${PackageDocbookXml[Libraries]}"\
-	# 							"${PackageDocbookXml[Python]}";
-	# return $?;
+	if [ ! -f /etc/xml/docbook ]; then
+		echo "${C_RED}docbook${C_RESET} " >&2;
+		return 1;
+	fi
+	if [ $(ls /usr/share/xml/docbook/xml-dtd-4.5/*.dtd 2>/dev/null | wc -l) -lt 3 ]; then
+		echo "${C_RED}*.dtd${C_RESET} " >&2;
+		return 2;
+	fi
+	if [ $(ls /usr/share/xml/docbook/xml-dtd-4.5/*.mod 2>/dev/null | wc -l) -lt 3 ]; then
+		echo "${C_RED}*.mod${C_RESET} " >&2;
+		return 3;
+	fi
+	return 0;
 }
 
 # =====================================||===================================== #

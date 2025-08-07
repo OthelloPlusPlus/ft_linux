@@ -37,27 +37,37 @@ InstallTemplate()
 
 	# Check Dependencies
 	EchoInfo	"${PackageTemplate[Name]}> Checking dependencies..."
-	Required=()
+	local Required=()
 	for Dependency in "${Required[@]}"; do
-		(source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}") || { PressAnyKeyToContinue; return $?; }
+		# EchoInfo	"${PackageTemplate[Name]}> Checking required ${Dependency}..."
+		(source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}") || { EchoError "${PackageTemplate[Name]}--->${Dependency}"; PressAnyKeyToContinue; return $?; }
 	done
 
-	Recommended=()
+	local Recommended=()
 	for Dependency in "${Recommended[@]}"; do
-		(source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}") || PressAnyKeyToContinue;
+		# EchoInfo	"${PackageTemplate[Name]}> Checking recommended ${Dependency}..."
+		(source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}") || { EchoError "${PackageTemplate[Name]}-->${Dependency}"; PressAnyKeyToContinue; }
 	done
 
-	Optional=()
+	local Optional=()
 	for Dependency in "${Optional[@]}"; do
+		# EchoInfo	"${PackageTemplate[Name]}> Checking optional ${Dependency}..."
 		if [ -f ${SHMAN_SDIR}/${Dependency}.sh ]; then
-			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
+			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"|| EchoWarning "${PackageTemplate[Name]}->${Dependency}";
 		fi
 	done
 
 	# Install Package
 	EchoInfo	"${PackageTemplate[Name]}> Building package..."
 	_ExtractPackageTemplate || return $?;
-	_BuildTemplate;
+	_BuildTemplate || return $?;
+
+	local RunTime=()
+	for Dependency in "${RunTime[@]}"; do
+		# EchoInfo	"${PackageTemplate[Name]}> Checking runtime ${Dependency}..."
+		(source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}") || { EchoError "${PackageTemplate[Name]}=>${Dependency}"; PressAnyKeyToContinue; return $?; }
+	done
+
 	return $?
 }
 
@@ -83,7 +93,7 @@ CheckTemplateVerbose()
 
 _ExtractPackageTemplate()
 {
-	DownloadPackage	"${PackageTemplate[Source]}"	"${SHMAN_PDIR}"	"${PackageTemplate[Package]}${PackageTemplate[Extension]}"	"${PackageTemplate[MD5]}";
+	DownloadPackage	"${PackageTemplate[Source]}"	"${SHMAN_PDIR}"	"${PackageTemplate[Package]}${PackageTemplate[Extension]}"	"${PackageTemplate[MD5]}" || return $?;
 	ReExtractPackage	"${SHMAN_PDIR}"	"${PackageTemplate[Package]}"	"${PackageTemplate[Extension]}" || return $?;
 
 	for URL in \

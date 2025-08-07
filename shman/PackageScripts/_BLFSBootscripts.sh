@@ -2,7 +2,7 @@
 
 if [ ! -z "${PackageBLFSBootscripts[Source]}" ]; then return; fi
 
-source ${SHMAN_DIR}Utils.sh
+source ${SHMAN_UDIR}Utils.sh
 
 # =====================================||===================================== #
 #									BLFSBootscripts								   #
@@ -37,4 +37,42 @@ BootScriptUnbound()
 	cd "${SHMAN_PDIR}${PackageBLFSBootscripts[Package]}";
 
 	make install-unbound
+}
+
+BootScriptGDM()
+{
+	cd "${SHMAN_PDIR}${PackageBLFSBootscripts[Package]}";
+
+
+	EchoInfo	"${PackageBLFSBootscripts[Name]}> Installing GDM"
+	make install-gdm
+	sed /initdefault/s/3/5/ -i /etc/inittab
+
+	# EchoInfo	"${PackageBLFSBootscripts[Name]}> Disabling screen suspension"
+	# su gdm -s /bin/bash \
+	# 		-c "dbus-run-session \
+	# 				gsettings set org.gnome.settings-daemon.plugins.power \
+	# 							sleep-inactive-ac-type \
+	# 							nothing"
+}
+
+BootScriptAt()
+{
+	cd "${SHMAN_PDIR}${PackageBLFSBootscripts[Package]}";
+
+	make install-atd
+}
+
+BootScriptFcron()
+{
+	cd "${SHMAN_PDIR}${PackageBLFSBootscripts[Package]}";
+
+	make install-fcron
+}
+
+BootScriptExim()
+{
+	cd "${SHMAN_PDIR}${PackageBLFSBootscripts[Package]}";
+
+	make install-exim
 }

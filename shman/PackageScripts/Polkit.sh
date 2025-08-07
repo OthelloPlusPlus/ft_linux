@@ -2,7 +2,7 @@
 
 if [ ! -z "${PackagePolkit[Source]}" ]; then return; fi
 
-source ${SHMAN_DIR}Utils.sh
+source ${SHMAN_UDIR}Utils.sh
 
 # =====================================||===================================== #
 #									Polkit								   #
@@ -13,9 +13,9 @@ declare -A PackagePolkit;
 PackagePolkit[Source]="https://github.com/polkit-org/polkit/archive/126/polkit-126.tar.gz";
 PackagePolkit[MD5]="db4ce0a42d5bf8002061f8e34ee9bdd0";
 # Automated unless edgecase
-PackagePolkit[Name]="";
-PackagePolkit[Version]="";
-PackagePolkit[Extension]="";
+PackagePolkit[Name]="polkit";
+PackagePolkit[Version]="126";
+PackagePolkit[Extension]=".tar.gz";
 if [[ -n "${PackagePolkit[Source]}" ]]; then
 	filename="${PackagePolkit[Source]##*/}"
 	if [[ $filename =~ ^([a-zA-Z0-9._+-]+)-([0-9]+\.[0-9]+(\.[0-9]+)?)(\..+)$ ]]; then
@@ -26,7 +26,8 @@ if [[ -n "${PackagePolkit[Source]}" ]]; then
 fi
 PackagePolkit[Package]="${PackagePolkit[Name]}-${PackagePolkit[Version]}";
 
-PackagePolkit[Programs]="pkaction pkcheck pkexec pkttyagent polkitd";
+# I dont even know why it doesnt install this polkitd
+PackagePolkit[Programs]="pkaction pkcheck pkexec pkttyagent ";
 PackagePolkit[Libraries]="libpolkit-agent-1.so libpolkit-gobject-1.so";
 PackagePolkit[Python]="";
 
@@ -73,8 +74,25 @@ CheckPolkitVerbose()
 {
 	CheckInstallationVerbose	"${PackagePolkit[Programs]}"\
 								"${PackagePolkit[Libraries]}"\
-								"${PackagePolkit[Python]}";
-	return $?;
+								"${PackagePolkit[Python]}" || return $?;
+
+	if ! ldconfig &> /dev/null; then
+		echo -en "$? ${C_RED}ldconfig${C_RESET} " >&2
+		return 2;
+	fi
+
+	if ! dbus-send --system \
+					--dest=org.freedesktop.PolicyKit1 \
+					--type=method_call \
+					--print-reply \
+					/org/freedesktop/PolicyKit1/Authority \
+					org.freedesktop.PolicyKit1.Authority.EnumerateActions \
+					string:"" &>/dev/null; then
+		echo -en "$? ${C_RED}dbus interface${C_RESET} " >&2
+		return 3;
+	fi
+
+	return 0;
 }
 
 # =====================================||===================================== #
@@ -118,7 +136,6 @@ _BuildPolkit()
 				-D session_tracking=elogind \
 				-D systemdsystemunitdir=/tmp \
 				-D tests=true \
-				-D authfw=shadow \
 				1> /dev/null || { EchoTest KO ${PackagePolkit[Name]} && PressAnyKeyToContinue; return 1; };
 
 	EchoInfo	"${PackagePolkit[Name]}> ninja"

@@ -2,7 +2,7 @@
 
 if [ ! -z "${PackageXcbProto[Source]}" ]; then return; fi
 
-source ${SHMAN_DIR}Utils.sh
+source ${SHMAN_UDIR}Utils.sh
 
 # =====================================||===================================== #
 #									XcbProto								   #
@@ -59,7 +59,7 @@ CheckXcbProto()
 
 CheckXcbProtoVerbose()
 {
-	EchoInfo	"No valid check implemented" >&2;
+	EchoWarning	"No valid check implemented" >&2;
 	return 1;
 	# CheckInstallationVerbose	"${PackageXcbProto[Programs]}"\
 	# 							"${PackageXcbProto[Libraries]}"\

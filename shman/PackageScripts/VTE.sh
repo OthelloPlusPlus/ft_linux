@@ -2,7 +2,7 @@
 
 if [ ! -z "${PackageVTE[Source]}" ]; then return; fi
 
-source ${SHMAN_DIR}Utils.sh
+source ${SHMAN_UDIR}Utils.sh
 
 # =====================================||===================================== #
 #									  VTE								   #
@@ -27,12 +27,14 @@ InstallVTE()
 
 	# Check Dependencies
 	Required=(GTK3 LibXml2 PCRE2)
+	EchoInfo	"${PackageVTE[Name]}> Checking dependencies..."
 	for Dependency in "${Required[@]}"; do
 		source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}" || { PressAnyKeyToContinue; return $?; }
 	done
 
 	Recommended=(ICU GnuTLS GLib GTK4 Vala)
 	for Dependency in "${Recommended[@]}"; do
+		# EchoInfo	"${PackageVTE[Name]}> Checking recommended ${Dependency}..."
 		source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}" || PressAnyKeyToContinue;
 	done
 

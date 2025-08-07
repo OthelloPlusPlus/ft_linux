@@ -2,7 +2,7 @@
 
 if [ ! -z "${PackageLibDrm[Source]}" ]; then return; fi
 
-source ${SHMAN_DIR}Utils.sh
+source ${SHMAN_UDIR}Utils.sh
 
 # =====================================||===================================== #
 #									LibDrm								   #
@@ -17,7 +17,8 @@ PackageLibDrm[Package]="${PackageLibDrm[Name]}-${PackageLibDrm[Version]}";
 PackageLibDrm[Extension]=".tar.xz";
 
 PackageLibDrm[Programs]="";
-PackageLibDrm[Libraries]="libdrm_amdgpu.so libdrm_intel.so libdrm_nouveau.so libdrm_radeon.so libdrm.so";
+# libdrm_intel.so doesnt seem to be relevant
+PackageLibDrm[Libraries]="libdrm_amdgpu.so libdrm_nouveau.so libdrm_radeon.so libdrm.so";
 PackageLibDrm[Python]="";
 
 InstallLibDrm()
@@ -31,7 +32,8 @@ InstallLibDrm()
 		source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}" || { PressAnyKeyToContinue; return $?; }
 	done
 
-	Recommended=(XorgLibraries)
+	# Removed XorgLibraries because circulare dependency...
+	Recommended=()
 	for Dependency in "${Recommended[@]}"; do
 		source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}" || PressAnyKeyToContinue;
 	done
@@ -96,7 +98,7 @@ _BuildLibDrm()
 				--buildtype=release \
 				-D udev=true \
 				-D valgrind=disabled \
-				..\
+				.. \
 				1> /dev/null || { EchoTest KO ${PackageLibDrm[Name]} && PressAnyKeyToContinue; return 1; };
 
 	EchoInfo	"${PackageLibDrm[Name]}> ninja"

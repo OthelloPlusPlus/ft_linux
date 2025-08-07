@@ -2,7 +2,7 @@
 
 if [ ! -z "${PackageNss[Source]}" ]; then return; fi
 
-source ${SHMAN_DIR}Utils.sh
+source ${SHMAN_UDIR}Utils.sh
 
 # =====================================||===================================== #
 #									  Nss									   #
@@ -102,9 +102,13 @@ _BuildNss()
 		1> /dev/null || { EchoTest KO ${PackageNss[Name]} && PressAnyKeyToContinue; return 1; };
 
 	EchoInfo	"${PackageNss[Name]}> nss/tests/all.sh"
-	echo "This can take a long ass time..."
+	EchoWarning	"${PackageNss[Name]}> $(date +%T) This can take a long ass time..."
 	cd "${SHMAN_PDIR}${PackageNss[Package]}/nss/tests" || return $?;
-	HOST=localhost DOMSUF=localdomain ./all.sh 1> /dev/null || { EchoTest KO ${PackageNss[Name]} && PressAnyKeyToContinue; };
+	HOST=localhost DOMSUF=localdomain ./all.sh \
+		1> >(while IFS= read -r line; do printf "\r\033[K%.*s" "$Width" "$(date +%T) $line"; done) \
+		2> >(while IFS= read -r line; do echo -e "$line\n" >&2; done) \
+		|| { EchoTest KO ${PackageNss[Name]} && PressAnyKeyToContinue; };
+	EchoInfo	"${PackageNss[Name]}> $(date +%T) Done..."
 	
 	EchoInfo	"${PackageNss[Name]}> Installation"
 	cd "${SHMAN_PDIR}${PackageNss[Package]}/dist" || return $?;

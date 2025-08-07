@@ -2,7 +2,7 @@
 
 if [ ! -z "${PackagePulseAudio[Source]}" ]; then return; fi
 
-source ${SHMAN_DIR}Utils.sh
+source ${SHMAN_UDIR}Utils.sh
 
 # =====================================||===================================== #
 #									PulseAudio								   #
@@ -25,9 +25,10 @@ if [[ -n "${PackagePulseAudio[Source]}" ]]; then
 	fi
 fi
 PackagePulseAudio[Package]="${PackagePulseAudio[Name]}-${PackagePulseAudio[Version]}";
-
-PackagePulseAudio[Programs]="pacat pacmd pactl padsp pamon paplay parec parecord qpaeq pasuspender pax11publish pulseaudio start-pulseaudio-x11";
-PackagePulseAudio[Libraries]="libpulse.so libpulse-mainloop-glib.so libpulse-simple.so libpulsecommon-17.0.so libpulsecore-17.0.so libpulsedsp.so";
+# requires fftw: qpaeq
+PackagePulseAudio[Programs]="pacat pacmd pactl padsp pamon paplay parec parecord pasuspender pax11publish pulseaudio start-pulseaudio-x11";
+#libpulsecommon-17.0.so libpulsecore-17.0.so libpulsedsp.so
+PackagePulseAudio[Libraries]="libpulse.so libpulse-mainloop-glib.so libpulse-simple.so";
 PackagePulseAudio[Python]="";
 
 InstallPulseAudio()
@@ -42,7 +43,8 @@ InstallPulseAudio()
 		(source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}") || { PressAnyKeyToContinue; return $?; }
 	done
 
-	Recommended=(AlsaLib Dbus Elogind GLib Speex XorgLibraries)
+	# kept recompiling for some reason... GLib
+	Recommended=(AlsaLib Dbus Elogind Speex XorgLibraries)
 	for Dependency in "${Recommended[@]}"; do
 		(source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}") || PressAnyKeyToContinue;
 	done

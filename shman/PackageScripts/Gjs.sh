@@ -2,7 +2,7 @@
 
 if [ ! -z "${PackageGjs[Source]}" ]; then return; fi
 
-source ${SHMAN_DIR}Utils.sh
+source ${SHMAN_UDIR}Utils.sh
 
 # =====================================||===================================== #
 #									  Gjs									   #
@@ -29,6 +29,7 @@ InstallGjs()
 	EchoInfo	"${PackageGjs[Name]}> Checking dependencies..."
 	Required=(Cairo Dbus GLib SpiderMonkey GTK3 GTK4)
 	for Dependency in "${Required[@]}"; do
+		# EchoInfo	"${PackageGjs[Name]}> Checking required ${Dependency}..."
 		source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}" || { PressAnyKeyToContinue; return $?; }
 	done
 

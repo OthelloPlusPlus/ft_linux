@@ -2,7 +2,7 @@
 
 if [ ! -z "${PackageFreeType[Source]}" ]; then return; fi
 
-source ${SHMAN_DIR}Utils.sh
+source ${SHMAN_UDIR}Utils.sh
 
 # =====================================||===================================== #
 #									FreeType								   #
@@ -28,7 +28,7 @@ InstallFreeType()
 	EchoInfo	"${PackageFreeType[Name]}> Checking dependencies..."
 
 	# Check Dependencies
-	Required=(LibPng Which)
+	Required=(LibPng Which FreeTypeChain)
 	for Dependency in "${Required[@]}"; do
 		source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}" || { PressAnyKeyToContinue; return $?; }
 	done
@@ -48,7 +48,7 @@ InstallFreeType()
 	# Install Package
 	EchoInfo	"${PackageFreeType[Name]}> Building package..."
 	_ExtractPackageFreeType || return $?;
-	_BuildFreeTypeBasic || return $?;
+	_BuildFreeTypeMinimal || return $?;
 	source "${SHMAN_SDIR}/HarfBuzz.sh" && InstallHarfBuzz;
 	EchoInfo	"${PackageFreeType[Name]}> Building package again..."
 	_BuildFreeTypeFull;
@@ -86,7 +86,7 @@ _ExtractPackageFreeType()
 	return $?;
 }
 
-_BuildFreeTypeBasic()
+_BuildFreeTypeMinimal()
 {
 	if ! cd "${SHMAN_PDIR}${PackageFreeType[Package]}"; then
 		EchoError	"cd ${SHMAN_PDIR}${PackageFreeType[Package]}";

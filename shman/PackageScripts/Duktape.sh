@@ -2,7 +2,7 @@
 
 if [ ! -z "${PackageDuktape[Source]}" ]; then return; fi
 
-source ${SHMAN_DIR}Utils.sh
+source ${SHMAN_UDIR}Utils.sh
 
 # =====================================||===================================== #
 #									Duktape								   #
@@ -63,18 +63,21 @@ InstallDuktape()
 
 CheckDuktape()
 {
-	CheckInstallation 	"${PackageDuktape[Programs]}"\
-						"${PackageDuktape[Libraries]}"\
-						"${PackageDuktape[Python]}" 1> /dev/null;
+	ldd /usr/lib/libduktape.so /usr/lib/libduktaped.so >/dev/null
 	return $?;
+	# CheckInstallation 	"${PackageDuktape[Programs]}"\
+	# 					"${PackageDuktape[Libraries]}"\
+	# 					"${PackageDuktape[Python]}" 1> /dev/null;
 }
 
 CheckDuktapeVerbose()
 {
-	CheckInstallationVerbose	"${PackageDuktape[Programs]}"\
-								"${PackageDuktape[Libraries]}"\
-								"${PackageDuktape[Python]}";
+	ldd /usr/lib/libduktape.so >/dev/null || { echo -en "${C_RED}libduktape.so${C_RESET} "; return 1; };
+	ldd /usr/lib/libduktaped.so >/dev/null || echo -en "${C_RED}libduktaped.so${C_RESET} ";
 	return $?;
+	# CheckInstallationVerbose	"${PackageDuktape[Programs]}"\
+	# 							"${PackageDuktape[Libraries]}"\
+	# 							"${PackageDuktape[Python]}";
 }
 
 # =====================================||===================================== #

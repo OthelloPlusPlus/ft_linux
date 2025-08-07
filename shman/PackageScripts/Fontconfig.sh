@@ -2,7 +2,7 @@
 
 if [ ! -z "${PackageFontconfig[Source]}" ]; then return; fi
 
-source ${SHMAN_DIR}Utils.sh
+source ${SHMAN_UDIR}Utils.sh
 
 # =====================================||===================================== #
 #									Fontconfig								   #
@@ -26,8 +26,10 @@ InstallFontconfig()
 	CheckFontconfig && return $?;
 
 	# Check Dependencies
+	EchoInfo	"${PackageFontconfig[Name]}> Checking dependencies..."
 	Dependencies=(FreeTypeChain)
 	for Dependency in "${Dependencies[@]}"; do
+
 		source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}" || return $?
 	done
 
@@ -36,7 +38,7 @@ InstallFontconfig()
 		source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 	done
 
-	Optional=(cURL LibXml2)
+	Optional=(Bubblewrap cURL LibArchive JSONC DocBookUtils LibXml2 Texlive)
 	for Dependency in "${Optional[@]}"; do
 		if [ -f ${SHMAN_SDIR}/${Dependency}.sh ]; then
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
@@ -68,6 +70,20 @@ CheckFontconfigVerbose()
 #								  Installation								   #
 # ===============ft_linux==============||==============©Othello=============== #
 
+_ExtractPackageFontconfig()
+{
+	DownloadPackage	"${PackageFontconfig[Source]}"	"${SHMAN_PDIR}"	"${PackageFontconfig[Package]}${PackageFontconfig[Extension]}"	"${PackageFontconfig[MD5]}";
+	ReExtractPackage	"${SHMAN_PDIR}"	"${PackageFontconfig[Package]}"	"${PackageFontconfig[Extension]}" || return $?;
+
+	for URL in \
+		# ""
+	do
+		wget -O "${SHMAN_PDIR}/${URL##*/}" "${URL}"
+	done
+
+	return $?;
+}
+
 _BuildFontconfig()
 {
 	EchoInfo	"Package ${PackageFontconfig[Name]}"
@@ -82,10 +98,11 @@ _BuildFontconfig()
 	fi
 
 	EchoInfo	"${PackageFontconfig[Name]}> Configure"
-	./configure --prefix=/usr        \
-				--sysconfdir=/etc    \
+	./configure --prefix=/usr \
+				--libdir=/usr/lib64 \
+				--sysconfdir=/etc \
 				--localstatedir=/var \
-				--disable-docs       \
+				--disable-docs \
 				--docdir=/usr/share/doc/fontconfig-2.16.0 \
 				1> /dev/null || { EchoTest KO ${PackageFontconfig[Name]} && PressAnyKeyToContinue; return 1; };
 

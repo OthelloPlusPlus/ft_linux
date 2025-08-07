@@ -2,10 +2,12 @@
 
 if [ ! -z "${PackageLinux[Source]}" ]; then return; fi
 
-source ${SHMAN_DIR}Utils.sh
+source ${SHMAN_UDIR}Utils.sh
+
+UserName="ohengelm"
 
 # =====================================||===================================== #
-#									Linux								   #
+#									 Linux									   #
 # ===============ft_linux==============||==============©Othello=============== #
 
 declare -A PackageLinux;
@@ -39,7 +41,7 @@ PackageLinuxConfigLFS=(
 			"--enable CONFIG_DEVTMPFS"
 			"--enable CONFIG_DEVTMPFS_MOUNT"
 		# Graphics support --->
-			"--module CONFIG_DRM" # Required to add GUI later
+			"--enable CONFIG_DRM" # Required to add GUI later
 				"--enable CONFIG_DRM_FBDEV_EMULATION"
 			# Console display driver support --->
 				"--enable CONFIG_FRAMEBUFFER_CONSOLE"
@@ -56,18 +58,28 @@ PackageLinuxConfigBLFS=(
 PackageLinuxConfigMesa=(
 	# Device Drivers --->
 		# Graphics support --->
+			"--enable CONFIG_DRM"
 			# Direct Rendering Manager --->
-				"--module CONFIG_DRM_RADEON" # r300 or r600
-				"--module CONFIG_DRM_AMDGPU" # radeonsi
-				"--enable CONFIG_DRM_AMDGPU_SI" # radeonsi
-				"--enable CONFIG_DRM_AMDGPU_CIK" # radeonsi
-				"--enable CONFIG_DRM_AMD_DC" # radeonsi
-				"--module CONFIG_DRM_NOUVEAU" # nouveau
-				"--enable CONFIG_DRM_NOUVEAU_GSP_DEFAULT" # nouveau
-				"--module CONFIG_DRM_I915" # i915, crocus, or iris
-				"--module CONFIG_DRM_VGEM" # llvmpipe or softpipe
-				"--module CONFIG_DRM_VMWGFX" # svga
-	
+				# "--module CONFIG_DRM_RADEON" # r300 or r600
+				# "--module CONFIG_DRM_AMDGPU" # radeonsi
+				# "--enable CONFIG_DRM_AMDGPU_SI" # radeonsi
+				# "--enable CONFIG_DRM_AMDGPU_CIK" # radeonsi
+				# "--enable CONFIG_DRM_AMD_DC" # radeonsi
+				# "--module CONFIG_DRM_NOUVEAU" # nouveau
+				# "--enable CONFIG_DRM_NOUVEAU_GSP_DEFAULT" # nouveau
+				# "--module CONFIG_DRM_I915" # i915, crocus, or iris
+				"--enable CONFIG_DRM_VGEM" # llvmpipe or softpipe
+				"--module CONFIG_DRM_VMWGFX" # svga	
+
+	# AI recommendations
+	# "--enable CONFIG_DRM"                         # Must be built-in for early GPU init
+	"--enable CONFIG_DRM_KMS_HELPER"             # KMS support for modern X
+	# "--enable CONFIG_DRM_VMWGFX"                 # VMware SVGA II graphics driver
+	"--enable CONFIG_DRM_TTM"                    # Required by vmwgfx
+	"--module CONFIG_DRM_TTM_HELPER"             # Helper for TTM memory manager
+	"--enable CONFIG_DRM_GEM_SHMEM_HELPER"       # GEM shared memory for modesetting
+	"--enable CONFIG_DRM_PANEL_ORIENTATION_QUIRKS" # Used for orientation hints
+
 )
 
 PackageLinuxConfigLibUSB=(
@@ -118,6 +130,23 @@ PackageLinuxConfigElogind=(
 		"--module CONFIG_CRYPTO_USER_API_HASH"
 )
 
+PackageLinuxConfigLinuxPAM=(
+	# General setup --->
+	"--enable CONFIG_AUDIT"    
+)
+
+# PackageLinuxConfigLinuxXorg=(
+# 	DRM
+# 	DRM_VMWGFX
+# 	DRM_BOCHS
+# 	DRM_VBOXVIDEO
+
+# 	SYSFB_SIMPLEFB
+# 	DRM  
+# 	DRM_SIMPLEDRM 
+# )
+
+
 PackageLinuxConfig=(
 	"${PackageLinuxConfigLFS[@]}"
 	# "${PackageLinuxConfigBLFS[@]}"
@@ -127,6 +156,7 @@ PackageLinuxConfig=(
 	"${PackageLinuxConfigLibEvdev[@]}"
 	"${PackageLinuxConfigPolkit[@]}"
 	"${PackageLinuxConfigElogind[@]}"
+	"${PackageLinuxConfigLinuxPAM[@]}"
 )
 
 InstallLinux()
@@ -136,22 +166,22 @@ InstallLinux()
 
 	# Check Dependencies
 	EchoInfo	"${PackageLinux[Name]}> Checking dependencies..."
-	Required=()
-	for Dependency in "${Required[@]}"; do
-		(source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}") || { PressAnyKeyToContinue; return $?; }
-	done
+	local Required=(Bash Bc Binutils Coreutils Diffutils Findutils GCC Glibc Grep Gzip Kmod Libelf,Make Ncurses OpenSSL Perl and Sed)
+	# for Dependency in "${Required[@]}"; do
+	# 	(source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}") || { PressAnyKeyToContinue; return $?; }
+	# done
 
-	Recommended=()
-	for Dependency in "${Recommended[@]}"; do
-		(source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}") || PressAnyKeyToContinue;
-	done
+	local Recommended=()
+	# for Dependency in "${Recommended[@]}"; do
+	# 	(source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}") || PressAnyKeyToContinue;
+	# done
 
-	Optional=()
-	for Dependency in "${Optional[@]}"; do
-		if [ -f ${SHMAN_SDIR}/${Dependency}.sh ]; then
-			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
-		fi
-	done
+	local Optional=(Cpio LLVM RustBindgen)
+	# for Dependency in "${Optional[@]}"; do
+	# 	if [ -f ${SHMAN_SDIR}/${Dependency}.sh ]; then
+	# 		source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
+	# 	fi
+	# done
 	
 	# Install Package
 	EchoInfo	"${PackageLinux[Name]}> Building package..."
@@ -162,7 +192,9 @@ InstallLinux()
 
 CheckLinux()
 {
-	local ConfigFile="/boot/config-$(uname -r)"
+	if [ "$(uname -r)" != "${PackageLinux[Version]}-${UserName}" ]; then return 1; fi
+
+	local ConfigFile="/boot/config-${PackageLinux[Version]}"
 	for ConfigItem in "${PackageLinuxConfig[@]}"; do
 		[[ -z "$ConfigItem" ]] && continue ;
 		local ConfigSetting="${ConfigItem%% *}"
@@ -179,16 +211,25 @@ CheckLinux()
 
 CheckLinuxVerbose()
 {
+	if [ "$(uname -r)" != "${PackageLinux[Version]}-${UserName}" ]; then
+		if [ -f /boot/config-${PackageLinux[Version]} ]; then
+			echo -en "${C_RED}Running kernel $(uname -r) (reboot)${C_RESET}" >&2
+			return 1;
+		else
+			echo -en "${C_RED}/boot/config-${PackageLinux[Version]}${C_RESET}" >&2
+		fi
+	fi
+
 	local ReturnValue=0;
-	local ConfigFile="/boot/config-$(uname -r)"
+	local ConfigFile="/boot/config-${PackageLinux[Version]}"
 	for ConfigItem in "${PackageLinuxConfig[@]}"; do
 		[[ -z "$ConfigItem" ]] && continue ;
 		local ConfigSetting="${ConfigItem%% *}"
-		local ConfigName="${ConfigItem#* }";
+		local ConfigName="$(echo "${ConfigItem#* }" | tr -d '[:space:]')";
 		case $ConfigSetting in
-			"--enable")		if ! grep -Eq "^${ConfigName}=y" $ConfigFile; then ReturnValue=1; echo -en "${C_RED}$ConfigName${C_RESET} " >&2; fi;;
-			"--module") 	if ! grep -Eq "^${ConfigName}=(y|m)" $ConfigFile; then ReturnValue=1; echo -en "${C_RED}$ConfigName${C_RESET} ">&2; fi;;
-			"--disable") 	if grep -Eq "^${ConfigName}=(y|m)" $ConfigFile; then ReturnValue=1; echo -en "${C_RED}$ConfigName${C_RESET} ">&2; fi;;
+			"--enable")		if ! grep -Eq "^${ConfigName}=y" $ConfigFile; then ReturnValue=1; echo -en "${C_RED}$ConfigName${C_RESET}=y " >&2; fi ;;
+			"--module") 	if ! grep -Eq "^${ConfigName}=(y|m)" $ConfigFile; then ReturnValue=1; echo -en "${C_RED}$ConfigName${C_RESET}=m ">&2; fi ;;
+			"--disable") 	if grep -Eq "^${ConfigName}=(y|m)" $ConfigFile; then ReturnValue=1; echo -en "${C_RED}$ConfigName${C_RESET} ">&2; fi ;;
 			*) echo -en "${C_RED}$ConfigSetting${C_RESET}[$ConfigName] " >&2; return 1;;
 		esac
 	done
@@ -231,24 +272,45 @@ _BuildLinux()
 	for Setting in "${PackageLinuxConfig[@]}"; do
 		scripts/config $Setting;
 	done
+	# Adding username to version
+	scripts/config --disable LOCALVERSION_AUTO
+	scripts/config --set-str LOCALVERSION "-${UserName}"
 
 	EchoInfo	"${PackageLinux[Name]}> Configure (enable new settings)"
 	make olddefconfig 1> /dev/null || { EchoTest KO ${PackageLinux[Name]} && PressAnyKeyToContinue; return 1; };
 
 	EchoInfo	"${PackageLinux[Name]}> make"
-	date 2> /dev/null;
-	make 1> /dev/null || { EchoTest KO ${PackageLinux[Name]} && PressAnyKeyToContinue; return 1; };
+	make 1> /dev/null &
+	local MakePid=$!;
+	(
+		while kill -0 $MakePid 2> /dev/null; do
+			date +%T
+			sleep 60
+		done
+	) &
+	local MonitorPid=$!;
+	echo "MonitorPid: $MonitorPid"
+	wait $MakePid && kill $MonitorPid || { 
+		kill $MonitorPid;
+		EchoTest KO ${PackageLinux[Name]};
+		PressAnyKeyToContinue;
+		return 1;
+	};
+	date +%T
+
 
 	EchoInfo	"${PackageLinux[Name]}> make modules_install"
+	date 2> /dev/null;
 	make modules_install 1> /dev/null || { EchoTest KO ${PackageLinux[Name]} && PressAnyKeyToContinue; return 1; };
 	
 	EchoInfo	"${PackageLinux[Name]}> Ensuring /boot in mounted";
+	date 2> /dev/null;
 	mountpoint /boot || mount /dev/sda1 /boot;
 
 	EchoInfo	"${PackageLinux[Name]}> Copying crucial files for GRUB boot";
-	cp -iv arch/x86/boot/bzImage /boot/vmlinuz-${PackageLinux[Version]}-lfs-12.2
-	cp -iv System.map /boot/System.map-${PackageLinux[Version]}
-	cp -iv .config /boot/config-${PackageLinux[Version]}
+	cp -v arch/x86/boot/bzImage /boot/vmlinuz-${PackageLinux[Version]}-${UserName}
+	cp -v System.map /boot/System.map-${PackageLinux[Version]}
+	cp -v .config /boot/config-${PackageLinux[Version]}
 	cp -r Documentation -T /usr/share/doc/linux-${PackageLinux[Version]}
 
 	# 10.3.2. Configuring Linux Module Load Order
@@ -263,6 +325,10 @@ install uhci_hcd /sbin/modprobe ehci_hcd ; /sbin/modprobe -i uhci_hcd ; true
 
 # End /etc/modprobe.d/usb.conf
 EOF
+
+	EchoInfo	"${PackageLinux[Name]}> Setting Grub Loader to ${PackageLinux[Version]}"
+	sed -i -E "s|vmlinuz-[0-9.]+-lfs-[0-9.]+|vmlinuz-${PackageLinux[Version]}-${UserName}|g" /boot/grub/grub.cfg
+	sed -i -E "s|Linux [0-9.]+-lfs-[0-9.]+|Linux ${PackageLinux[Version]}-${UserName}|g" /boot/grub/grub.cfg
 }
 
 # _AddLinuxConfiguration()

@@ -2,10 +2,10 @@
 
 if [ ! -z "${PackageGSettingsDesktopSchemas[Source]}" ]; then return; fi
 
-source ${SHMAN_DIR}Utils.sh
+source ${SHMAN_UDIR}Utils.sh
 
 # =====================================||===================================== #
-#									GSettingsDesktopSchemas								   #
+#							GSettingsDesktopSchemas							   #
 # ===============ft_linux==============||==============©Othello=============== #
 
 declare -A PackageGSettingsDesktopSchemas;
@@ -49,6 +49,7 @@ InstallGSettingsDesktopSchemas()
 
 CheckGSettingsDesktopSchemas()
 {
+	return 1;
 	local compiled="/usr/share/glib-2.0/schemas/gschemas.compiled"
 	local schema_dir="/usr/share/glib-2.0/schemas"
 
@@ -65,6 +66,8 @@ CheckGSettingsDesktopSchemas()
 
 CheckGSettingsDesktopSchemasVerbose()
 {
+	EchoWarning	"No valid check implemented" >&2;
+	return 1;
 	local compiled="/usr/share/glib-2.0/schemas/gschemas.compiled"
 	local schema_dir="/usr/share/glib-2.0/schemas"
 

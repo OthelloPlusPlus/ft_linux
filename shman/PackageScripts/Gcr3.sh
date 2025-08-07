@@ -2,7 +2,7 @@
 
 if [ ! -z "${PackageGcr3[Source]}" ]; then return; fi
 
-source ${SHMAN_DIR}Utils.sh
+source ${SHMAN_UDIR}Utils.sh
 
 # =====================================||===================================== #
 #									  Gcr3									   #
@@ -93,16 +93,16 @@ _BuildGcr3()
 	fi
 	cd "${SHMAN_PDIR}${PackageGcr3[Package]}/build";
 
-	EchoInfo	"${PackageGcr3[Name]}> Configure"
+	EchoInfo	"${PackageGcr3[Name]}3> Configure"
 	meson setup --prefix=/usr \
 				--buildtype=release \
 				-D gtk_doc=false \
 				-D ssh_agent=false \
 				.. \
-				1> /dev/null || { EchoTest KO ${PackageGcr3[Name]} && PressAnyKeyToContinue; return 1; };
+				1> /dev/null || { EchoTest KO "${PackageGcr3[Name]}3" && PressAnyKeyToContinue; return 1; };
 
-	EchoInfo	"${PackageGcr3[Name]}> ninja"
-	ninja 1> /dev/null || { EchoTest KO ${PackageGcr3[Name]} && PressAnyKeyToContinue; return 1; };
+	EchoInfo	"${PackageGcr3[Name]}3> ninja"
+	ninja 1> /dev/null || { EchoTest KO "${PackageGcr3[Name]}3" && PressAnyKeyToContinue; return 1; };
 	
 	if "${SHMAN_SDIR}/GiDocGen.sh" && CheckGiDocGen; then
 		sed -e "/install_dir/s@,\$@ / 'gcr-3.41.2'&@" \
@@ -111,9 +111,14 @@ _BuildGcr3()
 		ninja
 	fi
 
-	EchoInfo	"${PackageGcr3[Name]}> ninja test"
-	ninja test 1> /dev/null || { EchoTest KO ${PackageGcr3[Name]} && PressAnyKeyToContinue; return 1; };
+	EchoInfo	"${PackageGcr3[Name]}3> ninja test"
+	if [ -z "$DISPLAY" ]; then
+		EchoWarning "No X graphical environment detected."
+		ninja test || { EchoWarning "${PackageGcr3[Name]}3> 1 Failure expected due to no X graphical environment." && PressAnyKeyToContinue; };
+	else
+		ninja test 1> /dev/null || { EchoTest KO "${PackageGcr3[Name]}3" && PressAnyKeyToContinue; return 1; };
+	fi
 	
-	EchoInfo	"${PackageGcr3[Name]}> ninja install"
-	ninja install 1> /dev/null || { EchoTest KO ${PackageGcr3[Name]} && PressAnyKeyToContinue; return 1; };
+	EchoInfo	"${PackageGcr3[Name]}3> ninja install"
+	ninja install 1> /dev/null || { EchoTest KO "${PackageGcr3[Name]}3" && PressAnyKeyToContinue; return 1; };
 }

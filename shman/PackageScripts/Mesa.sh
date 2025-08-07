@@ -2,7 +2,7 @@
 
 if [ ! -z "${PackageMesa[Source]}" ]; then return; fi
 
-source ${SHMAN_DIR}Utils.sh
+source ${SHMAN_UDIR}Utils.sh
 
 # =====================================||===================================== #
 #									  Mesa									   #
@@ -16,7 +16,8 @@ PackageMesa[Version]="24.3.4";
 PackageMesa[Package]="${PackageMesa[Name]}-${PackageMesa[Version]}";
 PackageMesa[Extension]=".tar.xz";
 
-PackageMesa[Programs]="glxgears glxinfo mme_fermi_sim_hw_test mme_tu104_sim_hw_test";
+# removed debugging programs mme_fermi_sim_hw_test mme_tu104_sim_hw_test
+PackageMesa[Programs]="glxgears glxinfo";
 PackageMesa[Libraries]="libEGL.so libGL.so libGLESv1_CM.so libGLESv2.so libgbm.so libglapi.so libgallium-24.3.4.so libxatracker.so";
 PackageMesa[Python]="";
 
@@ -56,7 +57,7 @@ InstallMesa()
 CheckMesa()
 {
 	CheckInstallation 	"${PackageMesa[Programs]}"\
-						"${PackageMesa[Libraries]}"\
+						"${PackageMesa[Libraries]} swrast_dri.so llvmpipe_dri.so"\
 						"${PackageMesa[Python]}" 1> /dev/null;
 	return $?;
 }
@@ -64,7 +65,7 @@ CheckMesa()
 CheckMesaVerbose()
 {
 	CheckInstallationVerbose	"${PackageMesa[Programs]}"\
-								"${PackageMesa[Libraries]}"\
+								"${PackageMesa[Libraries]} swrast_dri.so llvmpipe_dri.so"\
 								"${PackageMesa[Python]}";
 	return $?;
 }
@@ -129,8 +130,8 @@ _BuildMesa()
 				--prefix=$XORG_PREFIX \
 				--buildtype=release \
 				-D platforms=x11,wayland \
-				-D gallium-drivers=svga \
-				-D vulkan-drivers="" \
+				-D gallium-drivers=svga,llvmpipe,swrast \
+				-D vulkan-drivers="swrast" \
 				-D valgrind=disabled \
 				-D video-codecs=all \
 				1> /dev/null || { EchoTest KO ${PackageMesa[Name]} && PressAnyKeyToContinue; return 1; };

@@ -2,7 +2,7 @@
 
 if [ ! -z "${PackageXkeyboardConfig[Source]}" ]; then return; fi
 
-source ${SHMAN_DIR}Utils.sh
+source ${SHMAN_UDIR}Utils.sh
 
 # =====================================||===================================== #
 #								XkeyboardConfig								   #
@@ -40,7 +40,7 @@ InstallXkeyboardConfig()
 	Optional=(LibXkbcommon XorgApplications)
 	for Dependency in "${Optional[@]}"; do
 		if [ -f ${SHMAN_SDIR}/${Dependency}.sh ]; then
-			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
+			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}" || PressAnyKeyToContinue;
 		fi
 	done
 	
@@ -62,7 +62,7 @@ CheckXkeyboardConfig()
 
 CheckXkeyboardConfigVerbose()
 {
-	EchoInfo	"No valid check implemented" >&2;
+	EchoWarning	"No valid check implemented" >&2;
 	return 1;
 	CheckInstallationVerbose	"${PackageXkeyboardConfig[Programs]}"\
 								"${PackageXkeyboardConfig[Libraries]}"\

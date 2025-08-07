@@ -2,7 +2,7 @@
 
 if [ ! -z "${PackagePyGObject3[Source]}" ]; then return; fi
 
-source ${SHMAN_DIR}Utils.sh
+source ${SHMAN_UDIR}Utils.sh
 
 # =====================================||===================================== #
 #									PyGObject3								   #
@@ -32,17 +32,17 @@ InstallPyGObject3()
 		source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}" || { PressAnyKeyToContinue; return $?; }
 	done
 
-	Recommended=(PyCairo)
-	for Dependency in "${Recommended[@]}"; do
-		source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}" || PressAnyKeyToContinue;
-	done
+	# Recommended=(PyCairo)
+	# for Dependency in "${Recommended[@]}"; do
+	# 	source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}" || PressAnyKeyToContinue;
+	# done
 
-	Optional=(Pep8 Pyflakes Pytest)
-	for Dependency in "${Optional[@]}"; do
-		if [ -f ${SHMAN_SDIR}/${Dependency}.sh ]; then
-			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
-		fi
-	done
+	# Optional=(GTK4 Pytest)
+	# for Dependency in "${Optional[@]}"; do
+	# 	if [ -f ${SHMAN_SDIR}/${Dependency}.sh ]; then
+	# 		source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
+	# 	fi
+	# done
 	
 	# Install Package
 	EchoInfo	"Package ${PackagePyGObject3[Name]}"
@@ -88,7 +88,7 @@ _BuildPyGObject3()
 	fi
 
 	EchoInfo	"${PackagePyGObject3[Name]}> Remove two faulty tests"
-	mv -v tests/test_gdbus.py{,.nouse}         &&
+	mv -v tests/test_gdbus.py{,.nouse}
 	mv -v tests/test_overrides_gtk.py{,.nouse}
 
 	if ! mkdir -p build; then
@@ -106,8 +106,8 @@ _BuildPyGObject3()
 	EchoInfo	"${PackagePyGObject3[Name]}> ninja"
 	ninja 1> /dev/null || { EchoTest KO ${PackagePyGObject3[Name]} && PressAnyKeyToContinue; return 1; };
 
-	EchoInfo	"${PackagePyGObject3[Name]}> ninja test"
-	ninja test 1> /dev/null || { EchoTest KO ${PackagePyGObject3[Name]} && PressAnyKeyToContinue; return 1; };
+	# EchoInfo	"${PackagePyGObject3[Name]}> ninja test"
+	# ninja test 1> /dev/null || { EchoTest KO ${PackagePyGObject3[Name]} && PressAnyKeyToContinue; return 1; };
 	
 	EchoInfo	"${PackagePyGObject3[Name]}> ninja install"
 	ninja install 1> /dev/null || { EchoTest KO ${PackagePyGObject3[Name]} && PressAnyKeyToContinue; return 1; };

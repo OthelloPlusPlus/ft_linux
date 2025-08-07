@@ -2,10 +2,10 @@
 
 if [ ! -z "${PackagePyCairo[Source]}" ]; then return; fi
 
-source ${SHMAN_DIR}Utils.sh
+source ${SHMAN_UDIR}Utils.sh
 
 # =====================================||===================================== #
-#									PyCairo								   #
+#									PyCairo									   #
 # ===============ft_linux==============||==============©Othello=============== #
 
 declare -A PackagePyCairo;
@@ -61,7 +61,7 @@ CheckPyCairo()
 
 CheckPyCairoVerbose()
 {
-	EchoInfo	"No valid check implemented" >&2;
+	EchoWarning	"No valid check implemented" >&2;
 	return 1;
 	# CheckInstallationVerbose	"${PackagePyCairo[Programs]}"\
 	# 							"${PackagePyCairo[Libraries]}"\

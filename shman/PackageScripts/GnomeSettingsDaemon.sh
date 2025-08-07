@@ -2,7 +2,7 @@
 
 if [ ! -z "${PackageGnomeSettingsDaemon[Source]}" ]; then return; fi
 
-source ${SHMAN_DIR}Utils.sh
+source ${SHMAN_UDIR}Utils.sh
 
 # =====================================||===================================== #
 #									GnomeSettingsDaemon								   #
@@ -38,7 +38,7 @@ InstallGnomeSettingsDaemon()
 	done
 
 	# Removed Mutter because circular dependency...
-	Optional=(GnomeSession Umockdev)
+	Optional=(Umockdev)
 	for Dependency in "${Optional[@]}"; do
 		if [ -f ${SHMAN_SDIR}/${Dependency}.sh ]; then
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
@@ -54,18 +54,40 @@ InstallGnomeSettingsDaemon()
 
 CheckGnomeSettingsDaemon()
 {
-	CheckInstallation 	"${PackageGnomeSettingsDaemon[Programs]}"\
-						"${PackageGnomeSettingsDaemon[Libraries]}"\
-						"${PackageGnomeSettingsDaemon[Python]}" 1> /dev/null;
-	return $?;
+	local ReturnValue=0;
+	echo 'int main() { return 0; }' | \
+		gcc -x c - \
+			-L/usr/lib/gnome-settings-daemon-47 \
+			-L/usr/lib64/gnome-settings-daemon-47 \
+			-lgsd \
+			-o TempTest \
+			&> /dev/null \
+		&& rm -f TempTest \
+		|| ReturnValue=$?;
+	return $ReturnValue;
+	# CheckInstallation 	"${PackageGnomeSettingsDaemon[Programs]}"\
+	# 					"${PackageGnomeSettingsDaemon[Libraries]}"\
+	# 					"${PackageGnomeSettingsDaemon[Python]}" 1> /dev/null;
+	# return $?;
 }
 
 CheckGnomeSettingsDaemonVerbose()
 {
-	CheckInstallationVerbose	"${PackageGnomeSettingsDaemon[Programs]}"\
-								"${PackageGnomeSettingsDaemon[Libraries]}"\
-								"${PackageGnomeSettingsDaemon[Python]}";
-	return $?;
+	local ReturnValue=0;
+	echo 'int main() { return 0; }' | \
+		gcc -x c - \
+			-L/usr/lib/gnome-settings-daemon-47 \
+			-L/usr/lib64/gnome-settings-daemon-47 \
+			-lgsd \
+			-o TempTest \
+			&> /dev/null \
+		&& rm -f TempTest \
+		|| { ReturnValue=$?; echo -en "${C_RED}libgsd.so${C_RESET} " >&2; };
+	return $ReturnValue;
+	# CheckInstallationVerbose	"${PackageGnomeSettingsDaemon[Programs]}"\
+	# 							"${PackageGnomeSettingsDaemon[Libraries]}"\
+	# 							"${PackageGnomeSettingsDaemon[Python]}";
+	# return $?;
 }
 
 # =====================================||===================================== #
@@ -93,9 +115,11 @@ _BuildGnomeSettingsDaemon()
 		return 1;
 	fi
 
+	EchoInfo	"${PackageGnomeSettingsDaemon[Name]}> Fix libelogind detection"
 	sed -e 's/libsystemd/libelogind/' \
 		-i plugins/power/test.py
 
+	EchoInfo	"${PackageGnomeSettingsDaemon[Name]}> Fix backlight functionality"
 	sed -e 's/(backlight->logind_proxy)/(0)/' \
 		-i plugins/power/gsd-backlight.c
 
@@ -106,6 +130,7 @@ _BuildGnomeSettingsDaemon()
 	meson setup --prefix=/usr \
 				--buildtype=release \
 				-D systemd=false \
+				-D cups=false \
 				.. \
 				1> /dev/null || { EchoTest KO ${PackageGnomeSettingsDaemon[Name]} && PressAnyKeyToContinue; return 1; };
 

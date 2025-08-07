@@ -2,7 +2,7 @@
 
 if [ ! -z "${PackageEvolutionDataServer[Source]}" ]; then return; fi
 
-source ${SHMAN_DIR}Utils.sh
+source ${SHMAN_UDIR}Utils.sh
 
 # =====================================||===================================== #
 #								EvolutionDataServer							   #
@@ -35,6 +35,7 @@ InstallEvolutionDataServer()
 
 	Recommended=(GnomeOnlineAccounts GLib GTK3 GTK4 ICU LibCanberra LibGweather Vala WebKitGTK)
 	for Dependency in "${Recommended[@]}"; do
+		# EchoInfo	"${PackageEvolutionDataServer[Name]}> Checking recommended ${Dependency}..."
 		source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}" || PressAnyKeyToContinue;
 	done
 

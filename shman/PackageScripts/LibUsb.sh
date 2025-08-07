@@ -2,7 +2,7 @@
 
 if [ ! -z "${PackageLibUsb[Source]}" ]; then return; fi
 
-source ${SHMAN_DIR}Utils.sh
+source ${SHMAN_UDIR}Utils.sh
 
 # =====================================||===================================== #
 #									LibUsb								   #
@@ -121,7 +121,7 @@ _BuildLibUsb()
 	EchoInfo	"${PackageLibUsb[Name]}> make install"
 	make install 1> /dev/null || { EchoTest KO ${PackageLibUsb[Name]} && PressAnyKeyToContinue; return 1; };
 
-	install -v -d -m755 /usr/share/doc/libusb-1.0.27/apidocs &&
-	install -v -m644    doc/api-1.0/* \
-						/usr/share/doc/libusb-1.0.27/apidocs
+	# install -v -d -m755 /usr/share/doc/libusb-1.0.27/apidocs &&
+	# install -v -m644    doc/api-1.0/* \
+	# 					/usr/share/doc/libusb-1.0.27/apidocs
 }

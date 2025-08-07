@@ -2,7 +2,7 @@
 
 if [ ! -z "${PackageLLVM[Source]}" ]; then return; fi
 
-source ${SHMAN_DIR}Utils.sh
+source ${SHMAN_UDIR}Utils.sh
 
 # =====================================||===================================== #
 #									LLVM								   #
@@ -96,22 +96,28 @@ _BuildLLVM()
 		return 1;
 	fi
 
-	EchoInfo	"${PackageLLVM[Name]}> Preparation"
+	EchoInfo	"${PackageLLVM[Name]}> Preparing llvm-cmake"
 	tar -xf ../llvm-cmake-19.1.7.src.tar.xz
+
+	EchoInfo	"${PackageLLVM[Name]}> Preparing llvm-third-party"
 	tar -xf ../llvm-third-party-19.1.7.src.tar.xz
 	sed '/LLVM_COMMON_CMAKE_UTILS/s@../cmake@cmake-19.1.7.src@' \
 		-i CMakeLists.txt
 	sed '/LLVM_THIRD_PARTY_DIR/s@../third-party@third-party-19.1.7.src@' \
 		-i cmake/modules/HandleLLVMOptions.cmake
 
+	EchoInfo	"${PackageLLVM[Name]}> Preparing clang"
 	tar -xf ../clang-19.1.7.src.tar.xz -C tools
 	mv tools/clang-19.1.7.src tools/clang
 
+	EchoInfo	"${PackageLLVM[Name]}> Preparing compiler-rt"
 	tar -xf ../compiler-rt-19.1.7.src.tar.xz -C projects
 	mv projects/compiler-rt-19.1.7.src projects/compiler-rt
 
+	EchoInfo	"${PackageLLVM[Name]}> Set to use Python3"
 	grep -rl '#!.*python' | xargs sed -i '1s/python$/python3/'
 
+	EchoInfo	"${PackageLLVM[Name]}> Ensure FileCheck"
 	sed 's/utility/tool/' -i utils/FileCheck/CMakeLists.txt
 
 	mkdir -p build 	&& cd ${SHMAN_PDIR}${PackageLLVM[Package]}/build \
@@ -135,7 +141,31 @@ _BuildLLVM()
 		1> /dev/null || { EchoTest KO ${PackageLLVM[Name]} && PressAnyKeyToContinue; return 1; };
 
 	EchoInfo	"${PackageLLVM[Name]}> ninja"
-	ninja 1> /dev/null || { EchoTest KO ${PackageLLVM[Name]} && PressAnyKeyToContinue; return 1; };
+	# ninja 1> /dev/null || { EchoTest KO ${PackageLLVM[Name]} && PressAnyKeyToContinue; return 1; };
+	local MaxSafeJobs=$(( $(free -m | awk '/^Mem:/ { print $7 }') / 1024 )) # could try 2048
+	MaxSafeJobs=$(( MaxSafeJobs > 0 ? MaxSafeJobs : 1 ))
+	ninja -j${MaxSafeJobs} 1> build.log 2> build.err &
+	local NinjaPid=$!;
+	(
+		EchoInfo	"${PackageLLVM[Name]}> Compiling with $MaxSafeJobs processors";
+		while kill -0 $NinjaPid 2> /dev/null; do
+			printf "%s Free: %4s MB %14s %14s\n" \
+				"$(date +%T)" \
+				"$(free -m | awk '/^Mem:/ { print $4 }')" \
+				"$(wc -l build.log)" \
+				"$(wc -l build.err)"
+			sleep 60
+		done
+	) &
+	local MonitorPid=$!;
+	wait $NinjaPid && kill $MonitorPid || { 
+		kill $MonitorPid;
+		EchoTest KO "${PackageLLVM[Name]} $(wc -l build.{log,err})";
+		PressAnyKeyToContinue;
+		return 1;
+	};
+	date +%T
+	rm build.{log,err};
 
 	# EchoInfo	"${PackageLLVM[Name]}> ninja check-all"
 	# sed -e 's/config.has_no_default_config_flag/True/' \

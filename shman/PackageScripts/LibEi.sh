@@ -2,7 +2,7 @@
 
 if [ ! -z "${PackageLibEi[Source]}" ]; then return; fi
 
-source ${SHMAN_DIR}Utils.sh
+source ${SHMAN_UDIR}Utils.sh
 
 # =====================================||===================================== #
 #									LibEi								   #
@@ -27,7 +27,7 @@ InstallLibEi()
 
 	# Check Dependencies
 	EchoInfo	"${PackageLibEi[Name]}> Checking dependencies..."
-	Required=(Attrs Elogind)
+	Required=(Elogind)
 	for Dependency in "${Required[@]}"; do
 		(source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}") || { PressAnyKeyToContinue; return $?; }
 	done
@@ -96,7 +96,7 @@ _BuildLibEi()
 					|| { EchoError "${PackageLibEi[Name]}> Failed to enter ${SHMAN_PDIR}${PackageLibEi[Package]}/build"; return 1; }
 
 	EchoInfo	"${PackageLibEi[Name]}> Configure"
-	EchoInfo "might require .. \\ for meson setup" && PressAnyKeyToContinue;
+	# EchoInfo "might require .. \\ for meson setup" && PressAnyKeyToContinue;
 	meson setup --prefix=/usr \
 				--buildtype=release \
 				-D tests=disabled \

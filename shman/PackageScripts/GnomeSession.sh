@@ -2,7 +2,7 @@
 
 if [ ! -z "${PackageGnomeSession[Source]}" ]; then return; fi
 
-source ${SHMAN_DIR}Utils.sh
+source ${SHMAN_UDIR}Utils.sh
 
 # =====================================||===================================== #
 #									GnomeSession								   #
@@ -127,4 +127,31 @@ _BuildGnomeSession()
 
 	EchoInfo	"${PackageGnomeSession[Name]}> Still requires initialization"
 	PressAnyKeyToContinue;
+
+	EchoInfo	"${PackageGnomeSession[Name]}> /boot/grub/grub.cfg"
+	cat > /boot/grub/grub.cfg << EOF
+# Begin /boot/grub/grub.cfg
+set default=0
+set timeout=5
+
+insmod part_gpt
+insmod ext2
+# insmod gfxterm
+# insmod all_video
+
+set root=(hd0,1)
+
+# set gfxmode=auto
+# terminal_output gfxterm
+
+menuentry "GNU/Linux, Linux $(uname -r)-lfs-12.2 (GNOME)" {
+        set gfxmode=3840x2160
+        set gfxpayload=keep
+        linux   /vmlinuz-$(uname -r)-lfs-12.2   root=/dev/sda5  ro 5
+}
+menuentry "GNU/Linux, Linux $(uname -r)-lfs-12.2 (Shell)" {
+        linux   /vmlinuz-$(uname -r)-lfs-12.2   root=/dev/sda5  ro 3
+}
+# End /boot/grub/grub.cfg
+EOF
 }

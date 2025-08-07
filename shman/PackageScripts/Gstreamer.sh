@@ -2,7 +2,7 @@
 
 if [ ! -z "${PackageGstreamer[Source]}" ]; then return; fi
 
-source ${SHMAN_DIR}Utils.sh
+source ${SHMAN_UDIR}Utils.sh
 
 # =====================================||===================================== #
 #									Gstreamer								   #
@@ -101,7 +101,12 @@ _BuildGstreamer()
 	ninja 1> /dev/null || { EchoTest KO ${PackageGstreamer[Name]} && PressAnyKeyToContinue; return 1; };
 
 	EchoInfo	"${PackageGstreamer[Name]}> ninja test"
-	ninja test 1> /dev/null || { EchoTest KO ${PackageGstreamer[Name]} && PressAnyKeyToContinue; return 1; };
+	ninja test 1> /dev/null || {
+		EchoTest KO ${PackageGstreamer[Name]};
+		grep -B1 -A999 '^Summary of Failures:' "${SHMAN_PDIR}${PackageGstreamer[Package]}/build/meson-logs/testlog.txt" || echo "No summary found.";
+		PressAnyKeyToContinue;
+		return 1;
+	};
 	
 	EchoInfo	"${PackageGstreamer[Name]}> ninja install"
 	ninja install 1> /dev/null || { EchoTest KO ${PackageGstreamer[Name]} && PressAnyKeyToContinue; return 1; };

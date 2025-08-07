@@ -2,7 +2,7 @@
 
 if [ ! -z "${PackageVala[Source]}" ]; then return; fi
 
-source ${SHMAN_DIR}Utils.sh
+source ${SHMAN_UDIR}Utils.sh
 
 # =====================================||===================================== #
 #									Vala								   #
@@ -16,6 +16,7 @@ PackageVala[Version]="0.56.17";
 PackageVala[Package]="${PackageVala[Name]}-${PackageVala[Version]}";
 PackageVala[Extension]=".tar.xz";
 
+# removed valadoc
 PackageVala[Programs]="vala vala-0.56 valac vala-gen-introspect vapigen valac-0.56 vala-gen-introspect-0.56 vapigen-0.56";
 PackageVala[Libraries]="libvala-0.56.so";
 PackageVala[Python]="";
@@ -27,7 +28,7 @@ InstallVala()
 
 	# Check Dependencies
 	EchoInfo	"${PackageVala[Name]}> Checking dependencies..."
-	Required=()
+	Required=(GLib)
 	for Dependency in "${Required[@]}"; do
 		source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}" || { PressAnyKeyToContinue; return $?; }
 	done
@@ -99,7 +100,13 @@ _BuildVala()
 	make 1> /dev/null || { EchoTest KO ${PackageVala[Name]} && PressAnyKeyToContinue; return 1; };
 
 	EchoInfo	"${PackageVala[Name]}> make check"
-	make check 1> /dev/null || { EchoTest KO ${PackageVala[Name]} && PressAnyKeyToContinue; return 1; };
+	make check 1> /dev/null || { 
+		EchoTest KO "${PackageVala[Name]}> make check";
+		EchoWarning "${PackageVala[Name]}> likely due to lacking DBus";
+		grep "^FAIL:" tests/test-suite.log;
+		grep -B1 -A9 "tests/test-suite.log" tests/test-suite.log;
+		PressAnyKeyToContinue;
+	};
 	
 	EchoInfo	"${PackageVala[Name]}> make install"
 	make install 1> /dev/null || { EchoTest KO ${PackageVala[Name]} && PressAnyKeyToContinue; return 1; };

@@ -3,12 +3,13 @@
 SHMAN_DIR=/usr/src/shman/
 SHMAN_SDIR=${SHMAN_DIR}PackageScripts/
 SHMAN_PDIR=${SHMAN_DIR}Packages/
+SHMAN_UDIR=${SHMAN_DIR}Utils/
 
 for Directory in $SHMAN_DIR $SHMAN_SDIR $SHMAN_PDIR; do
 	if [ ! -d $Directory ]; then mkdir $Directory; fi
 done
 
-source "${SHMAN_DIR}Utils.sh"
+source "${SHMAN_UDIR}Utils.sh"
 
 # =====================================||===================================== #
 #								Configuration									   #
@@ -47,6 +48,153 @@ fi
 #																			   #
 #																			   #
 # ===============ft_linux==============||==============©Othello=============== #
+
+DisplayPackage()
+{
+	if [ -z "$1" ]; then local KeyPress=""; else local KeyPress="$1)\t"; fi
+	local PackageName="${2:-'N/A'}"
+	local DisplayName="${3:-$PackageName}"
+
+	echo -en "${KeyPress}${DisplayName} ";
+	if source "$SHMAN_SDIR/$PackageName.sh" &> /dev/null; then 
+		if Check${PackageName}Verbose 1> /dev/null; then
+			echo -en "${C_GREEN}OK${C_RESET}"
+		fi
+	else 
+		echo -en "${C_YELLOW}N/A${C_RESET}";
+	fi
+	echo
+}
+
+# =====================================||===================================== #
+#									Menu LSB								   #
+# ===============ft_linux==============||==============©Othello=============== #
+
+MenuLSB()
+{
+	while true; do
+		Width=$(tput cols);
+		clear;
+
+		printf '%*s\n' "$Width" '' | tr ' ' '-';
+		echo -e	"${C_ORANGE}${C_BOLD}Linux Standard Base requirements${C_RESET}";
+		printf '%*s\n' "$Width" '' | tr ' ' '-';
+
+		echo -e	"c)\t ${C_ORANGE}${C_BOLD}Core${C_RESET}";
+		echo -en "  " && DisplayPackage "" "At3" "At";
+		# echo -en "  " && DisplayPackage "" "Bash" "Bash";
+		# echo -en "  " && DisplayPackage "" "Bc" "Bc";
+		# echo -en "  " && DisplayPackage "" "Binutils" "Binutils";
+		# echo -en "  " && DisplayPackage "" "Coreutils" "Coreutils";
+		echo -en "  " && DisplayPackage "" "Cpio2" "Cpio";
+		# echo -en "  " && DisplayPackage "" "Diffutils" "Diffutils";
+		echo -en "  " && DisplayPackage "" "Ed1" "Ed";
+		echo -en "  " && DisplayPackage "" "Fcron3" "Fcron";
+		# echo -en "  " && DisplayPackage "" "Findutls" "Findutls";
+		# echo -en "  " && DisplayPackage "" "Gawk" "Gawk";
+		# echo -en "  " && DisplayPackage "" "Grep" "Grep";
+		# echo -en "  " && DisplayPackage "" "Gzip" "Gzip";
+		echo -en "  " && DisplayPackage "" "LSBTools0" "LSB-Tools";
+		# echo -en "  " && DisplayPackage "" "M4" "M4";
+		# echo -en "  " && DisplayPackage "" "Man-DB" "Man-DB";
+		echo -e  "  ${C_BOLD}MTA Mail - Server Software${C_RESET}";
+		echo -en "   -" && DisplayPackage "" "Dovecot" "Dovecot";
+		echo -en "   -" && DisplayPackage "" "Exim4" "Exim";
+		echo -en "   -" && DisplayPackage "" "PostFix" "PostFix";
+		echo -en "   -" && DisplayPackage "" "Sendmail8" "Sendmail";
+		# echo -en "  " && DisplayPackage "" "Ncurses" "Ncurses";
+		echo -en "  " && DisplayPackage "" "NSPR" "NSPR";
+		echo -en "  " && DisplayPackage "" "Nss" "NSS";
+		echo -en "  " && DisplayPackage "" "LinuxPAM" "PAM";
+		echo -en "  " && DisplayPackage "" "Pax" "Pax";
+		# echo -en "  " && DisplayPackage "" "Procps" "Procps";
+		# echo -en "  " && DisplayPackage "" "Psmisc" "Psmisc";
+		# echo -en "  " && DisplayPackage "" "Sed" "Sed";
+		# echo -en "  " && DisplayPackage "" "Shadow" "Shadow";
+		# echo -en "  " && DisplayPackage "" "Tar" "Tar";
+		echo -en "  " && DisplayPackage "" "Time1" "time";
+		# echo -en "  " && DisplayPackage "" "Util-linux" "Util-linux";
+		# echo -en "  " && DisplayPackage "" "Zlib" "Zlib";
+		printf '%*s\n' "$Width" '' | tr ' ' '-';
+
+		echo -e	"d)\t ${C_ORANGE}${C_BOLD}Desktop${C_RESET}";
+		# echo -en "  " && DisplayPackage "" "Alsa" "Alsa"
+		# echo -en "  " && DisplayPackage "" "ATK" "ATK"
+		echo -en "  " && DisplayPackage "" "Cairo" "Cairo"
+		echo -en "  " && DisplayPackage "" "DesktopFileUtils" "DesktopFileUtils"
+		echo -en "  " && DisplayPackage "" "FreeType" "Freetype"
+		echo -en "  " && DisplayPackage "" "Fontconfig" "Fontconfig"
+		echo -en "  " && DisplayPackage "" "GdkPixbuf" "Gdk-pixbuf";
+		echo -en "  " && DisplayPackage "" "GLib" "Glib2"
+		# echo -en "  " && DisplayPackage "" "GTK2" "GTK+2";
+		# echo -en "  " && DisplayPackage "" "IconNamingUtils" "Icon-naming";
+		echo -en "  " && DisplayPackage "" "LibJpegTurbo" "Libjpeg-turbo";
+		echo -en "  " && DisplayPackage "" "LibPng" "Libpng"
+		# echo -en "  " && DisplayPackage "" "LibTiff" "Libtiff"
+		echo -en "  " && DisplayPackage "" "LibXml2" "Libxml2"
+		# echo -en "  " && DisplayPackage "" "MesaLib" "MesaLib"
+		echo -en "  " && DisplayPackage "" "Pango" "Pango"
+		# echo -en "  " && DisplayPackage "" "Qt5" "Qt5"
+		# echo -en "  " && DisplayPackage "" "XdgUtils" "Xdg-utils";
+		# echo -en "  " && DisplayPackage "" "Xorg" "Xorg"
+		printf '%*s\n' "$Width" '' | tr ' ' '-';
+
+		echo -e	"l)\t ${C_ORANGE}${C_BOLD}Runtime Languages${C_RESET}";
+		# echo -en "  " && DisplayPackage "" "Perl" "Perl"
+		# echo -en "  " && DisplayPackage "" "Python" "Python"
+		echo -en "  " && DisplayPackage "" "LibXml2" "Libxml2"
+		echo -en "  " && DisplayPackage "" "LibXslt" "Libxslt"
+		printf '%*s\n' "$Width" '' | tr ' ' '-';
+
+		echo -e	"-)\t ${C_ORANGE}${C_BOLD}Imaging${C_RESET}";
+		# echo -en "  " && DisplayPackage "" "Cups" "CUPS"
+		# echo -en "  " && DisplayPackage "" "CupsFilters" "Cups-filters"
+		# echo -en "  " && DisplayPackage "" "Ghostscript" "Ghostscript"
+		# echo -en "  " && DisplayPackage "" "SANE" "SANE"
+		printf '%*s\n' "$Width" '' | tr ' ' '-';
+
+		echo -e	"g)\t ${C_ORANGE}${C_BOLD}Gtk3 and Graphics${C_RESET}";
+		echo -en "  " && DisplayPackage "" "GTK3" "GTK+3"
+		printf '%*s\n' "$Width" '' | tr ' ' '-';
+
+
+		echo -e	"q)\t Return";
+		printf '%*s\n' "$Width" '' | tr ' ' '-';
+		if [ ! -z "$ErrorMsg" ]; then
+			printf	"$ErrorMsg\n"
+			unset ErrorMsg;
+			printf '%*s\n' "$Width" '' | tr ' ' '-';
+		fi
+
+		printf	"Input> ";
+		GetKeyPress
+
+		case "$input" in
+			c|C)
+				# Bash Bc Binutils Coreutils Diffutils Findutls Gawk Grep Gzip M4 Man Ncurses Procps Psmisc Sed Shadow Tar Util-linux Zlib
+				# MTA's: Dovecot Exim4 PostFix Sendmail8
+				for CorePackage in At3 Cpio2 Ed1 Fcron3 LSBTools0 NSPR Nss LinuxPAM Pax Time1; do
+					source "$SHMAN_SDIR/${CorePackage}.sh" && Install"${CorePackage}" || PressAnyKeyToContinue;
+				done ;;
+			d|D)
+				# Alsa ATK GTK2 IconNamingUtils LibTiff MesaLib Qt5 XdgUtils Xorg
+				for DesktopPackage in Cairo DesktopFileUtils FreeType Fontconfig GdkPixbuf GLib LibJpegTurbo LibPng LibXml2 Pango; do
+							source "$SHMAN_SDIR/${DesktopPackage}.sh" && Install"${DesktopPackage}" || PressAnyKeyToContinue;
+				done ;;
+			l|L)
+				# Perl Python
+				for LanguagePackage in LibXml2 LibXslt; do
+							source "$SHMAN_SDIR/${LanguagePackage}.sh" && Install"${LanguagePackage}" || PressAnyKeyToContinue;
+				done ;;
+			g|G)
+				# 
+				for GraphicsPackage in GTK3; do
+							source "$SHMAN_SDIR/${GraphicsPackage}.sh" && Install"${GraphicsPackage}" || PressAnyKeyToContinue;
+				done ;;
+			q|Q)	return;;
+		esac
+	done
+}
 
 # =====================================||===================================== #
 #									Menu Pips								   #
@@ -116,12 +264,12 @@ MenuGccLibraries()
 		printf '%*s\n' "$Width" '' | tr ' ' '-';
 		echo -e	"${C_ORANGE}${C_BOLD}gcc libraries${C_RESET}";
 		printf '%*s\n' "$Width" '' | tr ' ' '-';
-		echo -en "0)\t ICU "; 		source "$SHMAN_SDIR/ICU.sh" && CheckICU && 				echo -e "${C_GREEN}OK${C_RESET}" || { echo -en "${C_RED}KO${C_RESET}\t"; CheckICUVerbose 1> /dev/null; echo; }
-		echo -en "1)\t Nettle "; 	source "$SHMAN_SDIR/Nettle.sh" && CheckNettle && 		echo -e "${C_GREEN}OK${C_RESET}" || { echo -en "${C_RED}KO${C_RESET}\t"; CheckNettleVerbose 1> /dev/null; echo; }
-		echo -en "2)\t GnuTLS "; 	source "$SHMAN_SDIR/GnuTLS.sh" && CheckGnuTLS && 		echo -e "${C_GREEN}OK${C_RESET}" || { echo -en "${C_RED}KO${C_RESET}\t"; CheckGnuTLSVerbose 1> /dev/null; echo; }
-		echo -en "3)\t LibUnwind "; source "$SHMAN_SDIR/LibUnwind.sh" && CheckLibUnwind && 	echo -e "${C_GREEN}OK${C_RESET}" || { echo -en "${C_RED}KO${C_RESET}\t"; CheckLibUnwindVerbose 1> /dev/null; echo; }
-		echo -en "4)\t LibXml2 "; 	source "$SHMAN_SDIR/LibXml2.sh" && CheckLibXml2 && 		echo -e "${C_GREEN}OK${C_RESET}" || { echo -en "${C_RED}KO${C_RESET}\t"; CheckLibXml2Verbose 1> /dev/null; echo; }
-		echo -en "5)\t LibXslt "; 	source "$SHMAN_SDIR/LibXslt.sh" && CheckLibXslt && 		echo -e "${C_GREEN}OK${C_RESET}" || { echo -en "${C_RED}KO${C_RESET}\t"; CheckLibXsltVerbose 1> /dev/null; echo; }
+		DisplayPackage "0" "ICU" "";
+		DisplayPackage "1" "Nettle" "";
+		DisplayPackage "2" "GnuTLS" "";
+		DisplayPackage "3" "LibUnwind" "";
+		DisplayPackage "4" "LibXml2" "";
+		DisplayPackage "5" "LibXslt" "";
 		printf '%*s\n' "$Width" '' | tr ' ' '-';
 		echo -e	"a)\t All";
 		echo -e	"q)\t Return";
@@ -142,10 +290,9 @@ MenuGccLibraries()
 			3) source "$SHMAN_SDIR/LibUnwind.sh" && InstallLibUnwind;;
 			4) source "$SHMAN_SDIR/LibXml2.sh" && InstallLibXml2;;
 			5) source "$SHMAN_SDIR/LibXslt.sh" && InstallLibXslt;;
-			a) source "$SHMAN_SDIR/ICU.sh" && InstallICU;
-				source "$SHMAN_SDIR/GnuTLS.sh" && InstallGnuTLS;
-				source "$SHMAN_SDIR/LibUnwind.sh" && InstallLibUnwind;
-				source "$SHMAN_SDIR/LibXslt.sh" && InstallLibXslt;;
+			a) 	for InstallPackage in ICU GnuTLS LibUnwind LibXslt; do
+					source "$SHMAN_SDIR/${InstallPackage}.sh" && Install${InstallPackage};
+				done ;;
 			q|Q)	return;;
 		esac
 	done
@@ -164,13 +311,14 @@ MenuBinaries()
 		printf '%*s\n' "$Width" '' | tr ' ' '-';
 		echo -e	"${C_ORANGE}${C_BOLD}Binary programs${C_RESET}";
 		printf '%*s\n' "$Width" '' | tr ' ' '-';
-		echo -en "c)\t Wget "; 	source "$SHMAN_SDIR/Wget.sh" && CheckWget && 	echo -e "${C_GREEN}OK${C_RESET}" || echo -e "${C_RED}KO${C_RESET}"
-		echo -en "c)\t OpenSSH "; 	source "$SHMAN_SDIR/OpenSSH.sh" && CheckOpenSSH && 	echo -e "${C_GREEN}OK${C_RESET}" || echo -e "${C_RED}KO${C_RESET}"
-		echo -en "c)\t cURL "; 	source "$SHMAN_SDIR/cURL.sh" && CheckcURL && 	echo -e "${C_GREEN}OK${C_RESET}" || echo -e "${C_RED}KO${C_RESET}"
-		echo -en "g)\t git "; 	source "$SHMAN_SDIR/Git.sh" && CheckGit && 		echo -e "${C_GREEN}OK${C_RESET}" || echo -e "${C_RED}KO${C_RESET}"
-		echo -en "z)\t zsh "; 	source "$SHMAN_SDIR/Zsh.sh" && CheckZsh && 		echo -e "${C_GREEN}OK${C_RESET}" || echo -e "${C_RED}KO${C_RESET}"
-		echo -en "w)\t which "; source "$SHMAN_SDIR/Which.sh" && CheckWhich && 	echo -e "${C_GREEN}OK${C_RESET}" || echo -e "${C_RED}KO${C_RESET}"
-		echo -en "l)\t lynx "; 	source "$SHMAN_SDIR/Lynx.sh" && CheckLynx && 	echo -e "${C_GREEN}OK${C_RESET}" || echo -e "${C_RED}KO${C_RESET}"
+		DisplayPackage "c" "cURL" "";
+		echo -en " -" && DisplayPackage "" "Wget" "";
+		echo -en " -" && DisplayPackage "" "OpenSSH" "";
+		DisplayPackage "g" "Git" "git";
+		DisplayPackage "z" "Zsh" "zsh";
+		DisplayPackage "w" "Which" "which";
+		DisplayPackage "l" "Lynx" "lynx";
+		DisplayPackage "r" "Rustc" "Rust";
 		printf '%*s\n' "$Width" '' | tr ' ' '-';
 		echo -e	"a)\t All";
 		echo -e	"q)\t Return";
@@ -191,12 +339,12 @@ MenuBinaries()
 			w) source "$SHMAN_SDIR/Which.sh" && InstallWhich;
 				if which which &> /dev/null; then CheckBinary() { which "$1" &> /dev/null; return $?; } fi ;;
 			l) source "$SHMAN_SDIR/Lynx.sh" && InstallLynx;;
-			a) source "$SHMAN_SDIR/cURL.sh" && InstallcURL;
-				source "$SHMAN_SDIR/Git.sh" && InstallGit;
-				source "$SHMAN_SDIR/Zsh.sh" && InstallZsh;
-				source "$SHMAN_SDIR/Which.sh" && InstallWhich;
+			r) source "$SHMAN_SDIR/Rustc.sh" && InstallRustc;;
+			a) 	source "$SHMAN_SDIR/Which.sh" && InstallWhich;
 				if which which &> /dev/null; then CheckBinary() { which "$1" &> /dev/null; return $?; } fi ;
-				source "$SHMAN_SDIR/Lynx.sh" && InstallLynx;;
+				for InstallPackage in cURL Git Zsh Lynx Rustc; do
+					source "$SHMAN_SDIR/${InstallPackage}.sh" && Install${InstallPackage};
+				done ;;
 			q|Q)	return;;
 		esac
 	done
@@ -216,33 +364,42 @@ MenuGnome()
 		echo -e	"${C_ORANGE}${C_BOLD}GNU Network Object Model Environment${C_RESET}";
 		printf '%*s\n' "$Width" '' | tr ' ' '-';
 
-		CheckPips	docutils
-		# echo -en "FreeTypeChain "; 	source "$SHMAN_SDIR/FreeTypeChain.sh" && CheckFreeTypeChainVerbose 1> /dev/null && 	echo -e "${C_GREEN}OK${C_RESET}" || echo;
-		# echo -en "GstPluginsBase "; 	source "$SHMAN_SDIR/GstPluginsBase.sh" && CheckGstPluginsBaseVerbose 1> /dev/null && 	echo -e "${C_GREEN}OK${C_RESET}" || echo;
-		echo -en "GstPluginsGood "; 	source "$SHMAN_SDIR/GstPluginsGood.sh" && CheckGstPluginsGoodVerbose 1> /dev/null && 	echo -e "${C_GREEN}OK${C_RESET}" || echo;
-		# echo -en "GstPluginsBad "; 	source "$SHMAN_SDIR/GstPluginsBad.sh" && CheckGstPluginsBadVerbose 1> /dev/null && 	echo -e "${C_GREEN}OK${C_RESET}" || echo;
-		echo -en "DocbookXml "; 	source "$SHMAN_SDIR/DocbookXml.sh" && CheckDocbookXmlVerbose 1> /dev/null && 	echo -e "${C_GREEN}OK${C_RESET}" || echo;
-		echo -en "Ibus "; 	source "$SHMAN_SDIR/Ibus.sh" && CheckIbusVerbose 1> /dev/null && 	echo -e "${C_GREEN}OK${C_RESET}" || echo;
-		echo -en "Rustc "; 	source "$SHMAN_SDIR/Rustc.sh" && CheckRustcVerbose 1> /dev/null && 	echo -e "${C_GREEN}OK${C_RESET}" || echo;
-		# echo -en "DConf "; 	source "$SHMAN_SDIR/DConf.sh" && CheckDConfVerbose 1> /dev/null && 	echo -e "${C_GREEN}OK${C_RESET}" || echo;
-		# echo -en "DConfEditor "; 	source "$SHMAN_SDIR/DConfEditor.sh" && CheckDConfEditorVerbose 1> /dev/null && 	echo -e "${C_GREEN}OK${C_RESET}" || echo;
-		# echo -en "GnomeDesktop "; 	source "$SHMAN_SDIR/GnomeDesktop.sh" && CheckGnomeDesktopVerbose 1> /dev/null && 	echo -e "${C_GREEN}OK${C_RESET}" || echo;
+		echo -en "Python: "
+		CheckPips	docutils pygobject dbus-python python-dbusmock
 		printf '%*s\n' "$Width" '' | tr ' ' '-';
 
-		echo -en "-)\t Linux "; 	source "$SHMAN_SDIR/Linux.sh" && CheckLinuxVerbose 1> /dev/null && 	echo -e "${C_GREEN}OK${C_RESET}" || echo;
-		echo -en "0)\t GLib "; 		source "$SHMAN_SDIR/GLib.sh" && CheckGLibVerbose 1> /dev/null && 	echo -e "${C_GREEN}OK${C_RESET}" || echo;
-		echo -en "3)\t Gcr3 "; 		source "$SHMAN_SDIR/Gcr3.sh" && CheckGcr3Verbose 1> /dev/null && 	echo -e "${C_GREEN}OK${C_RESET}" || echo;
-		echo -en "4)\t Gcr4 "; 		source "$SHMAN_SDIR/Gcr4.sh" && CheckGcr4Verbose 1> /dev/null && 	echo -e "${C_GREEN}OK${C_RESET}" || echo;
-		echo -en "-)\t GSettingsDesktopSchemas "; 		source "$SHMAN_SDIR/GSettingsDesktopSchemas.sh" && CheckGSettingsDesktopSchemasVerbose 1> /dev/null && 	echo -e "${C_GREEN}OK${C_RESET}" || echo;
+		# DisplayPackage "" "AdwaitaIconTheme" "";
+		# DisplayPackage "" "GnomeShellExtensions" "";
+		# DisplayPackage "" "GSettingsDesktopSchemas" "";
+		# DisplayPackage "" "GstPluginsGood" "";
+		# DisplayPackage "" "Hwdata" "";
+		# DisplayPackage "" "PyCairo" "";
+		# DisplayPackage "" "UtilMacros" "";
+		# DisplayPackage "" "Xbitmaps" "";
+		# DisplayPackage "" "XcbProto" "";
+		# DisplayPackage "" "XcursorThemes" "";
+		# DisplayPackage "" "XkeyboardConfig" "";
+		# DisplayPackage "" "Xorgproto" "";
+		# printf '%*s\n' "$Width" '' | tr ' ' '-';
+		
+		DisplayPackage "0" "GLib" "";
+		DisplayPackage "1" "Dbus" "";
+		DisplayPackage "2" "XorgServer" "";
+		echo -en "  " && DisplayPackage "" "XorgApplications" "";
+		echo -en "  " && DisplayPackage "" "XorgBuildEnv" "";
+		echo -en "  " && DisplayPackage "" "XorgFonts" "";
+		echo -en "  " && DisplayPackage "" "XorgLibinput" "";
+		echo -en "  " && DisplayPackage "" "XorgLibraries" "";
+		echo -en "  " && DisplayPackage "" "Xorgproto" "";
+		DisplayPackage "3" "Gcr3" "";
+		DisplayPackage "4" "Gcr4" "";
 		printf '%*s\n' "$Width" '' | tr ' ' '-';
-
-		# echo -en "-)\t GnomeBackgrounds "; 		source "$SHMAN_SDIR/GnomeBackgrounds.sh" && CheckGnomeBackgroundsVerbose 1> /dev/null && 	echo -e "${C_GREEN}OK${C_RESET}" || echo;
-		# echo -en "-)\t GnomeKeyring "; 			source "$SHMAN_SDIR/GnomeKeyring.sh" && CheckGnomeKeyringVerbose 1> /dev/null && 	echo -e "${C_GREEN}OK${C_RESET}" || echo;
-		echo -en "-)\t GnomeSettingsDaemon "; 	source "$SHMAN_SDIR/GnomeSettingsDaemon.sh" && CheckGnomeSettingsDaemonVerbose 1> /dev/null && 	echo -e "${C_GREEN}OK${C_RESET}" || echo;
-		# echo -en "-)\t GnomeControlCenter "; 	source "$SHMAN_SDIR/GnomeControlCenter.sh" && CheckGnomeControlCenterVerbose 1> /dev/null && 	echo -e "${C_GREEN}OK${C_RESET}" || echo;
-		echo -en "9)\t GnomeShell "; 			source "$SHMAN_SDIR/GnomeShell.sh" && CheckGnomeShellVerbose 1> /dev/null && 	echo -e "${C_GREEN}OK${C_RESET}" || echo;
-		# echo -en "-)\t GnomeShellExtensions "; 	source "$SHMAN_SDIR/GnomeShellExtensions.sh" && CheckGnomeShellExtensionsVerbose 1> /dev/null && 	echo -e "${C_GREEN}OK${C_RESET}" || echo;
-		echo -en "-)\t GnomeSession "; 			source "$SHMAN_SDIR/GnomeSession.sh" && CheckGnomeSessionVerbose 1> /dev/null && 	echo -e "${C_GREEN}OK${C_RESET}" || echo;
+		DisplayPackage "5" "GDM" "";
+		echo -en "  " && DisplayPackage "" "Nautilus" "";
+		DisplayPackage "6" "GnomeShell" "";
+		DisplayPackage "7" "GnomeShellExtensions" "";
+		DisplayPackage "8" "GnomeControlCenter" "";
+		DisplayPackage "9" "GnomeSession" "";
 		printf '%*s\n' "$Width" '' | tr ' ' '-';
 
 		# echo -e	"a)\t All";
@@ -259,22 +416,45 @@ MenuGnome()
 
 		case "$input" in
 			0) source "$SHMAN_SDIR/GLib.sh" && InstallGLib;;
-			1) source "$SHMAN_SDIR/GTK3.sh" && InstallGTK3;;
-			2) source "$SHMAN_SDIR/GTK4.sh" && InstallGTK4;;
+			1) source "$SHMAN_SDIR/Dbus.sh" && InstallDbus;;
+			2) InstallFunctionForXorg;;
 			3) source "$SHMAN_SDIR/Gcr3.sh" && InstallGcr3;;
 			4) source "$SHMAN_SDIR/Gcr4.sh" && InstallGcr4;;
-			5) source "$SHMAN_SDIR/FreeType.sh" && InstallFreeType;;
-			a|A)	source "$SHMAN_SDIR/Gcr3.sh" && InstallGcr3;
-					source "$SHMAN_SDIR/Gcr4.sh" && InstallGcr4;
-					source "$SHMAN_SDIR/GSettingsDesktopSchemas.sh" && InstallGSettingsDesktopSchemas;
-					source "$SHMAN_SDIR/LibSecret.sh" && InstallLibSecret;
-					source "$SHMAN_SDIR/Rest.sh" && InstallRest;
-					source "$SHMAN_SDIR/TotemPlParser.sh" && InstallTotemPlParser;
-					source "$SHMAN_SDIR/VTE.sh" && InstallVTE;;
-			9) InstallFunctionForGnomeShell;;
+			4) source "$SHMAN_SDIR/GDM.sh" && InstallGDM;;
+			6) InstallFunctionForGnomeShell;;
+			7) source "$SHMAN_SDIR/GnomeShellExtensions.sh" && InstallGnomeShellExtensions;;
+			8) source "$SHMAN_SDIR/GnomeControlCenter.sh" && InstallGnomeControlCenter;;
+			9) source "$SHMAN_SDIR/GnomeSession.sh" && InstallGnomeSession;;
+			g|G) source "$SHMAN_SDIR/LibNma.sh" && InstallLibNma; PressAnyKeyToContinue;;
+			a|A)	for InstallPackage in Gcr3 Gcr4 GSettingsDesktopSchemas LibSecret Rest TotemPlParser VTE; do
+						source "$SHMAN_SDIR/${InstallPackage}.sh" && Install${InstallPackage};
+					done ;;
 			q|Q)	return;;
 		esac
-		PressAnyKeyToContinue;
+	done
+}
+
+InstallFunctionForXorg()
+{
+	# Xorg packages
+	# FreeTypeChain contains XorgLibraries
+	# XorgFonts XorgApplications are dependencies of XorgServer
+	for Dependency in XorgBuildEnv Xorgproto FreeTypeChain XorgServer; do
+		source "$SHMAN_SDIR/${Dependency}.sh" && Install${Dependency} || { PressAnyKeyToContinue; return 1; };
+	done
+
+	# Required Runtime Dependencies
+	for Dependency in XkeyboardConfig; do
+		source "$SHMAN_SDIR/${Dependency}.sh" && Install${Dependency} || { PressAnyKeyToContinue; return 1; };
+	done
+
+	# Recommended Runtime Dependencies
+	for Dependency in XorgLibinput Xinit; do
+		source "$SHMAN_SDIR/${Dependency}.sh" && Install${Dependency} || { PressAnyKeyToContinue; };
+	done
+	# Recommended Runtime Dependencies
+	for Dependency in Acpid; do
+		source "$SHMAN_SDIR/${Dependency}.sh" && Install${Dependency};
 	done
 }
 
@@ -283,17 +463,16 @@ InstallFunctionForGnomeShell()
 	source "$SHMAN_SDIR/GnomeShell.sh" && InstallGnomeShell || return $?;
 
 	# Required Runtime Dependencies
-	source "$SHMAN_SDIR/AdwaitaIconTheme.sh" && InstallAdwaitaIconTheme && \
-	source "$SHMAN_SDIR/DConf.sh" && InstallDConf && \
-	source "$SHMAN_SDIR/Elogind.sh" && InstallElogind && \
-	source "$SHMAN_SDIR/GDM.sh" && InstallGDM && \
-	source "$SHMAN_SDIR/LibGweather.sh" && InstallLibGweather || \
-	PressAnyKeyToContinue;
+	# removed cause its a hassle GnomeControlCenter (it is important though)
+	for Dependency in AdwaitaIconTheme DConf Elogind GDM  LibGweather; do
+		source "$SHMAN_SDIR/${Dependency}.sh" && Install${Dependency} || { PressAnyKeyToContinue; return 1; };
+	done
 
 	# Recommended Runtime Dependencies
-	source "$SHMAN_SDIR/Blocaled.sh" && InstallBlocaled && \
-	source "$SHMAN_SDIR/GnomeMenus.sh" && InstallGnomeMenus || \
-	PressAnyKeyToContinue;
+	# Added LibNma
+	for Dependency in Blocaled GnomeMenus LibNma; do
+		source "$SHMAN_SDIR/${Dependency}.sh" && Install${Dependency} || { PressAnyKeyToContinue; return 1; };
+	done
 }
 
 # =====================================||===================================== #
@@ -306,15 +485,19 @@ while true; do
 
 	printf '%*s\n' "$Width" '' | tr ' ' '-';
 	echo -e	"${C_ORANGE}${C_BOLD}Shman - Shell Package Manager${C_RESET}";
+	echo 	"Dir: ${SHMAN_DIR}";
 	echo -n "Scripts: "; ls ${SHMAN_SDIR}/*.sh -l | wc -l;
+	echo 	"PATH: $PATH"
 	printf '%*s\n' "$Width" '' | tr ' ' '-';
+	DisplayPackage "0" "Linux" " Linux";
+	echo -e "l)\t LSB requirements"
 	echo -e "p)\t Python Packages"
-	echo -e "l)\t gcc Libraries"
+	echo -e "y)\t gcc Libraries"
 	echo -e "b)\t Binaries"
-	echo -e "G)\t Gnome"
+	echo -e "g)\t Gnome"
 	printf '%*s\n' "$Width" '' | tr ' ' '-';
 	echo -e "c)\t Clean";
-	echo -e	"q)\t Quit";
+	echo -e "q)\t Quit";
 	printf '%*s\n' "$Width" '' | tr ' ' '-';
 	if [ ! -z "$ErrorMsg" ]; then
 		printf	"$ErrorMsg\n"
@@ -326,18 +509,79 @@ while true; do
 	GetKeyPress
 
 	case "$input" in
+		0) source "$SHMAN_SDIR/Linux.sh" && InstallLinux;;
+		l)	MenuLSB;;
 		p)	MenuPips;;
-		l)	MenuGccLibraries;;
+		y)	MenuGccLibraries;;
 		b)	MenuBinaries;;
-		G)	MenuGnome;;
-		c|C)	find "/usr/src/shman/Packages/" -maxdepth 1 -type f -name '*.tar.*' | while read -r Tarball; do
-					ExtractedDirectory="$(tar -tf "$Tarball" | head -1 | cut -f1 -d"/")";
-					[ -d ${SHMAN_PDIR}${ExtractedDirectory} ] && rm -r ${SHMAN_PDIR}${ExtractedDirectory};
-				done
-				;;&
-		C)	rm ${SHMAN_PDIR}*.patch*;
-			rm ${SHMAN_PDIR}*.tar.*;;
-		q|Q)	break;;
+		g|G)	MenuGnome;;
+		c)	RemoveAllPackages;;
+		C)	RemoveAllPackages;
+			RemoveAllDownloads;;
+		q)	break;;
+		Q)	poweroff -n;;
 		*)	ErrorMsg="Bad input: $input";;
 	esac
 done
+
+
+# bash-5.2# cat /etc/pam.d/system-session /etc/pam.d/gdm-launch-environment 
+# # Begin /etc/pam.d/system-session
+
+# session   required    pam_unix.so
+
+# # End /etc/pam.d/system-session
+# # Begin elogind addition
+
+# session  required    pam_loginuid.so
+# session  required    pam_elogind.so
+
+# # End elogind addition
+
+# # Begin /etc/pam.d/gdm-launch-environment
+
+# auth     required       pam_succeed_if.so audit quiet_success user = gdm
+# auth     required       pam_env.so
+# auth     optional       pam_permit.so
+
+# account  required       pam_succeed_if.so audit quiet_success user = gdm
+# account  include        system-account
+
+# password required       pam_deny.so
+
+# session  required       pam_succeed_if.so audit quiet_success user = gdm
+# session  required       pam_loginuid.so
+# session  required       pam_elogind.so
+# session  optional       pam_keyinit.so force revoke
+# session  optional       pam_permit.so
+
+# # End /etc/pam.d/gdm-launch-environment
+# bash-5.2# echo '' > /var/log/gdm/greeter.log 
+# bash-5.2# ps aux | grep gdm
+# root      1202  0.1  0.0 306192  8324 ?        Ssl  21:44   0:00 /usr/sbin/gdm
+# root      1269  0.0  0.0   2708  1484 pts/0    S+   21:45   0:00 grep gdm
+# bash-5.2# kill 1202
+# bash-5.2# cat /var/log/gdm/greeter.log | grep -E "(EE|WW)"
+# Current Operating System: Linux ohengelm 6.10.14 #1 SMP PREEMPT_DYNAMIC Wed Jul 16 16:43:40 CEST 2025 x86_64
+#         (WW) warning, (EE) error, (NI) not implemented, (??) unknown.
+# (WW) `fonts.dir' not found (or not valid) in "/usr/share/fonts/X11/misc".
+# (WW) `fonts.dir' not found (or not valid) in "/usr/share/fonts/X11/100dpi".
+# (WW) `fonts.dir' not found (or not valid) in "/usr/share/fonts/X11/75dpi".
+# (WW) Open ACPI failed (/var/run/acpid.socket) (No such file or directory)
+# (WW) Warning, couldn't open module vmware
+# (EE) Failed to load module "vmware" (module does not exist, 0)
+# (WW) Warning, couldn't open module fbdev
+# (EE) Failed to load module "fbdev" (module does not exist, 0)
+# (WW) Warning, couldn't open module vesa
+# (EE) Failed to load module "vesa" (module does not exist, 0)
+# (EE) 
+# (EE) xf86OpenConsole: Cannot open virtual console 1 (Permission denied)
+# (EE) 
+# (EE) 
+# (EE) Please also check the log file at "/var/log/Xorg.0.log" for additional information.
+# (EE) 
+# (WW) xf86CloseConsole: KDSETMODE failed: Bad file descriptor
+# (WW) xf86CloseConsole: VT_GETMODE failed: Bad file descriptor
+# (EE) Server terminated with error (1). Closing log file.
+# bash-5.2# loginctl
+# No sessions.

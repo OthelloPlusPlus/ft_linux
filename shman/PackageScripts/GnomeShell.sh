@@ -2,7 +2,7 @@
 
 if [ ! -z "${PackageGnomeShell[Source]}" ]; then return; fi
 
-source ${SHMAN_DIR}Utils.sh
+source ${SHMAN_UDIR}Utils.sh
 
 # =====================================||===================================== #
 #									GnomeShell								   #
@@ -16,7 +16,8 @@ PackageGnomeShell[Version]="47.4";
 PackageGnomeShell[Package]="${PackageGnomeShell[Name]}-${PackageGnomeShell[Version]}";
 PackageGnomeShell[Extension]=".tar.xz";
 
-PackageGnomeShell[Programs]="gnome-extensions gnome-extensions-app gnome-shell gnome-shell-extension-prefs gnome-shell-extension-tool gnome-shell-test-tool";
+# Removed gnome-extensions gnome-shell-extension-prefs gnome-shell-extension-tool as they appear to belong to GnomeShellExtensions
+PackageGnomeShell[Programs]="gnome-extensions-app gnome-shell gnome-shell-test-tool";
 PackageGnomeShell[Libraries]="";
 PackageGnomeShell[Python]="";
 
@@ -94,6 +95,7 @@ _BuildGnomeShell()
 				--buildtype=release \
 				-D systemd=false \
 				-D tests=false \
+				-D extensions_tool=false \
 				.. \
 				1> /dev/null || { EchoTest KO ${PackageGnomeShell[Name]} && PressAnyKeyToContinue; return 1; };
 
@@ -101,7 +103,13 @@ _BuildGnomeShell()
 	ninja 1> /dev/null || { EchoTest KO ${PackageGnomeShell[Name]} && PressAnyKeyToContinue; return 1; };
 
 	EchoInfo	"${PackageGnomeShell[Name]}> ninja test"
-	meson configure -D tests=true && ninja test 1> /dev/null || { EchoTest KO ${PackageGnomeShell[Name]} && PressAnyKeyToContinue; return 1; };
+	meson configure -D tests=true 1> /dev/null || { EchoTest KO ${PackageGnomeShell[Name]} && PressAnyKeyToContinue; return 1; };
+	if [ -z "$DISPLAY" ]; then
+		EchoWarning "No X graphical environment detected. Tests requiring X will fail."
+		ninja test || { EchoWarning "${PackageGnomeShell[Name]}> Failures expected due to no X graphical environment." && PressAnyKeyToContinue; };
+	else
+		ninja test 1> /dev/null || { EchoTest KO ${PackageGnomeShell[Name]} && PressAnyKeyToContinue; return 1; };
+	fi
 	
 	EchoInfo	"${PackageGnomeShell[Name]}> ninja install"
 	ninja install 1> /dev/null || { EchoTest KO ${PackageGnomeShell[Name]} && PressAnyKeyToContinue; return 1; };

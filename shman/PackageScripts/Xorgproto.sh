@@ -2,7 +2,7 @@
 
 if [ ! -z "${PackageXorgproto[Source]}" ]; then return; fi
 
-source ${SHMAN_DIR}Utils.sh
+source ${SHMAN_UDIR}Utils.sh
 
 # =====================================||===================================== #
 #									Xorgproto								   #
@@ -59,7 +59,7 @@ CheckXorgproto()
 
 CheckXorgprotoVerbose()
 {
-	EchoInfo	"No valid check implemented" >&2;
+	EchoWarning	"No valid check implemented" >&2;
 	return 1;
 	# CheckInstallationVerbose	"${PackageXorgproto[Programs]}"\
 	# 							"${PackageXorgproto[Libraries]}"\
@@ -100,5 +100,9 @@ _BuildXorgproto()
 	ninja install 1> /dev/null || { EchoTest KO ${PackageXorgproto[Name]} && PressAnyKeyToContinue; return 1; };
 
 	EchoInfo	"${PackageXorgproto[Name]}> mv -v $XORG_PREFIX/share/doc/xorgproto{,-2024.1}"
+	if [ -d "$XORG_PREFIX/share/doc/xorgproto-2024.1" ]; then
+		EchoWarning "${PackageXorgproto[Name]}> rm -rf $XORG_PREFIX/share/doc/xorgproto-2024.1"
+		rm -rf "$XORG_PREFIX/share/doc/xorgproto-2024.1"
+	fi
 	mv -v $XORG_PREFIX/share/doc/xorgproto{,-2024.1}
 }
