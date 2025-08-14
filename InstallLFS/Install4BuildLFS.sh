@@ -359,9 +359,25 @@ EOF
 	cat > /etc/resolv.conf << "EOF"
 # Begin /etc/resolv.conf
 domain codam.nl
-nameserver 10.0.2.3
-nameserver 8.8.8.8
+
+# DNS resolution
+# Local Caching Resolver
+nameserver 127.0.0.53
+# Quad9
+nameserver 9.9.9.9
+# Surfnet (NL)
+nameserver 145.100.100.100
+# Freenom World
+nameserver 80.80.80.80
+# Cloudflare
 nameserver 1.1.1.1
+# OpenDNS
+nameserver 208.67.222.222
+# Google DNS
+nameserver 8.8.8.8
+
+option edns0
+
 # End /etc/resolv.conf
 EOF
 
@@ -464,6 +480,15 @@ ConfigureSystemLocale()
 	cat > /etc/profile << EOF
 # Begin /etc/profile
 
+# System wide environment variables and startup programs.
+
+# System wide aliases and functions should go in /etc/bashrc.
+# Personal environment variables and startup programs should
+# go into ~/.bash_profile.
+# Personal aliases and functions should go into ~/.bashrc.
+
+## Begin Language settings
+
 for i in \$(locale); do
     unset \${i%=*}
 done
@@ -473,6 +498,39 @@ if [[ "\$TERM" = linux ]]; then
 else
     export LANG=${LocaleLanguage}_${LocaleCountry}.${LocaleCharmap}${LocaleModifers}
 fi
+
+## End Language Settings
+
+## Begin Environment values
+
+export PATH=/usr/bin
+if [ ! -L /bin ]; then export PATH="\$PATH:/bin"; fi
+if [ \$EUID -eq 0 ]; then
+    export PATH="\$PATH:/usr/sbin"
+	if [ ! -L /sbin ]; then export PATH="\$PATH:/sbin"; fi
+	unset HISTFILE
+fi
+
+export HISTSIZE=1000
+export HISTIGNORE="&:[bf]g:exit"
+
+export XDG_DATA_DIRS=\${XDG_DATA_DIRS:-/usr/share}
+export XDG_CONFIG_DIRS=\${XDG_CONFIG_DIRS:-/etc/xdg}
+export XDG_RUNTIME_DIR=\${XDG_RUNTIME_DIR:-/tmp/xdg-\$USER}
+
+## End Environment values
+
+## Begin Subscript inclusion
+
+for script in /etc/profile.d/*.sh; do
+    if [ -r \$script ]; then
+        . \$script
+    fi
+done
+
+unset script
+
+## End Subscript Inclusion
 
 # End /etc/profile
 EOF
