@@ -44,7 +44,7 @@ InstallIbus()
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 		fi
 	done
-	
+
 	# Install Package
 	EchoInfo	"${PackageIbus[Name]}> Building package..."
 	_ExtractPackageIbus || return $?;
@@ -150,7 +150,7 @@ _BuildIbus()
 			EchoWarning "${PackageIbus[Name]}> Otherwise Ctrl + C";
 			PressAnyKeyToContinue;
 		};
-	
+
 	EchoInfo	"${PackageIbus[Name]}> make install"
 	make install 1> /dev/null || { EchoTest KO ${PackageIbus[Name]} && PressAnyKeyToContinue; return 1; };
 

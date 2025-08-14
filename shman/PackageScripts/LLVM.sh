@@ -44,7 +44,7 @@ InstallLLVM()
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 		fi
 	done
-	
+
 	# Install Package
 	EchoInfo	"${PackageLLVM[Name]}> Building package..."
 	_ExtractPackageLLVM || return $?;
@@ -85,7 +85,7 @@ _ExtractPackageLLVM()
 	do
 		wget -O "${SHMAN_PDIR}/${URL##*/}" "${URL}"
 	done
-	
+
 	return $?;
 }
 
@@ -171,7 +171,7 @@ _BuildLLVM()
 	# sed -e 's/config.has_no_default_config_flag/True/' \
 	# 	-i ../projects/compiler-rt/test/lit.common.cfg.py
 	# sh -c 'ulimit -c 0 && ninja check-all' 1> /dev/null || { EchoTest KO ${PackageLLVM[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageLLVM[Name]}> ninja install"
 	ninja install 1> /dev/null || { EchoTest KO ${PackageLLVM[Name]} && PressAnyKeyToContinue; return 1; };
 }

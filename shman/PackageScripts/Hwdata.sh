@@ -42,7 +42,7 @@ InstallHwdata()
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 		fi
 	done
-	
+
 	# Install Package
 	EchoInfo	"Package ${PackageHwdata[Name]}"
 	_ExtractPackageHwdata || return $?;

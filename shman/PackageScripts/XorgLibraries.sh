@@ -43,7 +43,7 @@ InstallXorgLibraries()
 			source "${SHMAN_SDIR}/${Dependency}.sh";
 		fi
 	done
-	
+
 	# Install Package
 	{PDIR}=/usr/src/;
 	_DownloadPackageList;

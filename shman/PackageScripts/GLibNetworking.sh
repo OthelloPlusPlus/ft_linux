@@ -43,7 +43,7 @@ InstallGLibNetworking()
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 		fi
 	done
-	
+
 	# Install Package
 	EchoInfo	"Package ${PackageGLibNetworking[Name]}"
 	_ExtractPackageGLibNetworking || return $?;
@@ -104,7 +104,7 @@ _BuildGLibNetworking()
 
 	EchoInfo	"${PackageGLibNetworking[Name]}> ninja test"
 	ninja test 1> /dev/null || { EchoTest KO ${PackageGLibNetworking[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageGLibNetworking[Name]}> ninja install"
 	ninja install 1> /dev/null || { EchoTest KO ${PackageGLibNetworking[Name]} && PressAnyKeyToContinue; return 1; };
 }

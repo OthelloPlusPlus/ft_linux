@@ -43,7 +43,7 @@ InstallDocbookXml()
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 		fi
 	done
-	
+
 	# Install Package
 	EchoInfo	"${PackageDocbookXml[Name]}> Building package..."
 	_ExtractPackageDocbookXml || return $?;

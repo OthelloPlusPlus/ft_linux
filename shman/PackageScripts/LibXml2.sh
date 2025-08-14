@@ -43,7 +43,7 @@ InstallLibXml2()
 			source "${SHMAN_SDIR}/${Dependency}.sh";
 		fi
 	done
-	
+
 	# Install Package
 	_BuildLibXml2;
 	return $?
@@ -98,7 +98,7 @@ _BuildLibXml2()
 	# EchoInfo	"${PackageLibXml2[Name]}> make check"
 	# tar xf ../xmlts20130923.tar.gz;
 	# make check 1> /dev/null || { EchoTest KO ${PackageLibXml2[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageLibXml2[Name]}> make install"
 	make install 1> /dev/null || { EchoTest KO ${PackageLibXml2[Name]} && PressAnyKeyToContinue; return 1; };
 

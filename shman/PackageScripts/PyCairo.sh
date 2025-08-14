@@ -42,7 +42,7 @@ InstallPyCairo()
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 		fi
 	done
-	
+
 	# Install Package
 	EchoInfo	"Package ${PackagePyCairo[Name]}"
 	_ExtractPackagePyCairo || return $?;
@@ -108,7 +108,7 @@ _BuildPyCairo()
 		EchoInfo	"${PackagePyCairo[Name]}> ninja test"
 		ninja test 1> /dev/null || { EchoTest KO ${PackagePyCairo[Name]} && PressAnyKeyToContinue; return 1; };
 	fi
-	
+
 	EchoInfo	"${PackagePyCairo[Name]}> ninja install"
 	make install 1> /dev/null || { EchoTest KO ${PackagePyCairo[Name]} && PressAnyKeyToContinue; return 1; };
 }

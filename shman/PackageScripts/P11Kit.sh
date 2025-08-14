@@ -42,7 +42,7 @@ InstallP11Kit()
 			source "${SHMAN_SDIR}/${Dependency}.sh";
 		fi
 	done
-	
+
 	# Install Package
 	_BuildP11Kit;
 	return $?
@@ -107,7 +107,7 @@ EOF
 
 	EchoInfo	"${PackageP11Kit[Name]}> LC_ALL=C ninja test"
 	LC_ALL=C ninja test 1> /dev/null || { EchoTest KO ${PackageP11Kit[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageP11Kit[Name]}> ninja install"
 	ninja install 1> /dev/null || { EchoTest KO ${PackageP11Kit[Name]} && PressAnyKeyToContinue; return 1; };
 

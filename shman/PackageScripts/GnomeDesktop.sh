@@ -44,7 +44,7 @@ InstallGnomeDesktop()
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 		fi
 	done
-	
+
 	# Install Package
 	EchoInfo	"${PackageGnomeDesktop[Name]}> Building package..."
 	_ExtractPackageGnomeDesktop || return $?;

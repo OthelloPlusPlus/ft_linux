@@ -43,7 +43,7 @@ InstallSpiderMonkey()
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 		fi
 	done
-	
+
 	# Install Package
 	EchoInfo	"${PackageSpiderMonkey[Name]}> Building package..."
 	_ExtractPackageSpiderMonkey || return $?;
@@ -118,7 +118,7 @@ _BuildSpiderMonkey()
 		PressAnyKeyToContinue; 
 		return 1;
 	fi
-	
+
 	EchoInfo	"${PackageSpiderMonkey[Name]}> make install"
 	rm -fv /usr/lib/libmozjs-128.so
 	make install 1> /dev/null || { EchoTest KO ${PackageSpiderMonkey[Name]} && PressAnyKeyToContinue; return 1; };

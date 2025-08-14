@@ -43,7 +43,7 @@ InstallDConf()
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 		fi
 	done
-	
+
 	# Install Package
 	EchoInfo	"${PackageDConf[Name]}> Building package..."
 	_ExtractPackageDConf || return $?;
@@ -111,7 +111,7 @@ _BuildDConf()
 
 	EchoInfo	"${PackageDConf[Name]}> ninja test"
 	ninja test 1> /dev/null || { EchoTest KO ${PackageDConf[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageDConf[Name]}> ninja install"
 	ninja install 1> /dev/null || { EchoTest KO ${PackageDConf[Name]} && PressAnyKeyToContinue; return 1; };
 }

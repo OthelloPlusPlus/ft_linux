@@ -43,7 +43,7 @@ InstallLibEi()
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 		fi
 	done
-	
+
 	# Install Package
 	EchoInfo	"${PackageLibEi[Name]}> Building package..."
 	_ExtractPackageLibEi || return $?;
@@ -109,7 +109,7 @@ _BuildLibEi()
 	# EchoInfo	"${PackageLibEi[Name]}> ninja test"
 	# meson configure -D tests=enabled .. && \
 	# ninja test 1> /dev/null || { EchoTest KO ${PackageLibEi[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageLibEi[Name]}> ninja install"
 	ninja install 1> /dev/null || { EchoTest KO ${PackageLibEi[Name]} && PressAnyKeyToContinue; return 1; };
 }

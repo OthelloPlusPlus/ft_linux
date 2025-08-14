@@ -42,7 +42,7 @@ InstallWayland()
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 		fi
 	done
-	
+
 	# Install Package
 	EchoInfo	"Package ${PackageWayland[Name]}"
 	_ExtractPackageWayland || return $?;
@@ -104,7 +104,7 @@ _BuildWayland()
 
 	EchoInfo	"${PackageWayland[Name]}> ninja test"
 	env -u XDG_RUNTIME_DIR ninja test 1> /dev/null || { EchoTest KO ${PackageWayland[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageWayland[Name]}> ninja install"
 	ninja install 1> /dev/null || { EchoTest KO ${PackageWayland[Name]} && PressAnyKeyToContinue; return 1; };
 }

@@ -44,7 +44,7 @@ InstallGjs()
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 		fi
 	done
-	
+
 	# Install Package
 	EchoInfo	"${PackageGjs[Name]}> Building package..."
 	_ExtractPackageGjs || return $?;
@@ -108,7 +108,7 @@ _BuildGjs()
 		EchoInfo	"${PackageGjs[Name]}> ninja test (non-graphical)"
 		ninja test || { EchoTest KO "${PackageGjs[Name]}> Errors could be due to non-graphical testing" && PressAnyKeyToContinue; };
 	fi
-	
+
 	EchoInfo	"${PackageGjs[Name]}> ninja install"
 	ninja install 1> /dev/null || { EchoTest KO ${PackageGjs[Name]} && PressAnyKeyToContinue; return 1; };
 }

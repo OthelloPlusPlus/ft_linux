@@ -44,7 +44,7 @@ InstallGTK3()
 			source "${SHMAN_SDIR}/${Dependency}.sh";
 		fi
 	done
-	
+
 	# Install Package
 	EchoInfo	"${PackageGTK3[Name]}3> Building package..."
 	_BuildGTK3;
@@ -103,7 +103,7 @@ _BuildGTK3()
 # Requires graphical session, whatever that means
 	# EchoInfo	"${PackageGTK3[Name]}3> dbus-run-session ninja test"
 	# dbus-run-session ninja test 1> /dev/null || { EchoTest KO ${PackageGTK3[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageGTK3[Name]}3> ninja install"
 	ninja install 1> /dev/null || { EchoTest KO ${PackageGTK3[Name]} && PressAnyKeyToContinue; return 1; };
 }

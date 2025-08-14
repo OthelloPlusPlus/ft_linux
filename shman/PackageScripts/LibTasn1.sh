@@ -42,7 +42,7 @@ InstallLibTasn1()
 			source "${SHMAN_SDIR}/${Dependency}.sh";
 		fi
 	done
-	
+
 	# Install Package
 	_BuildLibTasn1;
 	return $?
@@ -90,7 +90,7 @@ _BuildLibTasn1()
 
 	EchoInfo	"${PackageLibTasn1[Name]}> make check"
 	make check 1> /dev/null || { EchoTest KO ${PackageLibTasn1[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageLibTasn1[Name]}> make install"
 	make install 1> /dev/null || { EchoTest KO ${PackageLibTasn1[Name]} && PressAnyKeyToContinue; return 1; };
 }

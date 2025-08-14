@@ -43,7 +43,7 @@ InstallGnuPG()
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 		fi
 	done
-	
+
 	# Install Package
 	EchoInfo	"${PackageGnuPG[Name]}> Building package..."
 	_ExtractPackageGnuPG || return $?;
@@ -106,7 +106,7 @@ _BuildGnuPG()
 
 	EchoInfo	"${PackageGnuPG[Name]}> make check"
 	make check 1> /dev/null || { EchoTest KO ${PackageGnuPG[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageGnuPG[Name]}> make install"
 	make install 1> /dev/null || { EchoTest KO ${PackageGnuPG[Name]} && PressAnyKeyToContinue; return 1; };
 	EchoInfo	"${PackageGnuPG[Name]}> install -v m..."

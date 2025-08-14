@@ -43,7 +43,7 @@ InstallAtSpi2Core()
 			source "${SHMAN_SDIR}/${Dependency}.sh";
 		fi
 	done
-	
+
 	# Install Package
 	_BuildAtSpi2Core;
 	return $?
@@ -96,7 +96,7 @@ _BuildAtSpi2Core()
 
 	EchoInfo	"${PackageAtSpi2Core[Name]}> ninja"
 	ninja 1> /dev/null || { EchoTest KO ${PackageAtSpi2Core[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageAtSpi2Core[Name]}> ninja install"
 	ninja install 1> /dev/null || { EchoTest KO ${PackageAtSpi2Core[Name]} && PressAnyKeyToContinue; return 1; };
 

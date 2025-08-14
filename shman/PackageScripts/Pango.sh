@@ -43,7 +43,7 @@ InstallPango()
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 		fi
 	done
-	
+
 	# Install Package
 	EchoInfo	"${PackagePango[Name]}> Building package..."
 	_ExtractPackagePango || return $?;
@@ -111,7 +111,7 @@ _BuildPango()
 
 	# EchoInfo	"${PackagePango[Name]}> ninja test"
 	# ninja test 1> /dev/null || { EchoTest KO ${PackagePango[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackagePango[Name]}> ninja install"
 	ninja install 1> /dev/null || { EchoTest KO ${PackagePango[Name]} && PressAnyKeyToContinue; return 1; };
 }

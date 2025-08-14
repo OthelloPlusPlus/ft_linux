@@ -42,7 +42,7 @@ InstallOpenSSH()
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 		fi
 	done
-	
+
 	# Install Package
 	EchoInfo	"Package ${PackageOpenSSH[Name]}"
 	# _ExtractPackageOpenSSH || return $?;
@@ -97,7 +97,7 @@ _BuildOpenSSH()
 
 	EchoInfo	"${PackageOpenSSH[Name]}> make check"
 	make check 1> /dev/null || { EchoTest KO ${PackageOpenSSH[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageOpenSSH[Name]}> make install"
 	make install 1> /dev/null || { EchoTest KO ${PackageOpenSSH[Name]} && PressAnyKeyToContinue; return 1; };
 }

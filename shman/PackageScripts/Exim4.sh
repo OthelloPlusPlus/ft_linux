@@ -135,7 +135,7 @@ _BuildExim4()
 
 	EchoInfo	"${PackageExim4[Name]}> install -v"
 	install -v -m644 doc/exim.8 /usr/share/man/man8
-	
+
 	install -vdm 755    /usr/share/doc/exim-4.98.1
 	cp      -Rv doc/*   /usr/share/doc/exim-4.98.1
 

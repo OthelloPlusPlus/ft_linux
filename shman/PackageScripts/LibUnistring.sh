@@ -35,7 +35,7 @@ InstallLibUnistring()
 	for Dependency in "${Recommended[@]}"; do
 		source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 	done
-	
+
 	# Install Package
 	_BuildLibUnistring;
 	return $?
@@ -84,7 +84,7 @@ _BuildLibUnistring()
 
 	EchoInfo	"${PackageLibUnistring[Name]}> make check"
 	make check 1> /dev/null || { EchoTest KO ${PackageLibUnistring[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageLibUnistring[Name]}> make install"
 	make install 1> /dev/null || { EchoTest KO ${PackageLibUnistring[Name]} && PressAnyKeyToContinue; return 1; };
 }

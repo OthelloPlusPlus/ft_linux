@@ -43,7 +43,7 @@ InstallLibKsba()
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 		fi
 	done
-	
+
 	# Install Package
 	EchoInfo	"${PackageLibKsba[Name]}> Building package..."
 	_ExtractPackageLibKsba || return $?;
@@ -98,7 +98,7 @@ _BuildLibKsba()
 
 	EchoInfo	"${PackageLibKsba[Name]}> make check"
 	make check 1> /dev/null || { EchoTest KO ${PackageLibKsba[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageLibKsba[Name]}> make install"
 	make install 1> /dev/null || { EchoTest KO ${PackageLibKsba[Name]} && PressAnyKeyToContinue; return 1; };
 }

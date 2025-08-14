@@ -43,7 +43,7 @@ InstallGstPluginsBase()
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 		fi
 	done
-	
+
 	# Install Package
 	EchoInfo	"${PackageGstPluginsBase[Name]}> Building package..."
 	_ExtractPackageGstPluginsBase || return $?;
@@ -102,7 +102,7 @@ _BuildGstPluginsBase()
 
 	# EchoInfo	"${PackageGstPluginsBase[Name]}> ninja test"
 	# ninja test 1> /dev/null || { EchoTest KO ${PackageGstPluginsBase[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageGstPluginsBase[Name]}> ninja install"
 	ninja install 1> /dev/null || { EchoTest KO ${PackageGstPluginsBase[Name]} && PressAnyKeyToContinue; return 1; };
 }

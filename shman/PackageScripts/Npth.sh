@@ -43,7 +43,7 @@ InstallNpth()
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 		fi
 	done
-	
+
 	# Install Package
 	EchoInfo	"${PackageNpth[Name]}> Building package..."
 	_ExtractPackageNpth || return $?;
@@ -98,7 +98,7 @@ _BuildNpth()
 
 	EchoInfo	"${PackageNpth[Name]}> make check"
 	make check 1> /dev/null || { EchoTest KO ${PackageNpth[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageNpth[Name]}> make install"
 	make install 1> /dev/null || { EchoTest KO ${PackageNpth[Name]} && PressAnyKeyToContinue; return 1; };
 }

@@ -42,7 +42,7 @@ InstallGdkPixbuf()
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 		fi
 	done
-	
+
 	# Install Package
 	EchoInfo	"Package ${PackageGdkPixbuf[Name]}"
 	_ExtractPackageGdkPixbuf || return $?;
@@ -110,7 +110,7 @@ _BuildGdkPixbuf()
 
 	EchoInfo	"${PackageGdkPixbuf[Name]}> ninja test"
 	ninja test 1> /dev/null || { EchoTest KO "${PackageGdkPixbuf[Name]} (Known space issue: gdk-pixbuf:format / pixbuf-jpeg)" && PressAnyKeyToContinue; };
-	
+
 	EchoInfo	"${PackageGdkPixbuf[Name]}> ninja install"
 	ninja install 1> /dev/null || { EchoTest KO ${PackageGdkPixbuf[Name]} && PressAnyKeyToContinue; return 1; };
 }

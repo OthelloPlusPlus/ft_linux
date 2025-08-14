@@ -42,7 +42,7 @@ InstallICU()
 			source "${SHMAN_SDIR}/${Dependency}.sh";
 		fi
 	done
-	
+
 	# Install Package
 	_BuildICU;
 	return $?
@@ -88,7 +88,7 @@ _BuildICU()
 
 	EchoInfo	"${PackageICU[Name]}> make check"
 	make check 1> /dev/null || { EchoTest KO ${PackageICU[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageICU[Name]}> make install"
 	make install 1> /dev/null || { EchoTest KO ${PackageICU[Name]} && PressAnyKeyToContinue; return 1; };
 }

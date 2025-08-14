@@ -42,7 +42,7 @@ InstallISOCodes()
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 		fi
 	done
-	
+
 	# Install Package
 	EchoInfo	"Package ${PackageISOCodes[Name]}"
 	_ExtractPackageISOCodes || return $?;
@@ -91,7 +91,7 @@ _BuildISOCodes()
 
 	EchoInfo	"${PackageISOCodes[Name]}> make check"
 	make check 1> /dev/null || { EchoTest KO ${PackageISOCodes[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageISOCodes[Name]}> make install"
 	make install LN_S='ln -sfn' 1> /dev/null || { EchoTest KO ${PackageISOCodes[Name]} && PressAnyKeyToContinue; return 1; };
 }

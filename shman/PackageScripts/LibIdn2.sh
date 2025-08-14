@@ -35,7 +35,7 @@ InstallLibIdn2()
 	for Dependency in "${Recommended[@]}"; do
 		source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 	done
-	
+
 	# Install Package
 	_BuildLibIdn2;
 	return $?
@@ -83,7 +83,7 @@ _BuildLibIdn2()
 
 	EchoInfo	"${PackageLibIdn2[Name]}> make check"
 	make check 1> /dev/null || { EchoTest KO ${PackageLibIdn2[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageLibIdn2[Name]}> make install"
 	make install 1> /dev/null || { EchoTest KO ${PackageLibIdn2[Name]} && PressAnyKeyToContinue; return 1; };
 }

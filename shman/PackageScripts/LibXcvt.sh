@@ -43,7 +43,7 @@ InstallLibXcvt()
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 		fi
 	done
-	
+
 	# Install Package
 	EchoInfo	"${PackageLibXcvt[Name]}> Building package..."
 	_ExtractPackageLibXcvt || return $?;

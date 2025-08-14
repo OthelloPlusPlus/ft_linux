@@ -43,7 +43,7 @@ InstallLibSeccomp()
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 		fi
 	done
-	
+
 	# Install Package
 	EchoInfo	"${PackageLibSeccomp[Name]}> Building package..."
 	_ExtractPackageLibSeccomp || return $?;
@@ -100,7 +100,7 @@ _BuildLibSeccomp()
 
 	EchoInfo	"${PackageLibSeccomp[Name]}> make check"
 	make check 1> /dev/null || { EchoTest KO ${PackageLibSeccomp[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageLibSeccomp[Name]}> make install"
 	make install 1> /dev/null || { EchoTest KO ${PackageLibSeccomp[Name]} && PressAnyKeyToContinue; return 1; };
 }

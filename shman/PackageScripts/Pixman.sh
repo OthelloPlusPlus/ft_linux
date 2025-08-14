@@ -44,7 +44,7 @@ InstallPixman()
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 		fi
 	done
-	
+
 	# Install Package
 	EchoInfo	"${PackagePixman[Name]}> Building package..."
 	_ExtractPackagePixman || return $?;
@@ -104,7 +104,7 @@ _BuildPixman()
 
 	EchoInfo	"${PackagePixman[Name]}> ninja test"
 	ninja test 1> /dev/null || { EchoTest KO ${PackagePixman[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackagePixman[Name]}> ninja install"
 	ninja install 1> /dev/null || { EchoTest KO ${PackagePixman[Name]} && PressAnyKeyToContinue; return 1; };
 }

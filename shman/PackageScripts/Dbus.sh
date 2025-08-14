@@ -43,7 +43,7 @@ InstallDbus()
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 		fi
 	done
-	
+
 	# Install Package
 	EchoInfo	"${PackageDbus[Name]}> Building package..."
 	_ExtractPackageDbus || return $?;
@@ -57,7 +57,7 @@ CheckDbus()
 	CheckInstallation 	"${PackageDbus[Programs]}"\
 						"${PackageDbus[Libraries]}"\
 						"${PackageDbus[Python]}" 1> /dev/null || return $?;
-	
+
 	# Check system bus
 	if [ ! -S /run/dbus/system_bus_socket ]; then
 		return 2;
@@ -84,7 +84,7 @@ CheckDbusVerbose()
 	CheckInstallationVerbose	"${PackageDbus[Programs]}"\
 								"${PackageDbus[Libraries]}"\
 								"${PackageDbus[Python]}" || return $?;
-	
+
 	# Check system bus
 	if [ ! -S /run/dbus/system_bus_socket ]; then
 		echo -en "${C_RED}system_bus_socket${C_RESET} ";
@@ -143,7 +143,7 @@ _BuildDbus()
 	EchoInfo	"${PackageDbus[Name]}> ninja"
 	ninja 1> /dev/null || { EchoTest KO ${PackageDbus[Name]} && PressAnyKeyToContinue; return 1; };
 
-	
+
 	EchoInfo	"${PackageDbus[Name]}> ninja install"
 	ninja install 1> /dev/null || { EchoTest KO ${PackageDbus[Name]} && PressAnyKeyToContinue; return 1; };
 

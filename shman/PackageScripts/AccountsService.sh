@@ -163,7 +163,7 @@ EOF
 	if [[ $? -ne 0 ]]; then EchoTest KO "${PackageAccountsService[Name]}> ninja test as $TempUser"; PressAnyKeyToContinue; return 1; fi
 
 	# ninja test 1> /dev/null || { EchoTest KO ${PackageAccountsService[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoWarning	"${PackageAccountsService[Name]}> Removing temporary user"
 	userdel -r ${TempUser}
 	chown -R root:root ${SHMAN_PDIR}${PackageAccountsService[Package]}

@@ -43,7 +43,7 @@ InstallLibArchive()
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 		fi
 	done
-	
+
 	# Install Package
 	EchoInfo	"Package ${PackageLibArchive[Name]}"
 	_ExtractPackageLibArchive || return $?;

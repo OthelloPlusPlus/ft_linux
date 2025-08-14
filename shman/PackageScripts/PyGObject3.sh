@@ -43,7 +43,7 @@ InstallPyGObject3()
 	# 		source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 	# 	fi
 	# done
-	
+
 	# Install Package
 	EchoInfo	"Package ${PackagePyGObject3[Name]}"
 	_ExtractPackagePyGObject3 || return $?;
@@ -108,7 +108,7 @@ _BuildPyGObject3()
 
 	# EchoInfo	"${PackagePyGObject3[Name]}> ninja test"
 	# ninja test 1> /dev/null || { EchoTest KO ${PackagePyGObject3[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackagePyGObject3[Name]}> ninja install"
 	ninja install 1> /dev/null || { EchoTest KO ${PackagePyGObject3[Name]} && PressAnyKeyToContinue; return 1; };
 }

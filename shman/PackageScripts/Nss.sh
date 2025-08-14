@@ -43,7 +43,7 @@ InstallNss()
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 		fi
 	done
-	
+
 	# Install Package
 	EchoInfo	"Package ${PackageNss[Name]}"
 	_ExtractPackageNss || return $?;
@@ -109,7 +109,7 @@ _BuildNss()
 		2> >(while IFS= read -r line; do echo -e "$line\n" >&2; done) \
 		|| { EchoTest KO ${PackageNss[Name]} && PressAnyKeyToContinue; };
 	EchoInfo	"${PackageNss[Name]}> $(date +%T) Done..."
-	
+
 	EchoInfo	"${PackageNss[Name]}> Installation"
 	cd "${SHMAN_PDIR}${PackageNss[Package]}/dist" || return $?;
 	install -v -m755 Linux*/lib/*.so 							/usr/lib && \

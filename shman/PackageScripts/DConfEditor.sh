@@ -45,7 +45,7 @@ InstallDConfEditor()
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 		fi
 	done
-	
+
 	# Install Package
 	EchoInfo	"${PackageDConfEditor[Name]}> Building package..."
 	_ExtractPackageDConfEditor || return $?;

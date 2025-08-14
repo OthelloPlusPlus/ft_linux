@@ -42,7 +42,7 @@ InstallLynx()
 			source "${SHMAN_SDIR}/${Dependency}.sh";
 		fi
 	done
-	
+
 	# Install Package
 	_BuildLynx;
 	return $?
@@ -96,7 +96,7 @@ _BuildLynx()
 
 	EchoInfo	"${PackageLynx[Name]}> make install-full"
 	make install-full 1> /dev/null || { EchoTest KO ${PackageLynx[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	chgrp -v -R root /usr/share/doc/lynx-2.9.2/lynx_doc
 
 	EchoInfo	"${PackageLynx[Name]}> Configuring"

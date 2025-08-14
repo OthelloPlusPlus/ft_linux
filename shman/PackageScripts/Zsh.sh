@@ -36,7 +36,7 @@ InstallZsh()
 	for Dependency in "${Recommended[@]}"; do
 		source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 	done
-	
+
 	# Install Package
 	_BuildZsh;
 	_ConfigureZsh;
@@ -65,7 +65,7 @@ CheckZshVerbose()
 
 _BuildZsh()
 {
-	
+
 	EchoInfo	"Package ${PackageZsh[Name]}"
 
 	DownloadPackage	"${PackageZsh[Source]}"	"${SHMAN_PDIR}";
@@ -113,7 +113,7 @@ _BuildZsh()
 
 	EchoInfo	"${PackageZsh[Name]}> make check"
 	make check 1> /dev/null || { EchoTest KO ${PackageZsh[Name]} && EchoInfo "V14system.ztst might fail due to timing issues, but is harmless" && PressAnyKeyToContinue; };
-	
+
 	EchoInfo	"${PackageZsh[Name]}> make install"
 	make install && \
 	make infodir=/usr/share/info install.info && \

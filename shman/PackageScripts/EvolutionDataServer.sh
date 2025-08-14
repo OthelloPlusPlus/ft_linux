@@ -45,7 +45,7 @@ InstallEvolutionDataServer()
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 		fi
 	done
-	
+
 	# Install Package
 	EchoInfo	"${PackageEvolutionDataServer[Name]}> Building package..."
 	_ExtractPackageEvolutionDataServer || return $?;
@@ -110,7 +110,7 @@ _BuildEvolutionDataServer()
 
 	EchoInfo	"${PackageEvolutionDataServer[Name]}> ninja"
 	ninja 1> /dev/null || { EchoTest KO ${PackageEvolutionDataServer[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageEvolutionDataServer[Name]}> ninja install"
 	ninja install 1> /dev/null || { EchoTest KO ${PackageEvolutionDataServer[Name]} && PressAnyKeyToContinue; return 1; };
 

@@ -44,7 +44,7 @@ InstallVTE()
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 		fi
 	done
-	
+
 	# Install Package
 	EchoInfo	"Package ${PackageVTE[Name]}"
 	_ExtractPackageVTE || return $?;
@@ -99,7 +99,7 @@ _BuildVTE()
 
 	EchoInfo	"${PackageVTE[Name]}> make check"
 	make check 1> /dev/null || { EchoTest KO ${PackageVTE[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageVTE[Name]}> make install"
 	make install 1> /dev/null || { EchoTest KO ${PackageVTE[Name]} && PressAnyKeyToContinue; return 1; };
 }

@@ -43,7 +43,7 @@ InstallItstool()
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 		fi
 	done
-	
+
 	# Install Package
 	EchoInfo	"${PackageItstool[Name]}> Building package..."
 	_ExtractPackageItstool || return $?;

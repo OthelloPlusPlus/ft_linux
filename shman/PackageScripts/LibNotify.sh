@@ -43,7 +43,7 @@ InstallLibNotify()
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 		fi
 	done
-	
+
 	# Install Package
 	EchoInfo	"${PackageLibNotify[Name]}> Building package..."
 	_ExtractPackageLibNotify || return $?;

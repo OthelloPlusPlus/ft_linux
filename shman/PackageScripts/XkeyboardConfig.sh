@@ -43,7 +43,7 @@ InstallXkeyboardConfig()
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}" || PressAnyKeyToContinue;
 		fi
 	done
-	
+
 	# Install Package
 	EchoInfo	"${PackageXkeyboardConfig[Name]}> Building package..."
 	_ExtractPackageXkeyboardConfig || return $?;
@@ -106,7 +106,7 @@ _BuildXkeyboardConfig()
 		EchoInfo	"${PackageXkeyboardConfig[Name]}> ninja test"
 		ninja test 1> /dev/null || { EchoTest KO ${PackageXkeyboardConfig[Name]} && PressAnyKeyToContinue; return 1; };
 	fi
-	
+
 	EchoInfo	"${PackageXkeyboardConfig[Name]}> ninja install"
 	ninja install 1> /dev/null || { EchoTest KO ${PackageXkeyboardConfig[Name]} && PressAnyKeyToContinue; return 1; };
 }

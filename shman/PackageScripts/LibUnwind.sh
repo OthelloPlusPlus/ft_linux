@@ -42,7 +42,7 @@ InstallLibUnwind()
 			source "${SHMAN_SDIR}/${Dependency}.sh";
 		fi
 	done
-	
+
 	# Install Package
 	_BuildLibUnwind;
 	return $?
@@ -89,7 +89,7 @@ _BuildLibUnwind()
 
 	EchoInfo	"${PackageLibUnwind[Name]}> make check"
 	make check 1> /dev/null || { EchoTest KO ${PackageLibUnwind[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageLibUnwind[Name]}> make install"
 	make install 1> /dev/null || { EchoTest KO ${PackageLibUnwind[Name]} && PressAnyKeyToContinue; return 1; };
 }

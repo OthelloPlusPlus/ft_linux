@@ -42,7 +42,7 @@ InstallWhich()
 			source "${SHMAN_SDIR}/${Dependency}.sh";
 		fi
 	done
-	
+
 	# Install Package
 	_BuildWhich;
 	return $?

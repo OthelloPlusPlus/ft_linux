@@ -42,7 +42,7 @@ InstallFriBidi()
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 		fi
 	done
-	
+
 	# Install Package
 	EchoInfo	"Package ${PackageFriBidi[Name]}"
 	_ExtractPackageFriBidi || return $?;
@@ -102,7 +102,7 @@ _BuildFriBidi()
 
 	EchoInfo	"${PackageFriBidi[Name]}> ninja test"
 	ninja test 1> /dev/null || { EchoTest KO ${PackageFriBidi[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageFriBidi[Name]}> ninja install"
 	ninja install 1> /dev/null || { EchoTest KO ${PackageFriBidi[Name]} && PressAnyKeyToContinue; return 1; };
 }

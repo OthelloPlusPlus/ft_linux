@@ -42,7 +42,7 @@ InstallLibYaml()
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 		fi
 	done
-	
+
 	# Install Package
 	EchoInfo	"Package ${PackageLibYaml[Name]}"
 	_ExtractPackageLibYaml || return $?;
@@ -95,7 +95,7 @@ _BuildLibYaml()
 
 	EchoInfo	"${PackageLibYaml[Name]}> make check"
 	make check 1> /dev/null || { EchoTest KO ${PackageLibYaml[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageLibYaml[Name]}> make install"
 	make install 1> /dev/null || { EchoTest KO ${PackageLibYaml[Name]} && PressAnyKeyToContinue; return 1; };
 }

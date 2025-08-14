@@ -44,7 +44,7 @@ InstallGcr4()
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 		fi
 	done
-	
+
 	# Install Package
 	EchoInfo	"Package ${PackageGcr4[Name]}4"
 	_ExtractPackageGcr4 || return $?;
@@ -117,7 +117,7 @@ _BuildGcr4()
 	else
 		ninja test 1> /dev/null || { EchoTest KO ${PackageGcr4[Name]}4 && PressAnyKeyToContinue; return 1; };
 	fi
-	
+
 	EchoInfo	"${PackageGcr4[Name]}4> ninja install"
 	ninja install 1> /dev/null || { EchoTest KO ${PackageGcr4[Name]}4 && PressAnyKeyToContinue; return 1; };
 }

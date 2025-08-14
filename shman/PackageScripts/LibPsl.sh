@@ -35,7 +35,7 @@ InstallLibPsl()
 	for Dependency in "${Recommended[@]}"; do
 		source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 	done
-	
+
 	# Install Package
 	_BuildLibPsl;
 	return $?
@@ -89,7 +89,7 @@ _BuildLibPsl()
 
 	EchoInfo	"${PackageLibPsl[Name]}> ninja test"
 	ninja test 1> /dev/null || { EchoTest KO ${PackageLibPsl[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageLibPsl[Name]}> ninja install"
 	ninja install 1> /dev/null || { EchoTest KO ${PackageLibPsl[Name]} && PressAnyKeyToContinue; return 1; };
 

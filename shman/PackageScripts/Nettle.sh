@@ -42,7 +42,7 @@ InstallNettle()
 			source "${SHMAN_SDIR}/${Dependency}.sh";
 		fi
 	done
-	
+
 	# Install Package
 	_BuildNettle;
 	return $?
@@ -90,10 +90,10 @@ _BuildNettle()
 
 	EchoInfo	"${PackageNettle[Name]}> make check"
 	make check 1> /dev/null || { EchoTest KO ${PackageNettle[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageNettle[Name]}> make install"
 	make install 1> /dev/null || { EchoTest KO ${PackageNettle[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageNettle[Name]}> Final Setup"
 	chmod   -v   755 /usr/lib64/lib{hogweed,nettle}.so || { EchoTest KO ${PackageNettle[Name]} && PressAnyKeyToContinue; return 1; };
 	install -v -m755 -d /usr/share/doc/nettle-3.10.1 || { EchoTest KO ${PackageNettle[Name]} && PressAnyKeyToContinue; return 1; };

@@ -42,7 +42,7 @@ InstallLibXkbcommon()
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 		fi
 	done
-	
+
 	# Install Package
 	EchoInfo	"Package ${PackageLibXkbcommon[Name]}"
 	_ExtractPackageLibXkbcommon || return $?;
@@ -104,7 +104,7 @@ _BuildLibXkbcommon()
 	# To test the results, ensure Xvfb and xkeyboard-config-2.44 are available, then issue: ninja test.
 	# EchoInfo	"${PackageLibXkbcommon[Name]}> ninja test"
 	# ninja test 1> /dev/null || { EchoTest KO ${PackageLibXkbcommon[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageLibXkbcommon[Name]}> ninja install"
 	ninja install 1> /dev/null || { EchoTest KO ${PackageLibXkbcommon[Name]} && PressAnyKeyToContinue; return 1; };
 }

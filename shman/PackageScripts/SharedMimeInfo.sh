@@ -42,7 +42,7 @@ InstallSharedMimeInfo()
 			source "${SHMAN_SDIR}/${Dependency}.sh"
 		fi
 	done
-	
+
 	# Install Package
 	EchoInfo	"Package ${PackageSharedMimeInfo[Name]}"
 	_ExtractPackageSharedMimeInfo || return $?;
@@ -74,7 +74,7 @@ _ExtractPackageSharedMimeInfo()
 {
 	DownloadPackage	"${PackageSharedMimeInfo[Source]}"	"${SHMAN_PDIR}"	"${PackageSharedMimeInfo[Package]}${PackageSharedMimeInfo[Extension]}"	"${PackageSharedMimeInfo[MD5]}";
 	ReExtractPackage	"${SHMAN_PDIR}"	"${PackageSharedMimeInfo[Package]}"	"${PackageSharedMimeInfo[Extension]}" || return $?;
-	
+
 	wget -P "${SHMAN_PDIR}" "https://anduin.linuxfromscratch.org/BLFS/xdgmime/xdgmime.tar.xz";
 
 	return $?;
@@ -107,7 +107,7 @@ _BuildSharedMimeInfo()
 
 	EchoInfo	"${PackageSharedMimeInfo[Name]}> ninja test"
 	ninja test 1> /dev/null || { EchoTest KO ${PackageSharedMimeInfo[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageSharedMimeInfo[Name]}> ninja install"
 	ninja install 1> /dev/null || { EchoTest KO ${PackageSharedMimeInfo[Name]} && PressAnyKeyToContinue; return 1; };
 }

@@ -44,7 +44,7 @@ InstallLibDrm()
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 		fi
 	done
-	
+
 	# Install Package
 	EchoInfo	"Package ${PackageLibDrm[Name]}"
 	_ExtractPackageLibDrm || return $?;
@@ -106,7 +106,7 @@ _BuildLibDrm()
 
 	EchoInfo	"${PackageLibDrm[Name]}> ninja test"
 	ninja test 1> /dev/null || { EchoTest KO ${PackageLibDrm[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageLibDrm[Name]}> ninja install"
 	ninja install 1> /dev/null || { EchoTest KO ${PackageLibDrm[Name]} && PressAnyKeyToContinue; return 1; };
 }

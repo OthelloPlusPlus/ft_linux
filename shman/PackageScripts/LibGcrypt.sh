@@ -42,7 +42,7 @@ InstallLibGcrypt()
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 		fi
 	done
-	
+
 	# Install Package
 	_BuildLibGcrypt;
 	return $?
@@ -96,7 +96,7 @@ _BuildLibGcrypt()
 
 	EchoInfo	"${PackageLibGcrypt[Name]}> make check"
 	make check 1> /dev/null || { EchoTest KO ${PackageLibGcrypt[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageLibGcrypt[Name]}> make install"
 	make install 		1> /dev/null && \
 	install -v -dm755   													/usr/share/doc/libgcrypt-1.11.0 		1> /dev/null && \

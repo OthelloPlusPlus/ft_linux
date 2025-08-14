@@ -42,7 +42,7 @@ InstallGit()
 			source "${SHMAN_SDIR}/${Dependency}.sh";
 		fi
 	done
-	
+
 	# Install Package
 	_BuildGit;
 	return $?
@@ -106,7 +106,7 @@ _BuildGit()
 	EchoInfo	"${PackageGit[Name]}> make test"
 	GIT_UNZIP=nonexist make test -k |& tee test.log
 	grep '^not ok' test.log | grep -v TODO
-	
+
 	EchoInfo	"${PackageGit[Name]}> make install"
 	make perllibdir=/usr/lib/perl5/5.40/site_perl install 1> /dev/null || { EchoTest KO ${PackageGit[Name]} && PressAnyKeyToContinue; return 1; };
 }

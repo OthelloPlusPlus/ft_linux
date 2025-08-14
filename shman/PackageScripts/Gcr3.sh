@@ -42,7 +42,7 @@ InstallGcr3()
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 		fi
 	done
-	
+
 	# Install Package
 	EchoInfo	"Package ${PackageGcr3[Name]}"
 	_ExtractPackageGcr3 || return $?;
@@ -103,7 +103,7 @@ _BuildGcr3()
 
 	EchoInfo	"${PackageGcr3[Name]}3> ninja"
 	ninja 1> /dev/null || { EchoTest KO "${PackageGcr3[Name]}3" && PressAnyKeyToContinue; return 1; };
-	
+
 	if "${SHMAN_SDIR}/GiDocGen.sh" && CheckGiDocGen; then
 		sed -e "/install_dir/s@,\$@ / 'gcr-3.41.2'&@" \
 			-i ../docs/*/meson.build && \
@@ -118,7 +118,7 @@ _BuildGcr3()
 	else
 		ninja test 1> /dev/null || { EchoTest KO "${PackageGcr3[Name]}3" && PressAnyKeyToContinue; return 1; };
 	fi
-	
+
 	EchoInfo	"${PackageGcr3[Name]}3> ninja install"
 	ninja install 1> /dev/null || { EchoTest KO "${PackageGcr3[Name]}3" && PressAnyKeyToContinue; return 1; };
 }

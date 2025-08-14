@@ -43,7 +43,7 @@ InstallLibAssuan()
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 		fi
 	done
-	
+
 	# Install Package
 	EchoInfo	"${PackageLibAssuan[Name]}> Building package..."
 	_ExtractPackageLibAssuan || return $?;
@@ -102,7 +102,7 @@ _BuildLibAssuan()
 
 	EchoInfo	"${PackageLibAssuan[Name]}> make check"
 	make check 1> /dev/null || { EchoTest KO ${PackageLibAssuan[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageLibAssuan[Name]}> make install"
 	make install 1> /dev/null || { EchoTest KO ${PackageLibAssuan[Name]} && PressAnyKeyToContinue; return 1; };
 

@@ -44,7 +44,7 @@ InstallOpenLDAP()
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 		fi
 	done
-	
+
 	# Install Package
 	EchoInfo	"${PackageOpenLDAP[Name]}> Building package..."
 	_ExtractPackageOpenLDAP || return $?;
@@ -108,7 +108,7 @@ _BuildOpenLDAP()
 
 	EchoInfo	"${PackageOpenLDAP[Name]}> make"
 	make 1> /dev/null || { EchoTest KO ${PackageOpenLDAP[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageOpenLDAP[Name]}> make install"
 	make install 1> /dev/null || { EchoTest KO ${PackageOpenLDAP[Name]} && PressAnyKeyToContinue; return 1; };
 }

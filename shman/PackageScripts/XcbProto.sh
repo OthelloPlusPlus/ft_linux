@@ -42,7 +42,7 @@ InstallXcbProto()
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 		fi
 	done
-	
+
 	# Install Package
 	_BuildXcbProto;
 	return $?
@@ -88,7 +88,7 @@ _BuildXcbProto()
 
 	EchoInfo	"${PackageXcbProto[Name]}> make check"
 	make check 1> /dev/null || { EchoTest KO ${PackageXcbProto[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageXcbProto[Name]}> make install"
 	make install 1> /dev/null || { EchoTest KO ${PackageXcbProto[Name]} && PressAnyKeyToContinue; return 1; };
 }

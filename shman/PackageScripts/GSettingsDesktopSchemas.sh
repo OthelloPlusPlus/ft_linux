@@ -39,7 +39,7 @@ InstallGSettingsDesktopSchemas()
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 		fi
 	done
-	
+
 	# Install Package
 	EchoInfo	"${PackageGSettingsDesktopSchemas[Name]}> Building package..."
 	_ExtractPackageGSettingsDesktopSchemas || return $?;

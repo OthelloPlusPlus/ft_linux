@@ -44,7 +44,7 @@ InstallVala()
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 		fi
 	done
-	
+
 	# Install Package
 	EchoInfo	"${PackageVala[Name]}> Building package..."
 	_ExtractPackageVala || return $?;
@@ -107,7 +107,7 @@ _BuildVala()
 		grep -B1 -A9 "tests/test-suite.log" tests/test-suite.log;
 		PressAnyKeyToContinue;
 	};
-	
+
 	EchoInfo	"${PackageVala[Name]}> make install"
 	make install 1> /dev/null || { EchoTest KO ${PackageVala[Name]} && PressAnyKeyToContinue; return 1; };
 }

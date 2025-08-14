@@ -43,7 +43,7 @@ InstallCbindgen()
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 		fi
 	done
-	
+
 	# Install Package
 	EchoInfo	"${PackageCbindgen[Name]}> Building package..."
 	_ExtractPackageCbindgen || return $?;
@@ -98,7 +98,7 @@ _BuildCbindgen()
 
 	# EchoInfo	"${PackageCbindgen[Name]}> cargo test --release"
 	# cargo test --release 1> /dev/null || { EchoTest KO ${PackageCbindgen[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageCbindgen[Name]}> install"
 	install -Dm755 target/release/cbindgen /usr/bin/ 1> /dev/null || { EchoTest KO ${PackageCbindgen[Name]} && PressAnyKeyToContinue; return 1; };
 }

@@ -44,7 +44,7 @@ InstallGnomeShell()
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 		fi
 	done
-	
+
 	# Install Package
 	EchoInfo	"${PackageGnomeShell[Name]}> Building package..."
 	_ExtractPackageGnomeShell || return $?;
@@ -110,7 +110,7 @@ _BuildGnomeShell()
 	else
 		ninja test 1> /dev/null || { EchoTest KO ${PackageGnomeShell[Name]} && PressAnyKeyToContinue; return 1; };
 	fi
-	
+
 	EchoInfo	"${PackageGnomeShell[Name]}> ninja install"
 	ninja install 1> /dev/null || { EchoTest KO ${PackageGnomeShell[Name]} && PressAnyKeyToContinue; return 1; };
 }

@@ -42,7 +42,7 @@ InstallCMake()
 			source "${SHMAN_SDIR}/${Dependency}.sh"
 		fi
 	done
-	
+
 	# Install Package
 	EchoInfo	"Package ${PackageCMake[Name]}"
 	_ExtractPackageCMake || return $?;
@@ -109,7 +109,7 @@ _BuildCMake()
 				-E ParseImplicitLinkInfo \
 				--output-on-failure \
 				1> /dev/null || { EchoTest KO ${PackageCMake[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageCMake[Name]}> make install"
 	make install 1> /dev/null || { EchoTest KO ${PackageCMake[Name]} && PressAnyKeyToContinue; return 1; };
 }

@@ -43,7 +43,7 @@ InstallLibGudev()
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 		fi
 	done
-	
+
 	# Install Package
 	EchoInfo	"${PackageLibGudev[Name]}> Building package..."
 	_ExtractPackageLibGudev || return $?;
@@ -106,7 +106,7 @@ _BuildLibGudev()
 
 	EchoInfo	"${PackageLibGudev[Name]}> ninja test"
 	ninja test 1> /dev/null || { EchoTest KO ${PackageLibGudev[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageLibGudev[Name]}> ninja install"
 	ninja install 1> /dev/null || { EchoTest KO ${PackageLibGudev[Name]} && PressAnyKeyToContinue; return 1; };
 }

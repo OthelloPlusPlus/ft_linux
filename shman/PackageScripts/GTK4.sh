@@ -46,7 +46,7 @@ InstallGTK4()
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 		fi
 	done
-	
+
 	# Install Package
 	EchoInfo	"Package ${PackageGTK4[Name]}"
 	_ExtractPackageGTK4 || return $?;
@@ -125,7 +125,7 @@ _BuildGTK4()
 	# 	dbus-run-session meson test --setup x11 \
 	# 								--no-suite={headless,needs-udmabuf} \
 	# 	1> /dev/null || { EchoTest KO ${PackageGTK4[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageGTK4[Name]}4> ninja install"
 	ninja install 1> /dev/null || { EchoTest KO ${PackageGTK4[Name]} && PressAnyKeyToContinue; return 1; };
 }

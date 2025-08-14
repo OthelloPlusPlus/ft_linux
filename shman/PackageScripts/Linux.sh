@@ -52,7 +52,7 @@ PackageLinuxConfigLFS=(
 )
 
 PackageLinuxConfigBLFS=(
-	
+
 )
 
 PackageLinuxConfigMesa=(
@@ -69,7 +69,7 @@ PackageLinuxConfigMesa=(
 				# "--enable CONFIG_DRM_NOUVEAU_GSP_DEFAULT" # nouveau
 				# "--module CONFIG_DRM_I915" # i915, crocus, or iris
 				"--enable CONFIG_DRM_VGEM" # llvmpipe or softpipe
-				"--module CONFIG_DRM_VMWGFX" # svga	
+				"--module CONFIG_DRM_VMWGFX" # svga
 
 	# AI recommendations
 	# "--enable CONFIG_DRM"                         # Must be built-in for early GPU init
@@ -182,7 +182,7 @@ InstallLinux()
 	# 		source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 	# 	fi
 	# done
-	
+
 	# Install Package
 	EchoInfo	"${PackageLinux[Name]}> Building package..."
 	_ExtractPackageLinux || return $?;
@@ -302,7 +302,7 @@ _BuildLinux()
 	EchoInfo	"${PackageLinux[Name]}> make modules_install"
 	date 2> /dev/null;
 	make modules_install 1> /dev/null || { EchoTest KO ${PackageLinux[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageLinux[Name]}> Ensuring /boot in mounted";
 	date 2> /dev/null;
 	mountpoint /boot || mount /dev/sda1 /boot;

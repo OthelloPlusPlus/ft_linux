@@ -35,7 +35,7 @@ InstallcURL()
 	for Dependency in "${Recommended[@]}"; do
 		source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 	done
-	
+
 	# Install Package
 	_BuildcURL;
 	return $?
@@ -85,11 +85,11 @@ _BuildcURL()
 
 	# EchoInfo	"${PackagecURL[Name]}> make test"
 	# make test 1> /dev/null || { EchoTest KO ${PackagecURL[Name]} && EchoInfo "Some tests are flaky..." && PressAnyKeyToContinue; };
-	
+
 	EchoInfo	"${PackagecURL[Name]}> make install"
 	make install 1> /dev/null || { EchoTest KO ${PackagecURL[Name]} && PressAnyKeyToContinue; return 1; };
 
-	
+
 	rm -rf docs/examples/.deps &&
 	find docs \(-name Makefile\* -o  \
 				-name \*.1       -o  \

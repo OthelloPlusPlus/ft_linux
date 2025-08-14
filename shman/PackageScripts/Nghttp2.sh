@@ -42,7 +42,7 @@ InstallNghttp2()
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 		fi
 	done
-	
+
 	# Install Package
 	EchoInfo	"Package ${PackageNghttp2[Name]}"
 	_ExtractPackageNghttp2 || return $?;
@@ -97,7 +97,7 @@ _BuildNghttp2()
 
 	EchoInfo	"${PackageNghttp2[Name]}> make check"
 	make check 1> /dev/null || { EchoTest KO ${PackageNghttp2[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageNghttp2[Name]}> make install"
 	make install 1> /dev/null || { EchoTest KO ${PackageNghttp2[Name]} && PressAnyKeyToContinue; return 1; };
 }

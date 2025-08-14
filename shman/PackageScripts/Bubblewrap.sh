@@ -43,7 +43,7 @@ InstallBubblewrap()
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 		fi
 	done
-	
+
 	# Install Package
 	EchoInfo	"${PackageBubblewrap[Name]}> Building package..."
 	_ExtractPackageBubblewrap || return $?;
@@ -105,7 +105,7 @@ _BuildBubblewrap()
 	# EchoInfo	"${PackageBubblewrap[Name]}> ninja test (as non root...)"
 	# sed 's@symlink usr/lib64@ro-bind-try /lib64@' -i ../tests/libtest.sh
 	# ninja test 1> /dev/null || { EchoTest KO ${PackageBubblewrap[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageBubblewrap[Name]}> ninja install"
 	ninja install 1> /dev/null || { EchoTest KO ${PackageBubblewrap[Name]} && PressAnyKeyToContinue; return 1; };
 }

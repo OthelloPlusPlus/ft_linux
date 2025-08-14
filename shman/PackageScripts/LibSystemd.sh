@@ -206,7 +206,7 @@ _BuildLibSystemd()
 	install -vm755 $udev_helpers						/usr/lib/udev			1> /dev/null && \
 	install -vm644 ../network/99-default.link			/usr/lib/udev/network 	1> /dev/null && \
 	PackageUdev[Status]=$? || { EchoTest KO ${PackageLibSystemd[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageLibSystemd[Name]}> Install custom rules and support files"
 	tar -xvf ../../udev-lfs-20230818.tar.xz 1> /dev/null || { EchoTest KO ${PackageLibSystemd[Name]} && PressAnyKeyToContinue; return 1; };
 	make -f udev-lfs-20230818/Makefile.lfs install 1> /dev/null || { EchoTest KO ${PackageLibSystemd[Name]} && PressAnyKeyToContinue; return 1; };
@@ -219,7 +219,7 @@ _BuildLibSystemd()
 	sed 's|systemd/network|udev/network|' \
 		/usr/share/man/man5/systemd.link.5 \
 		> /usr/share/man/man5/udev.link.5
-	
+
 	sed 's/systemd\(\\\?-\)/udev\1/' /usr/share/man/man8/systemd-hwdb.8 \
 		> /usr/share/man/man8/udev-hwdb.8
 

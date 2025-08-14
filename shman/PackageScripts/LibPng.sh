@@ -44,7 +44,7 @@ InstallLibPng()
 			source "${SHMAN_SDIR}/${Dependency}.sh"
 		fi
 	done
-	
+
 	# Install Package
 	EchoInfo	"${PackageLibPng[Name]}> Building package..."
 	_ExtractPackageLibPng || return $?;
@@ -102,7 +102,7 @@ _BuildLibPng()
 
 	EchoInfo	"${PackageLibPng[Name]}> make check"
 	make check 1> /dev/null || { EchoTest KO ${PackageLibPng[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageLibPng[Name]}> make install"
 	make install 1> /dev/null || { EchoTest KO ${PackageLibPng[Name]} && PressAnyKeyToContinue; return 1; };
 

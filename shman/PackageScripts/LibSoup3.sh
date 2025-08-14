@@ -43,7 +43,7 @@ InstallLibSoup3()
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 		fi
 	done
-	
+
 	# Install Package
 	EchoInfo	"${PackageLibSoup3[Name]}3> Building package..."
 	_ExtractPackageLibSoup3 || return $?;
@@ -105,7 +105,7 @@ _BuildLibSoup3()
 
 	EchoInfo	"${PackageLibSoup3[Name]}3> ninja test"
 	ninja test 1> /dev/null || { EchoTest KO ${PackageLibSoup3[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageLibSoup3[Name]}3> ninja install"
 	ninja install 1> /dev/null || { EchoTest KO ${PackageLibSoup3[Name]} && PressAnyKeyToContinue; return 1; };
 }

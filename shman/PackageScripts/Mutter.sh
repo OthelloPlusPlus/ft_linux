@@ -45,7 +45,7 @@ InstallMutter()
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 		fi
 	done
-	
+
 	# Install Package
 	EchoInfo	"${PackageMutter[Name]}> Building package..."
 	_ExtractPackageMutter || return $?;
@@ -115,7 +115,7 @@ _BuildMutter()
 		meson configure -D tests=enabled -D clutter_tests=false && \
 		ninja test 1> /dev/null || { EchoTest KO ${PackageMutter[Name]} && PressAnyKeyToContinue; return 1; };
 	fi
-	
+
 	EchoInfo	"${PackageMutter[Name]}> ninja install"
 	ninja install 1> /dev/null || { EchoTest KO ${PackageMutter[Name]} && PressAnyKeyToContinue; return 1; };
 }

@@ -42,7 +42,7 @@ InstallGraphene()
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 		fi
 	done
-	
+
 	# Install Package
 	EchoInfo	"Package ${PackageGraphene[Name]}"
 	_ExtractPackageGraphene || return $?;
@@ -103,7 +103,7 @@ _BuildGraphene()
 
 	EchoInfo	"${PackageGraphene[Name]}> ninja test"
 	ninja test 1> /dev/null || { EchoTest KO ${PackageGraphene[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageGraphene[Name]}> ninja install"
 	ninja install 1> /dev/null || { EchoTest KO ${PackageGraphene[Name]} && PressAnyKeyToContinue; return 1; };
 }

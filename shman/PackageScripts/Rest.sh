@@ -42,7 +42,7 @@ InstallRest()
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 		fi
 	done
-	
+
 	# Install Package
 	EchoInfo	"Package ${PackageRest[Name]}"
 	_ExtractPackageRest || return $?;
@@ -111,7 +111,7 @@ _BuildRest()
 
 	EchoInfo	"${PackageRest[Name]}> ninja test"
 	ninja test 1> /dev/null || { EchoTest KO ${PackageRest[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageRest[Name]}> ninja install"
 	ninja install 1> /dev/null || { EchoTest KO ${PackageRest[Name]} && PressAnyKeyToContinue; return 1; };
 }

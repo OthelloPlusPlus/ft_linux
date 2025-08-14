@@ -42,7 +42,7 @@ InstallUtilMacros()
 			source "${SHMAN_SDIR}/${Dependency}.sh";
 		fi
 	done
-	
+
 	# Install Package
 	_BuildUtilMacros;
 	return $?
@@ -85,7 +85,7 @@ _BuildUtilMacros()
 
 	EchoInfo	"${PackageUtilMacros[Name]}> Configure"
 	./configure $XORG_CONFIG 1> /dev/null || { EchoTest KO ${PackageUtilMacros[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageUtilMacros[Name]}> make install"
 	make install 1> /dev/null || { EchoTest KO ${PackageUtilMacros[Name]} && PressAnyKeyToContinue; return 1; };
 }

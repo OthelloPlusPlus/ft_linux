@@ -46,7 +46,7 @@ InstallHarfBuzz()
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 		fi
 	done
-	
+
 	# Install Package
 	EchoInfo	"${PackageHarfBuzz[Name]}> Building package..."
 	_ExtractPackageHarfBuzz || return $?;
@@ -106,7 +106,7 @@ _BuildHarfBuzz()
 
 	EchoInfo	"${PackageHarfBuzz[Name]}> ninja test"
 	ninja test 1> /dev/null || { EchoTest KO ${PackageHarfBuzz[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageHarfBuzz[Name]}> ninja install"
 	ninja install 1> /dev/null || { EchoTest KO ${PackageHarfBuzz[Name]} && PressAnyKeyToContinue; return 1; };
 }

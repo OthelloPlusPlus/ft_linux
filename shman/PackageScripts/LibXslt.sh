@@ -43,7 +43,7 @@ InstallLibXslt()
 			source "${SHMAN_SDIR}/${Dependency}.sh";
 		fi
 	done
-	
+
 	# Install Package
 	_BuildLibXslt;
 	return $?
@@ -92,7 +92,7 @@ _BuildLibXslt()
 
 	EchoInfo	"${PackageLibXslt[Name]}> make check"
 	make check 1> /dev/null || { EchoTest KO ${PackageLibXslt[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageLibXslt[Name]}> make install"
 	make install 1> /dev/null || { EchoTest KO ${PackageLibXslt[Name]} && PressAnyKeyToContinue; return 1; };
 }

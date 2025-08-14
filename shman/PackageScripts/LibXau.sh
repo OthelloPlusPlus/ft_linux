@@ -42,7 +42,7 @@ InstallLibXau()
 			source "${SHMAN_SDIR}/${Dependency}.sh";
 		fi
 	done
-	
+
 	# Install Package
 	_BuildLibXau;
 	return $?
@@ -88,7 +88,7 @@ _BuildLibXau()
 
 	EchoInfo	"${PackageLibXau[Name]}> make check"
 	make check 1> /dev/null || { EchoTest KO ${PackageLibXau[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageLibXau[Name]}> make install"
 	make install 1> /dev/null || { EchoTest KO ${PackageLibXau[Name]} && PressAnyKeyToContinue; return 1; };
 }

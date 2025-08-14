@@ -42,7 +42,7 @@ InstallWaylandProtocols()
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 		fi
 	done
-	
+
 	# Install Package
 	EchoInfo	"Package ${PackageWaylandProtocols[Name]}"
 	_ExtractPackageWaylandProtocols || return $?;
@@ -99,7 +99,7 @@ _BuildWaylandProtocols()
 
 	EchoInfo	"${PackageWaylandProtocols[Name]}> ninja test"
 	ninja test 1> /dev/null || { EchoTest KO ${PackageWaylandProtocols[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageWaylandProtocols[Name]}> ninja install"
 	ninja install 1> /dev/null || { EchoTest KO ${PackageWaylandProtocols[Name]} && PressAnyKeyToContinue; return 1; };
 }

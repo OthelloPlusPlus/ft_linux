@@ -53,7 +53,7 @@ InstallElogind()
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 		fi
 	done
-	
+
 	# Install Package
 	EchoInfo	"${PackageElogind[Name]}> Building package..."
 	_ExtractPackageElogind || return $?;
@@ -71,7 +71,7 @@ CheckElogind()
 						"${PackageElogind[Libraries]}"\
 						"${PackageElogind[Python]}" 1> /dev/null || return $?;
 
-	
+
 	if ! pgrep -x dbus-daemon &> /dev/null; then return 2; fi
 	if ! ps -p $(cat /run/elogind.pid) &>/dev/null; then return 3; fi
 	if ! loginctl &> /dev/null; then return 4; fi
@@ -185,7 +185,7 @@ _BuildElogind()
 		grep -B1 -A999 '^Summary of Failures:' "${SHMAN_PDIR}${PackageElogind[Package]}/build/meson-logs/testlog.txt" | GREP_COLORS='mt=1;33' grep --color=always -E -B10 -A10 "test-login|dbus-docs-fresh|check-version-history" || echo "No summary found.";
 		PressAnyKeyToContinue;
 	}
-	
+
 	EchoInfo	"${PackageElogind[Name]}> ninja install"
 	ninja install 1> /dev/null || { EchoTest KO ${PackageElogind[Name]} && PressAnyKeyToContinue; return 1; };
 
@@ -217,7 +217,7 @@ session  optional    pam_elogind.so
 EOF
 	fi
 
-	EchoInfo	"${PackageElogind[Name]}> /etc/pam.d/elogind-user"	
+	EchoInfo	"${PackageElogind[Name]}> /etc/pam.d/elogind-user"
 	cat > /etc/pam.d/elogind-user << "EOF"
 # Begin /etc/pam.d/elogind-user
 

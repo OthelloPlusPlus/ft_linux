@@ -42,7 +42,7 @@ InstallXorgBuildEnv()
 			source "${SHMAN_SDIR}/${Dependency}.sh";
 		fi
 	done
-	
+
 	# Install Package
 	_BuildXorgBuildEnv;
 	return $?

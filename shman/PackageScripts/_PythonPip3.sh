@@ -6,7 +6,7 @@ InstallPips()
 {
 	# Build Tools / Packaging
 	InstallPip	editables hatchling hatch-fancy-pypi-readme hatch_vcs meson_python pyproject-metadata setuptools_scm
-	# InstallPip	
+	# InstallPip
 	# Utilities / Helper Libraries
 	InstallPip	alabaster attrs chardet charset-normalizer idna imagesize pathspec pytz trove-classifiers
 	InstallPip	packaging pyxdg six
@@ -14,7 +14,7 @@ InstallPips()
 	InstallPip	iniconfig pluggy
 	InstallPip	pytest
 	# Python / C Integration / Math
-	# InstallPip	
+	# InstallPip
 	InstallPip	Cython numpy psutil
 	# Network / Web / HTTP
 	InstallPip	certifi urllib3
@@ -26,10 +26,10 @@ InstallPips()
 	InstallPip	Babel Markdown sphinxcontrib-applehelp sphinxcontrib-devhelp sphinxcontrib-htmlhelp sphinxcontrib-jquery sphinxcontrib-jsmath sphinxcontrib-qthelp sphinxcontrib-serializinghtml
 	InstallPip	asciidoc docutils doxypypy doxyqml gi-docgen recommonmark scour sphinx sphinx_rtd_theme
 	# Syntax Highlighting / Code Tools
-	# InstallPip	
+	# InstallPip
 	InstallPip	ply pygdbmi Pygments
 	# GUI / Graphics / GObject / GTK
-	# InstallPip	
+	# InstallPip
 	InstallPip	pygobject dbus-python python-dbusmock
 
 	pip3 cache purge

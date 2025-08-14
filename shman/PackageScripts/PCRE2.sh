@@ -42,7 +42,7 @@ InstallPCRE2()
 			source "${SHMAN_SDIR}/${Dependency}.sh";
 		fi
 	done
-	
+
 	# Install Package
 	_BuildPCRE2;
 	return $?
@@ -98,7 +98,7 @@ _BuildPCRE2()
 
 	EchoInfo	"${PackagePCRE2[Name]}> make check"
 	make check 1> /dev/null || { EchoTest KO ${PackagePCRE2[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackagePCRE2[Name]}> make install"
 	make install 1> /dev/null || { EchoTest KO ${PackagePCRE2[Name]} && PressAnyKeyToContinue; return 1; };
 }

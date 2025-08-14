@@ -43,7 +43,7 @@ InstallMakeCa()
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 		fi
 	done
-	
+
 	# Install Package
 	EchoInfo	"${PackageMakeCa[Name]}> Building packages..."
 	_ExtractPackageMakeCa || return $?;
@@ -87,7 +87,7 @@ _BuildMakeCa()
 		EchoError	"cd ${SHMAN_PDIR}${PackageMakeCa[Package]}";
 		return 1;
 	fi
-	
+
 	EchoInfo	"${PackageMakeCa[Name]}> make install"
 	make install 1> /dev/null || { EchoTest KO ${PackageMakeCa[Name]} && PressAnyKeyToContinue; return 1; };
 	install -vdm755 /etc/ssl/local 1> /dev/null || { EchoTest KO ${PackageMakeCa[Name]} && PressAnyKeyToContinue; return 1; };

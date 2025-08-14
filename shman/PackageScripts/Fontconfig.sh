@@ -44,7 +44,7 @@ InstallFontconfig()
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 		fi
 	done
-	
+
 	# Install Package
 	_BuildFontconfig;
 	return $?
@@ -111,10 +111,10 @@ _BuildFontconfig()
 
 	EchoInfo	"${PackageFontconfig[Name]}> make check"
 	make check 1> /dev/null || { EchoTest KO ${PackageFontconfig[Name]} && EchoInfo	"${PackageFontconfig[Name]}> One test is known to fail if the kernel does not support user namespaces" && PressAnyKeyToContinue; };
-	
+
 	EchoInfo	"${PackageFontconfig[Name]}> make install"
 	make install 1> /dev/null || { EchoTest KO ${PackageFontconfig[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageFontconfig[Name]}> Installing the pre-generated documentation"
 	install -v -dm755 							/usr/share/{man/man{1,3,5},doc/fontconfig-2.16.0} 
 	install -v -m644 fc-*/*.1					/usr/share/man/man1

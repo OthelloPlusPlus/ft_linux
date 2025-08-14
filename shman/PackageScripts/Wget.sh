@@ -42,7 +42,7 @@ InstallWget()
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 		fi
 	done
-	
+
 	# Install Package
 	EchoInfo	"Package ${PackageWget[Name]}"
 	# _ExtractPackageWget || return $?;
@@ -96,7 +96,7 @@ _BuildWget()
 
 	EchoInfo	"${PackageWget[Name]}> make check"
 	make check 1> /dev/null || { EchoTest KO ${PackageWget[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageWget[Name]}> make install"
 	make install 1> /dev/null || { EchoTest KO ${PackageWget[Name]} && PressAnyKeyToContinue; return 1; };
 }

@@ -45,7 +45,7 @@ InstallMesa()
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 		fi
 	done
-	
+
 	# Install Package
 	EchoInfo	"Package ${PackageMesa[Name]}"
 	_CheckKernelConfigurationForMesa || return $?;
@@ -141,7 +141,7 @@ _BuildMesa()
 
 	EchoInfo	"${PackageMesa[Name]}> ninja test"
 	meson configure -D build-tests=true && ninja test 1> /dev/null || { EchoTest KO ${PackageMesa[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageMesa[Name]}> ninja install"
 	ninja install 1> /dev/null || { EchoTest KO ${PackageMesa[Name]} && PressAnyKeyToContinue; return 1; };
 

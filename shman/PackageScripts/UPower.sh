@@ -43,7 +43,7 @@ InstallUPower()
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 		fi
 	done
-	
+
 	# Install Package
 	EchoInfo	"${PackageUPower[Name]}> Building package..."
 	_ExtractPackageUPower || return $?;
@@ -117,7 +117,7 @@ _BuildUPower()
 	else
 		LC_ALL=C ninja test 1> /dev/null || { EchoTest KO ${PackageUPower[Name]}4 && PressAnyKeyToContinue; return 1; };
 	fi
-	
+
 	EchoInfo	"${PackageUPower[Name]}> ninja install"
 	ninja install 1> /dev/null || { EchoTest KO ${PackageUPower[Name]} && PressAnyKeyToContinue; return 1; };
 }

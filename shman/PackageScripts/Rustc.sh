@@ -44,7 +44,7 @@ InstallRustc()
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 		fi
 	done
-	
+
 	# Install Package
 	EchoInfo	"${PackageRustc[Name]}> Building package..."
 	_ExtractPackageRustc || return $?;
@@ -178,7 +178,7 @@ EOF
 	./x.py test --verbose --no-fail-fast | tee rustc-testlog 1> /dev/null || { EchoTest KO ${PackageRustc[Name]} && PressAnyKeyToContinue; return 1; };
 	EchoInfo	"${PackageRustc[Name]}> test results"
 	grep '^test result:' rustc-testlog | awk '{sum1 += $4; sum2 += $6} END { print sum1 " passed; " sum2 " failed" }'
-	
+
 	EchoInfo	"${PackageRustc[Name]}> ./x.py install"
 	./x.py install rustc std && \
 	./x.py install --stage=1 cargo clippy rustfmt 1> /dev/null || { EchoTest KO ${PackageRustc[Name]} && PressAnyKeyToContinue; return 1; };

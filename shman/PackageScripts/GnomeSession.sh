@@ -43,7 +43,7 @@ InstallGnomeSession()
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 		fi
 	done
-	
+
 	# Install Package
 	EchoInfo	"${PackageGnomeSession[Name]}> Building package..."
 	_ExtractPackageGnomeSession || return $?;
@@ -110,7 +110,7 @@ _BuildGnomeSession()
 
 	EchoInfo	"${PackageGnomeSession[Name]}> ninja install"
 	ninja install 1> /dev/null || { EchoTest KO ${PackageGnomeSession[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageGnomeSession[Name]}> Move documentation"
 	mv -v /usr/share/doc/gnome-session{,-47.0.1}
 

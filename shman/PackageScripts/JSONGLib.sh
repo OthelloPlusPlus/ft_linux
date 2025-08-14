@@ -42,7 +42,7 @@ InstallJSONGLib()
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 		fi
 	done
-	
+
 	# Install Package
 	EchoInfo	"Package ${PackageJSONGLib[Name]}"
 	_ExtractPackageJSONGLib || return $?;
@@ -102,7 +102,7 @@ _BuildJSONGLib()
 
 	EchoInfo	"${PackageJSONGLib[Name]}> ninja test"
 	ninja test 1> /dev/null || { EchoTest KO ${PackageJSONGLib[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageJSONGLib[Name]}> ninja install"
 	ninja install 1> /dev/null || { EchoTest KO ${PackageJSONGLib[Name]} && PressAnyKeyToContinue; return 1; };
 }

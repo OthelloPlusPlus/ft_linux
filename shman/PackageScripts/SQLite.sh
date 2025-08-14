@@ -42,7 +42,7 @@ InstallSQLite()
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 		fi
 	done
-	
+
 	# Install Package
 	EchoInfo	"Package ${PackageSQLite[Name]}"
 	_ExtractPackageSQLite || return $?;

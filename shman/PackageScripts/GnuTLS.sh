@@ -44,7 +44,7 @@ InstallGnuTLS()
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 		fi
 	done
-	
+
 	# Install Package
 	EchoInfo	"${PackageGnuTLS[Name]}> Building packages..."
 	_BuildGnuTLS;
@@ -101,7 +101,7 @@ _BuildGnuTLS()
 
 	EchoInfo	"${PackageGnuTLS[Name]}> make check"
 	make check 1> /dev/null || { EchoTest KO ${PackageGnuTLS[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageGnuTLS[Name]}> make install"
 	make install 1> /dev/null || { EchoTest KO ${PackageGnuTLS[Name]} && PressAnyKeyToContinue; return 1; };
 }

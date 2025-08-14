@@ -124,7 +124,7 @@ _BuildSassc()
 		EchoInfo	"lib${PackageSassc[Name]}> make install"
 		make install 1> /dev/null || { EchoTest KO lib${PackageSassc[Name]} && PressAnyKeyToContinue; return 1; };
 	popd
-	
+
 
 	# mkdir -p build 	&& cd ${SHMAN_PDIR}${PackageSassc[Package]}/build \
 	# 				|| { EchoError "${PackageSassc[Name]}> Failed to enter ${SHMAN_PDIR}${PackageSassc[Package]}/build"; return 1; }

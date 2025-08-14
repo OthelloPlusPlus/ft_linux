@@ -45,7 +45,7 @@ InstallGstPluginsBad()
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 		fi
 	done
-	
+
 	# Install Package
 	EchoInfo	"${PackageGstPluginsBad[Name]}> Building package..."
 	_ExtractPackageGstPluginsBad || return $?;
@@ -103,7 +103,7 @@ _BuildGstPluginsBad()
 
 	# EchoInfo	"${PackageGstPluginsBad[Name]}> ninja test"
 	# ninja test 1> /dev/null || { EchoTest KO ${PackageGstPluginsBad[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageGstPluginsBad[Name]}> ninja install"
 	ninja install 1> /dev/null || { EchoTest KO ${PackageGstPluginsBad[Name]} && PressAnyKeyToContinue; return 1; };
 }

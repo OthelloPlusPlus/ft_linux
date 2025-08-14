@@ -43,7 +43,7 @@ InstallLibIcal()
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 		fi
 	done
-	
+
 	# Install Package
 	EchoInfo	"${PackageLibIcal[Name]}> Building package..."
 	_ExtractPackageLibIcal || return $?;
@@ -105,7 +105,7 @@ _BuildLibIcal()
 
 	EchoInfo	"${PackageLibIcal[Name]}> make test"
 	make test 1> /dev/null || { EchoTest KO ${PackageLibIcal[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageLibIcal[Name]}> make install"
 	make install 1> /dev/null || { EchoTest KO ${PackageLibIcal[Name]} && PressAnyKeyToContinue; return 1; };
 }

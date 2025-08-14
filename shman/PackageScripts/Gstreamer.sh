@@ -43,7 +43,7 @@ InstallGstreamer()
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 		fi
 	done
-	
+
 	# Install Package
 	EchoInfo	"${PackageGstreamer[Name]}> Building package..."
 	_ExtractPackageGstreamer || return $?;
@@ -107,7 +107,7 @@ _BuildGstreamer()
 		PressAnyKeyToContinue;
 		return 1;
 	};
-	
+
 	EchoInfo	"${PackageGstreamer[Name]}> ninja install"
 	ninja install 1> /dev/null || { EchoTest KO ${PackageGstreamer[Name]} && PressAnyKeyToContinue; return 1; };
 }

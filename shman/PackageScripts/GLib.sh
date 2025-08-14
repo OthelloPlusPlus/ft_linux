@@ -37,7 +37,7 @@ InstallGLib()
 	for Dependency in "${Recommended[@]}"; do
 		source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 	done
-	
+
 	# Install Package
 	_BuildGLib;
 	return $?
@@ -48,7 +48,7 @@ CheckGLib()
 	CheckInstallation 	"${PackageGLib[Programs]}"\
 						"${PackageGLib[Libraries]}"\
 						"${PackageGLib[Python]}" 1> /dev/null || return $?;
-	
+
 	# GObject Introspection
 	CheckInstallation 	"g-ir-annotation-tool g-ir-compiler g-ir-doc-tool g-ir-generate g-ir-inspect g-ir-scanner"\
 						"libgirepository-1.0.so"\
@@ -172,7 +172,7 @@ _InstallGObjectInstrospection()
 
 	EchoInfo	"${PackageGLib[Name]}|GObject> Test GObject Introspection"
 	ninja -C gi-build test || { PackageGLib[Status]=$?; EchoTest KO ${PackageGLib[Name]} && EchoInfo "Check Errors manually..." && PressAnyKeyToContinue; };
-	
+
 	EchoInfo	"${PackageGLib[Name]}|GObject> Install GObject Introspection"
 	ninja -C gi-build install 1> /dev/null || { PackageGLib[Status]=$?; EchoTest KO ${PackageGLib[Name]} && PressAnyKeyToContinue; return 1; };
 

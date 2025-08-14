@@ -43,7 +43,7 @@ InstallLibHandy()
 			source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}"
 		fi
 	done
-	
+
 	# Install Package
 	EchoInfo	"${PackageLibHandy[Name]}> Building package..."
 	_ExtractPackageLibHandy || return $?;

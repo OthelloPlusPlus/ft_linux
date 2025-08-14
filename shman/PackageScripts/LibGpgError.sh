@@ -42,7 +42,7 @@ InstallLibGpgError()
 			source "${SHMAN_SDIR}/${Dependency}.sh";
 		fi
 	done
-	
+
 	# Install Package
 	_BuildLibGpgError;
 	return $?
@@ -88,7 +88,7 @@ _BuildLibGpgError()
 
 	EchoInfo	"${PackageLibGpgError[Name]}> make check"
 	make check 1> /dev/null || { EchoTest KO ${PackageLibGpgError[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageLibGpgError[Name]}> make install"
 	make install 1> /dev/null && \
 	install -v -m644 -D README /usr/share/doc/libgpg-error-1.51/README \
