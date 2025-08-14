@@ -471,7 +471,7 @@ ConfigureSystemLocale()
 	printf	"%-17s " "Character Map:";	LC_ALL="$LocaleName" locale charmap || PressAnyKeyToContinue;
 	printf	"%-17s " "Currency:";	LC_ALL="$LocaleName" locale int_curr_symbol || PressAnyKeyToContinue;
 	printf	"%-17s " "Telephone Prefix:";	LC_ALL="$LocaleName" locale int_prefix || PressAnyKeyToContinue;
-	
+
 	EchoInfo	"/etc/profile";
 	local LocaleLanguage="en";
 	local LocaleCountry="US";
@@ -898,7 +898,7 @@ AuthorizedKeysCommandUser root
 # 99-archlinux.conf
 KbdInteractiveAuthentication no
 UsePAM yes
-PrintMotd no	
+PrintMotd no
 EOF
 
 	# Ensure include

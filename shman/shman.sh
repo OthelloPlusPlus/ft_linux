@@ -248,7 +248,7 @@ MenuPips()
 			a)	source $SHMAN_SDIR/_PythonPip3.sh && InstallPips;;
 			q|Q)	return;;
 		esac
-	done	
+	done
 }
 
 # =====================================||===================================== #
@@ -381,7 +381,7 @@ MenuGnome()
 		# DisplayPackage "" "XkeyboardConfig" "";
 		# DisplayPackage "" "Xorgproto" "";
 		# printf '%*s\n' "$Width" '' | tr ' ' '-';
-		
+	
 		DisplayPackage "0" "GLib" "";
 		DisplayPackage "1" "Dbus" "";
 		DisplayPackage "2" "XorgServer" "";

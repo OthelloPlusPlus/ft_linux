@@ -60,11 +60,11 @@ ReExtractPackage()
 		if [ ! -d "$DST" ]; then EchoError	"ReExtractPackage DST[$DST]"; fi
 		return 1;
 	fi
-	
+
 	if [ -d "$RSLT" ]; then
 		rm -rf "$RSLT";
 	fi
-	
+
 	tar -xf "$SRC" -C "$DST" || { echo "Failed to extract $?" >&2 && PressAnyKeyToContinue; };
 }
 

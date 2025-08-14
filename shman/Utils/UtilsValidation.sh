@@ -64,7 +64,7 @@ CheckLibrariesGcc()
 	echo 'int main() {return 0;}' > /tmp/TempLibraryTest.c
 	for Library in $@; do
 		case $(dirname $Library) in
-			.)	
+			.)
 				LibName=${Library%.so};
 				CFLAG="-l${LibName#lib}";;
 			*)	CFLAG=$Library;;
@@ -84,7 +84,7 @@ CheckLibrariesGccVerbose()
 	for Library in $@; do
 		echo "$Library[$(dirname $Library)]"
 		case $(dirname $Library) in
-			.)	
+			.)
 				LibName=${Library%.so};
 				CFLAG="-l${LibName#lib}";;
 			*)	CFLAG=$Library;;

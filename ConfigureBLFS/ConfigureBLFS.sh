@@ -129,7 +129,7 @@ ConfigureBash()
 {
 	#/etc/profile
 	# ConfigureBashProfile; now done in LFS, not BLFS as this shouldve been
-	
+
 	# /etc/profile.d
 	EchoInfo "bash> Creating /etc/profile.d"
 	install --directory --mode=0755 --owner=root --group=root /etc/profile.d

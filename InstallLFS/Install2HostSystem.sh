@@ -224,7 +224,7 @@ while true; do
 	printf '%*s\n' "$Width" '' | tr ' ' '-';
 	echo -n	"Mirror:      "; ping -c 1 $MirrorSite 1> /dev/null && echo -n "${C_GREEN}" || echo -n "${C_RED}" && echo "$MirrorURL${C_RESET}";
 	echo -n	"Directory:   "; [ -d $DEST ] 1> /dev/null && echo -n "${C_GREEN}" || echo -n "${C_RED}" && echo "$DEST${C_RESET}";
-	
+
 	if [ -d $DEST ]; then
 		printf	"%-13s"	"md5sums:"
 		if [ ! -f "$DEST/md5sums" ]; then

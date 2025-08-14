@@ -621,6 +621,6 @@ PrintDemo()
 		-d*)	SetAnsiColor;	PrintDemo;
 				Set256Color;	PrintDemo;
 				SetTrueColor;	PrintDemo;;
-		*)		echo	"Known flags: -d -d8 -d256 -dtrue -dall";	
+		*)		echo	"Known flags: -d -d8 -d256 -dtrue -dall";;
 	esac
 fi

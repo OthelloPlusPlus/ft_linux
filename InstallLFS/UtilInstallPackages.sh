@@ -23,13 +23,13 @@ ReExtractPackage()
 		# return false;
 		return 1;
 	fi
-	
+
 	# EchoInfo	"remove old"; PressAnyKeyToContinue;
 	if [ -d "$RSLT" ]; then
 		# echo "removing old"; PressAnyKeyToContinue;
 		rm -rf "$RSLT";
 	fi
-	
+
 	# EchoInfo	"extract new"; PressAnyKeyToContinue
 	tar -xf "$SRC" -C "$DST" || { echo "Failed to extract $?" >&2 && PressAnyKeyToContinue; };
 	# PressAnyKeyToContinue;
@@ -75,7 +75,7 @@ RemovePackageDirectories()
 
 # 	EchoInfo	"${Packagetemp[Name]}> make check"
 # 	make check 1> /dev/null || { Packagetemp[Status]=$?; EchoTest KO ${Packagetemp[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 # 	EchoInfo	"${Packagetemp[Name]}> make install"
 # 	make install 1> /dev/null && Packagetemp[Status]=$? || { Packagetemp[Status]=$?; EchoTest KO ${Packagetemp[Name]} && PressAnyKeyToContinue; return 1; };
 
@@ -137,7 +137,7 @@ InstallBinutils_CT1()
 
 	EchoInfo	"${PackageBinutils[Name]}> make check"
 	make check 1> /dev/null || { PackageBinutils[Status]=$?; EchoTest KO ${PackageBinutils[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageBinutils[Name]}> make install"
 	make install 1> /dev/null && PackageBinutils[Status]=$? || { PackageBinutils[Status]=$?; EchoTest KO ${PackageBinutils[Name]} && PressAnyKeyToContinue; return 1; };
 }
@@ -240,7 +240,7 @@ InstallBinutils()
 		else
 			EchoTest OK "${PackageBinutils[Name]} Only the 12 valid errors";
 		fi
-	
+
 	EchoInfo	"${PackageBinutils[Name]}> make tooldir=/usr install"
 	make tooldir=/usr install 1> /dev/null && PackageBinutils[Status]=$? || { PackageBinutils[Status]=$?; EchoTest KO ${PackageBinutils[Name]} && PressAnyKeyToContinue; return 1; };
 
@@ -446,7 +446,7 @@ InstallGcc()
 
 	EchoInfo	"${PackageGCC[Name]}> make install"
 	make install 1> /dev/null && PackageGCC[Status]=$? || { PackageGCC[Status]=$?; EchoTest KO ${PackageGCC[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageGCC[Name]}> Change owner to root"
 	chown -v -R root:root /usr/lib/gcc/$(gcc -dumpmachine)/14.2.0/include{,-fixed}
 
@@ -483,7 +483,7 @@ InstallGcc()
 	fi
 
 	if [ $(grep -A9 "#include *...* search starts here:" gcctest.log | grep -B9 "End of search list." | grep "/usr/.*include" -c ) -lt 4 ]; then
-		
+	
 		EchoError	"${PackageGCC[Name]}> Compiler fails to search for correct header files";
 		grep -A9 "#include *...* search starts here:" gcctest.log | grep -B9 "End of search list.";
 		PressAnyKeyToContinue;
@@ -575,7 +575,7 @@ InstallLinuxAPI_CT()
 
 	EchoInfo	"${PackageLinuxAPI[Name]}> make headers"
 	make headers 1> /dev/null && PackageLinuxAPI[Status]=$? || { PackageLinuxAPI[Status]=$?; EchoTest KO ${PackageLinuxAPI[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageLinuxAPI[Name]}> Copying headers to $LFS/usr/include...";
 	find usr/include -type f ! -name '*.h' -delete
 	echo	"${C_DGRAY}> cp -rv usr/include $LFS/usr 1> /dev/null${C_RESET}";
@@ -912,7 +912,7 @@ InstallM4_TT()
 
 	EchoInfo	"${PackageM4[Name]}> make check"
 	make check 1> /dev/null || { PackageM4[Status]=$?; EchoTest KO ${PackageM4[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageM4[Name]}> make DESTDIR=$LFS install"
 	make DESTDIR=$LFS install 1> /dev/null && PackageM4[Status]=$? || { PackageM4[Status]=$?; EchoTest KO ${PackageM4[Name]} && PressAnyKeyToContinue; return 1; };
 }
@@ -937,7 +937,7 @@ InstallM4()
 
 	EchoInfo	"${PackageM4[Name]}> make check"
 	make check 1> /dev/null || { PackageM4[Status]=$?; EchoTest KO ${PackageM4[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageM4[Name]}> make install"
 	make install 1> /dev/null && PackageM4[Status]=$? || { PackageM4[Status]=$?; EchoTest KO ${PackageM4[Name]} && PressAnyKeyToContinue; return 1; };
 }
@@ -1155,11 +1155,11 @@ lassign [wait] _ _ _ value
 exit $value
 EOF
 ) || { PackageBash[Status]=$?; EchoTest KO ${PackageBash[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageBash[Name]}> make install"
 	make install 1> /dev/null && PackageBash[Status]=$? || { PackageBash[Status]=$?; EchoTest KO ${PackageBash[Name]} && PressAnyKeyToContinue; return 1; };
 
-	echo	
+	echo
 	echo $BASH_VERSION;
 	bash --version | grep "bash";
 
@@ -1310,7 +1310,7 @@ InstallDiffutils()
 
 	EchoInfo	"${PackageDiffutils[Name]}> make check"
 	make check 1> /dev/null || { PackageDiffutils[Status]=$?; EchoTest KO ${PackageDiffutils[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageDiffutils[Name]}> make install"
 	make install 1> /dev/null && PackageDiffutils[Status]=$? || { PackageDiffutils[Status]=$?; EchoTest KO ${PackageDiffutils[Name]} && PressAnyKeyToContinue; return 1; };
 }
@@ -1389,7 +1389,7 @@ InstallFile()
 
 	EchoInfo	"${PackageFile[Name]}> make check"
 	make check 1> /dev/null || { PackageFile[Status]=$?; EchoTest KO ${PackageFile[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageFile[Name]}> make install"
 	make install 1> /dev/null && PackageFile[Status]=$? || { PackageFile[Status]=$?; EchoTest KO ${PackageFile[Name]} && PressAnyKeyToContinue; return 1; };
 }
@@ -1452,7 +1452,7 @@ InstallFindutils()
 	EchoInfo	"${PackageFindutils[Name]}> su tester -c \"PATH=\$PATH make check\""
 	chown -R tester .
 	su tester -c "PATH=$PATH make check" 1> /dev/null || { PackageFindutils[Status]=$?; EchoTest KO ${PackageFindutils[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageFindutils[Name]}> make install"
 	make install 1> /dev/null && PackageFindutils[Status]=$? || { PackageFindutils[Status]=$?; EchoTest KO ${PackageFindutils[Name]} && PressAnyKeyToContinue; return 1; };
 }
@@ -1521,7 +1521,7 @@ InstallGawk()
 	EchoInfo	"${PackageGawk[Name]}> make install"
 	rm -f /usr/bin/gawk-5.3.0
 	make install 1> /dev/null && PackageGawk[Status]=$? || { PackageGawk[Status]=$?; EchoTest KO ${PackageGawk[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageGawk[Name]}> symlink awk to gawk"
 	ln -sv gawk.1 /usr/share/man/man1/awk.1
 
@@ -1587,7 +1587,7 @@ InstallGrep()
 
 	EchoInfo	"${PackageGrep[Name]}> make check"
 	make check 1> /dev/null || { PackageGrep[Status]=$?; EchoTest KO ${PackageGrep[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageGrep[Name]}> make install"
 	make install 1> /dev/null && PackageGrep[Status]=$? || { PackageGrep[Status]=$?; EchoTest KO ${PackageGrep[Name]} && PressAnyKeyToContinue; return 1; };
 }
@@ -1645,7 +1645,7 @@ InstallGzip()
 
 	EchoInfo	"${PackageGzip[Name]}> make check"
 	make check 1> /dev/null || { PackageGzip[Status]=$?; EchoTest KO ${PackageGzip[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageGzip[Name]}> make install"
 	make install 1> /dev/null && PackageGzip[Status]=$? || { PackageGzip[Status]=$?; EchoTest KO ${PackageGzip[Name]} && PressAnyKeyToContinue; return 1; };
 }
@@ -1706,7 +1706,7 @@ InstallMake()
 	EchoInfo	"${PackageMake[Name]}> su tester -c \"PATH=\$PATH make check\""
 	chown -R tester .
 	su tester -c "PATH=$PATH make check" 1> /dev/null || { PackageMake[Status]=$?; EchoTest KO ${PackageMake[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageMake[Name]}> make install"
 	make install 1> /dev/null && PackageMake[Status]=$? || { PackageMake[Status]=$?; EchoTest KO ${PackageMake[Name]} && PressAnyKeyToContinue; return 1; };
 }
@@ -1765,7 +1765,7 @@ InstallPatch()
 
 	EchoInfo	"${PackagePatch[Name]}> make check"
 	make check 1> /dev/null || { PackagePatch[Status]=$?; EchoTest KO ${PackagePatch[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackagePatch[Name]}> make install"
 	make install 1> /dev/null && PackagePatch[Status]=$? || { PackagePatch[Status]=$?; EchoTest KO ${PackagePatch[Name]} && PressAnyKeyToContinue; return 1; };
 }
@@ -1824,7 +1824,7 @@ InstallSed()
 
 	EchoInfo	"${PackageSed[Name]}> make html"
 	make html 1> /dev/null || { PackageSed[Status]=$?; EchoTest KO ${PackageSed[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageSed[Name]}> u tester -c \"PATH=\$PATH make check\""
 	chown -R tester .
 	su tester -c "PATH=$PATH make check" 1> /dev/null || { PackageSed[Status]=$?; EchoTest KO ${PackageSed[Name]} && PressAnyKeyToContinue; return 1; };
@@ -1900,7 +1900,7 @@ InstallTar()
 		grep "^[ |0-9].*FAILED " "TempMakeCheck.log";
 		rm TempMakeCheck.log;
 	fi
-	
+
 	EchoInfo	"${PackageTar[Name]}> make install"
 	make install 1> /dev/null && PackageTar[Status]=$? || { PackageTar[Status]=$?; EchoTest KO ${PackageTar[Name]} && PressAnyKeyToContinue; return 1; };
 	make -C doc install-html docdir=/usr/share/doc/tar-1.35 1> /dev/null && PackageTar[Status]=$? || { PackageTar[Status]=$?; EchoTest KO ${PackageTar[Name]} && PressAnyKeyToContinue; return 1; };
@@ -1969,7 +1969,7 @@ InstallXz()
 
 	EchoInfo	"${PackageXz[Name]}> make check"
 	make check 1> /dev/null || { PackageXz[Status]=$?; EchoTest KO ${PackageXz[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageXz[Name]}> make install"
 	make install 1> /dev/null && PackageXz[Status]=$? || { PackageXz[Status]=$?; EchoTest KO ${PackageXz[Name]} && PressAnyKeyToContinue; return 1; };
 }
@@ -2027,7 +2027,7 @@ InstallGettext()
 
 	EchoInfo	"${PackageGettext[Name]}> make check"
 	make check 1> /dev/null || { PackageGettext[Status]=$?; EchoTest KO ${PackageGettext[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageGettext[Name]}> make install"
 	make install 1> /dev/null && PackageGettext[Status]=$? || { PackageGettext[Status]=$?; EchoTest KO ${PackageGettext[Name]} && PressAnyKeyToContinue; return 1; };
 
@@ -2089,7 +2089,7 @@ InstallBison()
 
 	EchoInfo	"${PackageBison[Name]}> make check"
 	make check 1> /dev/null || { PackageBison[Status]=$?; EchoTest KO ${PackageBison[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageBison[Name]}> make install"
 	make install 1> /dev/null && PackageBison[Status]=$? || { PackageBison[Status]=$?; EchoTest KO ${PackageBison[Name]} && PressAnyKeyToContinue; return 1; };
 }
@@ -2171,7 +2171,7 @@ InstallPerl()
 
 	EchoInfo	"${PackagePerl[Name]}> TEST_JOBS=\$(nproc) make test_harness"
 	TEST_JOBS=$(nproc) make test_harness 1> /dev/null || { PackagePerl[Status]=$?; EchoTest KO ${PackagePerl[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackagePerl[Name]}> make install"
 	make install 1> /dev/null && PackagePerl[Status]=$? || { PackagePerl[Status]=$?; EchoTest KO ${PackagePerl[Name]} && PressAnyKeyToContinue; return 1; };
 
@@ -2236,10 +2236,10 @@ InstallPython()
 
 	EchoInfo	"${PackagePython[Name]}> make test TESTOPTS=\"--timeout 120\""
 	make test TESTOPTS="--timeout 120" 1> /dev/null || { PackagePython[Status]=$?; EchoTest KO ${PackagePython[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackagePython[Name]}> make install"
 	make install 1> /dev/null && PackagePython[Status]=$? || { PackagePython[Status]=$?; EchoTest KO ${PackagePython[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackagePython[Name]}> Silence pip3 warning"
 	cat > /etc/pip.conf << EOF
 [global]
@@ -2311,10 +2311,10 @@ InstallTexinfo()
 
 	EchoInfo	"${PackageTexinfo[Name]}> make check"
 	make check 1> /dev/null || { PackageTexinfo[Status]=$?; EchoTest KO ${PackageTexinfo[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageTexinfo[Name]}> make install"
 	make install 1> /dev/null && PackageTexinfo[Status]=$? || { PackageTexinfo[Status]=$?; EchoTest KO ${PackageTexinfo[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageTexinfo[Name]}> TEXMF=/usr/share/texmf install-tex"
 	make TEXMF=/usr/share/texmf install-tex 1> /dev/null && PackageTexinfo[Status]=$? || { PackageTexinfo[Status]=$?; EchoTest KO ${PackageTexinfo[Name]} && PressAnyKeyToContinue; return 1; };
 
@@ -2367,7 +2367,7 @@ InstallUtilLinux_TT()
 
 	EchoInfo	"${PackageUtilLinux[Name]}> make"
 	make  1> /dev/null || { PackageUtilLinux[Status]=$?; EchoTest KO ${PackageUtilLinux[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageUtilLinux[Name]}> make install"
 	make install 1> /dev/null && PackageUtilLinux[Status]=$? || { PackageUtilLinux[Status]=$?; EchoTest KO ${PackageUtilLinux[Name]} && PressAnyKeyToContinue; return 1; };
 }
@@ -2495,7 +2495,7 @@ InstallZlib()
 		EchoError	"cd ${PDIR}${PackageZlib[Package]}";
 		return 1;
 	fi
-	
+
 	EchoInfo	"${PackageZlib[Name]}> Configure"
 	./configure --prefix=/usr 1> /dev/null || { PackageZlib[Status]=$?; EchoTest KO ${PackageZlib[Name]} && PressAnyKeyToContinue; return 1; };
 
@@ -2504,10 +2504,10 @@ InstallZlib()
 
 	EchoInfo	"${PackageZlib[Name]}> make check"
 	make check 1> /dev/null || { PackageZlib[Status]=$?; EchoTest KO ${PackageZlib[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageZlib[Name]}> make install"
 	make install 1> /dev/null && PackageZlib[Status]=$? || { PackageZlib[Status]=$?; EchoTest KO ${PackageZlib[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	# Remove a useless static lbrary
 	rm -fv /usr/lib/libz.a
 }
@@ -2550,7 +2550,7 @@ InstallBzip2()
 
 	EchoInfo	"${PackageBzip2[Name]}> make check"
 	make check 1> /dev/null || { PackageBzip2[Status]=$?; EchoTest KO ${PackageBzip2[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageBzip2[Name]}> make PREFIX=/usr install"
 	make PREFIX=/usr install 1> /dev/null && PackageBzip2[Status]=$? || { PackageBzip2[Status]=$?; EchoTest KO ${PackageBzip2[Name]} && PressAnyKeyToContinue; return 1; };
 
@@ -2594,7 +2594,7 @@ InstallLz4()
 
 	EchoInfo	"${PackageLz4[Name]}> make -j1 check"
 	make -j1 check 1> /dev/null || { PackageLz4[Status]=$?; EchoTest KO ${PackageLz4[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageLz4[Name]}> make BUILD_STATIC=no PREFIX=/usr install"
 	make BUILD_STATIC=no PREFIX=/usr install 1> /dev/null && PackageLz4[Status]=$? || { PackageLz4[Status]=$?; EchoTest KO ${PackageLz4[Name]} && PressAnyKeyToContinue; return 1; };
 }
@@ -2626,7 +2626,7 @@ InstallZstd()
 
 	EchoInfo	"${PackageZstd[Name]}> make check"
 	make check 1> /dev/null || { PackageZstd[Status]=$?; EchoTest KO ${PackageZstd[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageZstd[Name]}> make prefix=/usr install"
 	make prefix=/usr install 1> /dev/null && PackageZstd[Status]=$? || { PackageZstd[Status]=$?; EchoTest KO ${PackageZstd[Name]} && PressAnyKeyToContinue; return 1; };
 
@@ -2709,7 +2709,7 @@ InstallBc()
 
 	EchoInfo	"${PackageBc[Name]}> make test"
 	make test 1> /dev/null || { PackageBc[Status]=$?; EchoTest KO ${PackageBc[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageBc[Name]}> make install"
 	make install 1> /dev/null && PackageBc[Status]=$? || { PackageBc[Status]=$?; EchoTest KO ${PackageBc[Name]} && PressAnyKeyToContinue; return 1; };
 }
@@ -2747,7 +2747,7 @@ InstallFlex()
 
 	EchoInfo	"${PackageFlex[Name]}> make check"
 	make check 1> /dev/null || { PackageFlex[Status]=$?; EchoTest KO ${PackageFlex[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageFlex[Name]}> make install"
 	make install 1> /dev/null && PackageFlex[Status]=$? || { PackageFlex[Status]=$?; EchoTest KO ${PackageFlex[Name]} && PressAnyKeyToContinue; return 1; };
 
@@ -2808,7 +2808,7 @@ InstallTcl()
 
 	EchoInfo	"${PackageTcl[Name]}> make test"
 	make test 1> /dev/null || { PackageTcl[Status]=$?; EchoTest KO ${PackageTcl[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageTcl[Name]}> make install"
 	make install 1> /dev/null && PackageTcl[Status]=$? || { PackageTcl[Status]=$?; EchoTest KO ${PackageTcl[Name]} && PressAnyKeyToContinue; return 1; };
 
@@ -2866,7 +2866,7 @@ InstallExpect()
 
 	EchoInfo	"${PackageExpect[Name]}> make test"
 	make test 1> /dev/null || { PackageExpect[Status]=$?; EchoTest KO ${PackageExpect[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageExpect[Name]}> make install"
 	make install 1> /dev/null && PackageExpect[Status]=$? || { PackageExpect[Status]=$?; EchoTest KO ${PackageExpect[Name]} && PressAnyKeyToContinue; return 1; };
 
@@ -2890,7 +2890,7 @@ InstallDejaGNU()
 
 	ReExtractPackage	"${PDIR}"	"${PackageDejaGNU[Package]}"	"${PackageDejaGNU[Extension]}";
 
-	
+
 	if ! cd "${PDIR}${PackageDejaGNU[Package]}"; then
 		EchoError	"cd ${PDIR}${PackageDejaGNU[Package]}";
 		return 1;
@@ -2912,7 +2912,7 @@ InstallDejaGNU()
 
 	EchoInfo	"${PackageDejaGNU[Name]}> make check"
 	make check 1> /dev/null || { PackageDejaGNU[Status]=$?; EchoTest KO ${PackageDejaGNU[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageDejaGNU[Name]}> make install"
 	make install 1> /dev/null && PackageDejaGNU[Status]=$? || { PackageDejaGNU[Status]=$?; EchoTest KO ${PackageDejaGNU[Name]} && PressAnyKeyToContinue; return 1; };
 	install -v -dm755	/usr/share/doc/dejagnu-1.6.3
@@ -3051,7 +3051,7 @@ InstallMPFR()
 
 	EchoInfo	"${PackageMPFR[Name]}> make check"
 	make check 1> /dev/null || { PackageMPFR[Status]=$?; EchoTest KO ${PackageMPFR[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageMPFR[Name]}> make install"
 	make install 1> /dev/null && PackageMPFR[Status]=$? || { PackageMPFR[Status]=$?; EchoTest KO ${PackageMPFR[Name]} && PressAnyKeyToContinue; return 1; };
 
@@ -3095,7 +3095,7 @@ InstallMPC()
 
 	EchoInfo	"${PackageMPC[Name]}> make check"
 	make check 1> /dev/null || { PackageMPC[Status]=$?; EchoTest KO ${PackageMPC[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageMPC[Name]}> make install"
 	make install 1> /dev/null && PackageMPC[Status]=$? || { PackageMPC[Status]=$?; EchoTest KO ${PackageMPC[Name]} && PressAnyKeyToContinue; return 1; };
 
@@ -3138,7 +3138,7 @@ InstallAttr()
 
 	EchoInfo	"${PackageAttr[Name]}> make check"
 	make check 1> /dev/null || { PackageAttr[Status]=$?; EchoTest KO ${PackageAttr[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageAttr[Name]}> make install"
 	make install 1> /dev/null && PackageAttr[Status]=$? || { PackageAttr[Status]=$?; EchoTest KO ${PackageAttr[Name]} && PressAnyKeyToContinue; return 1; };
 }
@@ -3208,7 +3208,7 @@ InstallLibcap()
 
 	EchoInfo	"${PackageLibcap[Name]}> make test"
 	make test 1> /dev/null || { PackageLibcap[Status]=$?; EchoTest KO ${PackageLibcap[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageLibcap[Name]}> make prefix=/usr lib=lib install"
 	make prefix=/usr lib=lib install 1> /dev/null && PackageLibcap[Status]=$? || { PackageLibcap[Status]=$?; EchoTest KO ${PackageLibcap[Name]} && PressAnyKeyToContinue; return 1; };
 }
@@ -3248,7 +3248,7 @@ InstallLibxcrypt()
 
 	EchoInfo	"${PackageLibxcrypt[Name]}> make check"
 	make check 1> /dev/null || { PackageLibxcrypt[Status]=$?; EchoTest KO ${PackageLibxcrypt[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageLibxcrypt[Name]}> make install"
 	make install 1> /dev/null && PackageLibxcrypt[Status]=$? || { PackageLibxcrypt[Status]=$?; EchoTest KO ${PackageLibxcrypt[Name]} && PressAnyKeyToContinue; return 1; };
 }
@@ -3356,7 +3356,7 @@ InstallPsmisc()
 
 	EchoInfo	"${PackagePsmisc[Name]}> make check"
 	make check 1> /dev/null || { PackagePsmisc[Status]=$?; EchoTest KO ${PackagePsmisc[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackagePsmisc[Name]}> make install"
 	make install 1> /dev/null && PackagePsmisc[Status]=$? || { PackagePsmisc[Status]=$?; EchoTest KO ${PackagePsmisc[Name]} && PressAnyKeyToContinue; return 1; };
 }
@@ -3469,7 +3469,7 @@ InstallGDBM()
 
 	EchoInfo	"${PackageGDBM[Name]}> make check"
 	make check 1> /dev/null || { PackageGDBM[Status]=$?; EchoTest KO ${PackageGDBM[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageGDBM[Name]}> make install"
 	make install 1> /dev/null && PackageGDBM[Status]=$? || { PackageGDBM[Status]=$?; EchoTest KO ${PackageGDBM[Name]} && PressAnyKeyToContinue; return 1; };
 }
@@ -3506,7 +3506,7 @@ InstallGperf()
 
 	EchoInfo	"${PackageGperf[Name]}> make -j1 check"
 	make -j1 check 1> /dev/null || { PackageGperf[Status]=$?; EchoTest KO ${PackageGperf[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageGperf[Name]}> make install"
 	make install 1> /dev/null && PackageGperf[Status]=$? || { PackageGperf[Status]=$?; EchoTest KO ${PackageGperf[Name]} && PressAnyKeyToContinue; return 1; };
 }
@@ -3544,7 +3544,7 @@ InstallExpat()
 
 	EchoInfo	"${PackageExpat[Name]}> make check"
 	make check 1> /dev/null || { PackageExpat[Status]=$?; EchoTest KO ${PackageExpat[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageExpat[Name]}> make install"
 	make install 1> /dev/null && PackageExpat[Status]=$? || { PackageExpat[Status]=$?; EchoTest KO ${PackageExpat[Name]} && PressAnyKeyToContinue; return 1; };
 
@@ -3593,7 +3593,7 @@ InstallInetutils()
 
 	EchoInfo	"${PackageInetutils[Name]}> make check"
 	make check 1> /dev/null || { PackageInetutils[Status]=$?; EchoTest KO ${PackageInetutils[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageInetutils[Name]}> make install"
 	make install 1> /dev/null && PackageInetutils[Status]=$? || { PackageInetutils[Status]=$?; EchoTest KO ${PackageInetutils[Name]} && PressAnyKeyToContinue; return 1; };
 
@@ -3633,7 +3633,7 @@ InstallLess()
 
 	EchoInfo	"${PackageLess[Name]}> make check"
 	make check 1> /dev/null || { PackageLess[Status]=$?; EchoTest KO ${PackageLess[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageLess[Name]}> make install"
 	make install 1> /dev/null && PackageLess[Status]=$? || { PackageLess[Status]=$?; EchoTest KO ${PackageLess[Name]} && PressAnyKeyToContinue; return 1; };
 }
@@ -3670,7 +3670,7 @@ InstallXMLParser()
 
 	EchoInfo	"${PackageXMLParser[Name]}> make test"
 	make test 1> /dev/null || { PackageXMLParser[Status]=$?; EchoTest KO ${PackageXMLParser[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageXMLParser[Name]}> make install"
 	make install 1> /dev/null && PackageXMLParser[Status]=$? || { PackageXMLParser[Status]=$?; EchoTest KO ${PackageXMLParser[Name]} && PressAnyKeyToContinue; return 1; };
 }
@@ -3708,7 +3708,7 @@ InstallIntltool()
 
 	EchoInfo	"${PackageIntltool[Name]}> make check"
 	make check 1> /dev/null || { PackageIntltool[Status]=$?; EchoTest KO ${PackageIntltool[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageIntltool[Name]}> make install"
 	make install 1> /dev/null && PackageIntltool[Status]=$? || { PackageIntltool[Status]=$?; EchoTest KO ${PackageIntltool[Name]} && PressAnyKeyToContinue; return 1; };
 	install -v -Dm644 doc/I18N-HOWTO /usr/share/doc/intltool-0.51.0/I18N-HOWTO || { PackageIntltool[Status]=$?; EchoTest KO ${PackageIntltool[Name]} && PressAnyKeyToContinue; return 1; };
@@ -3744,7 +3744,7 @@ InstallAutoconf()
 
 	EchoInfo	"${PackageAutoconf[Name]}> make check"
 	make check 1> /dev/null || { PackageAutoconf[Status]=$?; EchoTest KO ${PackageAutoconf[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageAutoconf[Name]}> make install"
 	make install 1> /dev/null && PackageAutoconf[Status]=$? || { PackageAutoconf[Status]=$?; EchoTest KO ${PackageAutoconf[Name]} && PressAnyKeyToContinue; return 1; };
 }
@@ -3781,7 +3781,7 @@ InstallAutomake()
 
 	EchoInfo	"${PackageAutomake[Name]}> make -j\$((\$(nproc)>4\?\$(nproc):4)) check"
 	make -j$(($(nproc)>4?$(nproc):4)) check 1> /dev/null || { PackageAutomake[Status]=$?; EchoTest KO ${PackageAutomake[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageAutomake[Name]}> make install"
 	make install 1> /dev/null && PackageAutomake[Status]=$? || { PackageAutomake[Status]=$?; EchoTest KO ${PackageAutomake[Name]} && PressAnyKeyToContinue; return 1; };
 }
@@ -3821,7 +3821,7 @@ InstallOpenSSL()
 
 	EchoInfo	"${PackageOpenSSL[Name]}> HARNESS_JOBS=\$(nproc) make test"
 	HARNESS_JOBS=$(nproc) make test 1> /dev/null || { PackageOpenSSL[Status]=$?; EchoTest KO ${PackageOpenSSL[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageOpenSSL[Name]}> make install"
 	sed -i '/INSTALL_LIBS/s/libcrypto.a libssl.a//' Makefile
 	make MANSUFFIX=ssl install 1> /dev/null && PackageOpenSSL[Status]=$? || { PackageOpenSSL[Status]=$?; EchoTest KO ${PackageOpenSSL[Name]} && PressAnyKeyToContinue; return 1; };
@@ -3909,7 +3909,7 @@ InstallElfutils()
 
 	EchoInfo	"${PackageElfutils[Name]}> make check"
 	make check 1> /dev/null || { PackageElfutils[Status]=$?; EchoTest KO ${PackageElfutils[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageElfutils[Name]}> make install"
 	make -C libelf install 1> /dev/null && PackageElfutils[Status]=$? || { PackageElfutils[Status]=$?; EchoTest KO ${PackageElfutils[Name]} && PressAnyKeyToContinue; return 1; };
 	install -vm644 config/libelf.pc /usr/lib/pkgconfig 1> /dev/null && PackageElfutils[Status]=$? || { PackageElfutils[Status]=$?; EchoTest KO ${PackageElfutils[Name]} && PressAnyKeyToContinue; return 1; };
@@ -3949,7 +3949,7 @@ InstallLibffi()
 
 	EchoInfo	"${PackageLibffi[Name]}> make check"
 	make check 1> /dev/null || { PackageLibffi[Status]=$?; EchoTest KO ${PackageLibffi[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageLibffi[Name]}> make install"
 	make install 1> /dev/null && PackageLibffi[Status]=$? || { PackageLibffi[Status]=$?; EchoTest KO ${PackageLibffi[Name]} && PressAnyKeyToContinue; return 1; };
 }
@@ -3990,7 +3990,7 @@ InstallFlitCore()
 					--no-user \
 					--find-links dist flit_core \
 					1> /dev/null && PackagePython[Status]=$? || { PackageFlitCore[Status]=$?; EchoTest KO ${PackageFlitCore[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	cd -;
 }
 
@@ -4175,7 +4175,7 @@ InstallCheck()
 
 	EchoInfo	"${PackageCheck[Name]}> make check"
 	make check 1> /dev/null || { PackageCheck[Status]=$?; EchoTest KO ${PackageCheck[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageCheck[Name]}> make docdir=/usr/share/doc/check-0.15.2 install"
 	make docdir=/usr/share/doc/check-0.15.2 install 1> /dev/null && PackageCheck[Status]=$? || { PackageCheck[Status]=$?; EchoTest KO ${PackageCheck[Name]} && PressAnyKeyToContinue; return 1; };
 }
@@ -4216,7 +4216,7 @@ InstallGroff()
 
 	EchoInfo	"${PackageGroff[Name]}> make check"
 	make check 1> /dev/null || { PackageGroff[Status]=$?; EchoTest KO ${PackageGroff[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageGroff[Name]}> make install"
 	make install 1> /dev/null && PackageGroff[Status]=$? || { PackageGroff[Status]=$?; EchoTest KO ${PackageGroff[Name]} && PressAnyKeyToContinue; return 1; };
 }
@@ -4258,7 +4258,7 @@ InstallGRUB()
 
 	# EchoInfo	"${PackageGRUB[Name]}> make check"
 	# make check 1> /dev/null || { PackageGRUB[Status]=$?; EchoTest KO ${PackageGRUB[Name]} && EchoInfo "Most of the tests depend on packages that are not available in the limited LFS environment." && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageGRUB[Name]}> make install"
 	make install 1> /dev/null && PackageGRUB[Status]=$? || { PackageGRUB[Status]=$?; EchoTest KO ${PackageGRUB[Name]} && PressAnyKeyToContinue; return 1; };
 	mv -v 	/etc/bash_completion.d/grub 	/usr/share/bash-completion/completions
@@ -4297,7 +4297,7 @@ InstallIPRoute2()
 
 	EchoInfo	"${PackageIPRoute2[Name]}> make SBINDIR=/usr/sbin install"
 	make SBINDIR=/usr/sbin install 1> /dev/null && PackageIPRoute2[Status]=$? || { PackageIPRoute2[Status]=$?; EchoTest KO ${PackageIPRoute2[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageIPRoute2[Name]}> Install documentation"
 	mkdir 	-pv 				/usr/share/doc/iproute2-6.10.0
 	cp 		-v COPYING README* 	/usr/share/doc/iproute2-6.10.0 1> /dev/null
@@ -4327,7 +4327,7 @@ InstallKbd()
 
 	EchoInfo	"${PackageKbd[Name]}> Patch"
 	patch -Np1 -i ../kbd-2.6.4-backspace-1.patch 1> /dev/null || { EchoTest KO ${PackageKbd[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageKbd[Name]}> Remove redundant resizecons program"
 	sed -i '/RESIZECONS_PROGS=/s/yes/no/' configure
 	sed -i 's/resizecons.8 //' docs/man/man8/Makefile.in
@@ -4342,7 +4342,7 @@ InstallKbd()
 
 	EchoInfo	"${PackageKbd[Name]}> make check"
 	make check 1> /dev/null || { PackageKbd[Status]=$?; EchoTest KO ${PackageKbd[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageKbd[Name]}> make install"
 	make install 1> /dev/null && PackageKbd[Status]=$? || { PackageKbd[Status]=$?; EchoTest KO ${PackageKbd[Name]} && PressAnyKeyToContinue; return 1; };
 
@@ -4380,7 +4380,7 @@ InstallLibpipeline()
 
 	EchoInfo	"${PackageLibpipeline[Name]}> make check"
 	make check 1> /dev/null || { PackageLibpipeline[Status]=$?; EchoTest KO ${PackageLibpipeline[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageLibpipeline[Name]}> make install"
 	make install 1> /dev/null && PackageLibpipeline[Status]=$? || { PackageLibpipeline[Status]=$?; EchoTest KO ${PackageLibpipeline[Name]} && PressAnyKeyToContinue; return 1; };
 }
@@ -4427,7 +4427,7 @@ InstallVim()
 	EchoInfo	"${PackageVim[Name]}> make check"
 	chown -R tester .
 	su tester -c "TERM=xterm-256color LANG=en_US.UTF-8 make -j1 test" < /dev/null &> vim-test.log
-	
+
 	EchoInfo	"${PackageVim[Name]}> make install"
 	make install 1> /dev/null && PackageVim[Status]=$? || { PackageVim[Status]=$?; EchoTest KO ${PackageVim[Name]} && PressAnyKeyToContinue; return 1; };
 
@@ -4596,7 +4596,7 @@ InstallUdev()
 	install -vm755 $udev_helpers						/usr/lib/udev			1> /dev/null && \
 	install -vm644 ../network/99-default.link			/usr/lib/udev/network 	1> /dev/null && \
 	PackageUdev[Status]=$? || { PackageUdev[Status]=$?; EchoTest KO ${PackageUdev[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageUdev[Name]}> Install custom rules and support files"
 	tar -xvf ../../udev-lfs-20230818.tar.xz || { PackageUdev[Status]=$?; EchoTest KO ${PackageUdev[Name]} && PressAnyKeyToContinue; return 1; };
 	make -f udev-lfs-20230818/Makefile.lfs install || { PackageUdev[Status]=$?; EchoTest KO ${PackageUdev[Name]} && PressAnyKeyToContinue; return 1; };
@@ -4609,7 +4609,7 @@ InstallUdev()
 	sed 's|systemd/network|udev/network|' \
 		/usr/share/man/man5/systemd.link.5 \
 		> /usr/share/man/man5/udev.link.5
-	
+
 	sed 's/systemd\(\\\?-\)/udev\1/' /usr/share/man/man8/systemd-hwdb.8 \
 		> /usr/share/man/man8/udev-hwdb.8
 
@@ -4665,7 +4665,7 @@ InstallManDB()
 
 	EchoInfo	"${PackageManDB[Name]}> make check"
 	make check 1> /dev/null || { PackageManDB[Status]=$?; EchoTest KO ${PackageManDB[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageManDB[Name]}> make install"
 	make install 1> /dev/null && PackageManDB[Status]=$? || { PackageManDB[Status]=$?; EchoTest KO ${PackageManDB[Name]} && PressAnyKeyToContinue; return 1; };
 }
@@ -4976,7 +4976,7 @@ InstallLinux()
 
 	EchoInfo	"${PackageLinux[Name]}> make modules_install"
 	make modules_install 1> /dev/null && PackageLinux[Status]=$? || { PackageLinux[Status]=$?; EchoTest KO ${PackageLinux[Name]} && PressAnyKeyToContinue; return 1; };
-	
+
 	EchoInfo	"${PackageLinux[Name]}> Ensuring /boot in mounted";
 	mountpoint /boot || mount /dev/sda1 /boot;
 
