@@ -166,7 +166,7 @@ InstallLinux()
 
 	# Check Dependencies
 	EchoInfo	"${PackageLinux[Name]}> Checking dependencies..."
-	local Required=(Bash Bc Binutils Coreutils Diffutils Findutils GCC Glibc Grep Gzip Kmod Libelf,Make Ncurses OpenSSL Perl and Sed)
+	local Required=(Bash Bc Binutils Coreutils Diffutils Findutils GCC Glibc Grep Gzip Kmod Libelf Make Ncurses OpenSSL Perl Sed)
 	# for Dependency in "${Required[@]}"; do
 	# 	(source "${SHMAN_SDIR}/${Dependency}.sh" && Install"${Dependency}") || { PressAnyKeyToContinue; return $?; }
 	# done
