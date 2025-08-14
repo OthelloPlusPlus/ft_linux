@@ -4947,7 +4947,17 @@ InstallLinux()
 			scripts/config --enable CONFIG_DEVTMPFS_MOUNT
 		# Graphics support --->
 			scripts/config --module CONFIG_DRM # Required to add GUI later
-			scripts/config --enable CONFIG_DRM_FBDEV_EMULATION
+				scripts/config --enable CONFIG_DRM_FBDEV_EMULATION
+				scripts/config --module CONFIG_DRM_RADEON # Required by BLFS for Mesa in r300 or r600
+				scripts/config --module CONFIG_DRM_AMDGPU # Required by BLFS for Mesa in radeonsi
+				scripts/config --enable CONFIG_DRM_AMDGPU_SI # Required by BLFS for Mesa in radeonsi
+				scripts/config --enable CONFIG_DRM_AMDGPU_CIK # Required by BLFS for Mesa in radeonsi
+				scripts/config --enable CONFIG_DRM_AMD_DC # Required by BLFS for Mesa in radeonsi
+				scripts/config --module CONFIG_DRM_NOUVEAU # Required by BLFS for Mesa in nouveau
+				scripts/config --enable CONFIG_DRM_NOUVEAU_GSP_DEFAULT # Required by BLFS for Mesa in nouveau
+				scripts/config --module CONFIG_DRM_I915 # Required by BLFS for Mesa in i915, crocus, or iris
+				scripts/config --module CONFIG_DRM_VGEM # Required by BLFS for Mesa in llvmpipe or softpipe
+				scripts/config --enable CONFIG_DRM_VMWGFX # Required by BLFS for Mesa in svga
 			# Console display driver support --->
 				scripts/config --enable CONFIG_FRAMEBUFFER_CONSOLE
 		scripts/config --enable CONFIG_PCI #64
